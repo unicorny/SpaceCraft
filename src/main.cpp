@@ -85,7 +85,7 @@ DRReturn load()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(90.0f, (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 1230.0f);
+    gluPerspective(40.0f, (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 300.0f);
     glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
 
     glLoadIdentity();                    // Reset (init) the modelview matrix
@@ -113,7 +113,10 @@ DRReturn load()
     //glEnable(GL_LIGHTING);
     glDisable(GL_FOG);
     
-    generateSphere(1500.0f);
+    Uint32 start = SDL_GetTicks();
+    generateSphere(5.0f);
+    
+    DRLog.writeToLog("%f Sekunden für generate Planet", ((float)SDL_GetTicks()-start)/1000.0f);
 
     return DR_OK;
 }
@@ -163,22 +166,27 @@ DRReturn generateSphere(DRReal radius)
     
     glScalef(radius, radius, radius);
     glColor3f(0.0f, 1.0f, 1.0f);
-    const int iSegments = 100;
-    const int segs = 100;
+    
+    float percent = 0.4f;
+    
+    const int totalSegments = 200;
+    const int currentSegments = (int)((float)totalSegments*percent);
+    const int iSegments = 200;
+    const int segs = 200;
     DRVector3 points[iSegments*(segs+2)];
     DRColor color[iSegments*(segs+2)];
     GLuint indices[2*iSegments-1+2*iSegments*segs];
     memset(indices, 0, sizeof(GLuint)*iSegments*(segs+2));    
     memset(color, 1, sizeof(DRColor)*iSegments*(segs+2));
     
-   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   //  glDisable(GL_CULL_FACE);
     
     //glBegin(GL_LINE_LOOP);
     for(int i = 0; i < iSegments; i++)
     {
-        DRReal sin = sinf((PI/(double)(iSegments-1))*(double)i);
-        DRReal cos = cosf((PI/(double)(iSegments-1))*(double)i);        
+        DRReal sin = sinf(((PI)/(double)(iSegments-1))*(double)i);
+        DRReal cos = cosf(((PI)/(double)(iSegments-1))*(double)i);        
 
         points[i] = DRVector3(cos, sin, 0.0f);
         color[i] = DRColor(1.0f, 1.0f, 0.0f);
@@ -189,11 +197,13 @@ DRReturn generateSphere(DRReal radius)
     }   
     for(int j = 1; j <= segs; j++)
     {
+        // PI/segs*2 = 360°
+        // PI/segs = 180°
         DRMatrix rot = DRMatrix::rotationX((PI/segs*2)*j);
         for(int i = 0; i < iSegments; i++)
         {
             //glVertex3fv(points[i].transformNormal(rot));
-            points[j*iSegments+i] = points[i].transformNormal(rot)*DRRandom::rReal(1.02, 0.98f);
+            points[j*iSegments+i] = points[i].transformNormal(rot);//*DRRandom::rReal(1.02, 0.98f);
             color[j*iSegments+i] = DRColor((float)i/(float)iSegments, (float)j/(float)segs, 0.2f);
             //glVertex3fv(points[i+iSegments]);
         }
@@ -209,6 +219,56 @@ DRReturn generateSphere(DRReal radius)
     
     for(int i = 0; i < 8; i++)
         DRLog.writeVector3ToLog(points[indices[i]]);
+    
+    int iterator =150;
+    int m = 1;
+    float max = 0.0f, min = 1.0f;
+    for(int i = 0; i < iterator; i++)
+    {
+        DRVector3 n = DRRandom::rVector3(1.0f);
+        DRPlane pl(n, n.length());
+        //int m = rand() % 2;
+        //if(!m) m =-1;
+        m = -m;
+        for(int j = 0; j < iSegments*(segs+2); j++)
+        {
+            float d = 1.0f - points[j].length();
+            if(d != 1.0f && d > max) max = d;
+            if(d < min) min = d;
+            if(pl.dotCoords(points[j]) >= 1)
+            {
+                points[j] = points[j] * (1.0f+(float)m/1000.0f);
+            }
+            else
+            {
+                points[j] = points[j] * (1.0f-(float)m/1000.0f);
+            }
+        }
+    }
+    
+    //einfärben
+    DRLog.writeToLog("min: %f, max: %f", min, max);
+    for(int j = 0; j < iSegments*(segs+2); j++)
+    {
+        float d = 1.0f - points[j].length();
+        d *= -1.0f;
+        if(j < 10)
+            DRLog.writeToLog("d: %f", d);
+        if(d < 0)
+        {
+            color[j] = DRColor(0.0f, (1.0f-(d/min))/10.0f, 1.0f-(d/min));
+        }
+        else if(d > 0)
+        {
+            if(d > max/2)
+                color[j] = DRColor((d/max), (d/max)/2.0f, 0.1f);
+            else if(d < max-max/10)
+                color[j] = DRColor((d/max)/2.0f, (d/max), 0.1f);
+            else
+                color[j] = DRColor(d/max);
+        }
+    }
+
 
     //glEnd();
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -291,10 +351,15 @@ DRReturn render(float fTime)
     glDisable(GL_LIGHTING);
     glPushMatrix();
     
-    glTranslatef(0.0, 0.0f, -1500.0f);
+    glTranslatef(0.0, 0.0f, -15.0f);
     //renderSphere(5.0f);
     
+    static float sphereRotate = 0;
+    glRotatef(sphereRotate, 0.4f, 0.4f, 0.4f);
+    
     glCallList(sphereList);
+    
+    sphereRotate += fTime*10.0f;
       
     
     glPopMatrix();
