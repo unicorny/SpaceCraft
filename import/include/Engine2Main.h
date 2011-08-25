@@ -41,6 +41,9 @@
 
 #define XWIDTH g_v2WindowLength.x
 #define YHEIGHT g_v2WindowLength.y
+#define GRADTORAD 0.017453292f
+#define RADTOGRAD 57.29577951f
+const double PI = 3.1415926535;
 
 /*#define LOG_SOUND_INTERN(text, f, l, fu) DRLog.WriteToLog("<tr><td><font size=\"2\"><b><font color=\"#F8900\">OpenAL Fehler:</font></b> %s</font></td><td><font size=\"2\"> (<i>%s</i>, Zeile <i>%d</i>, Funktion <i>%s</i>)</font></td></tr>", text, f, l, fu)
 #define LOG_ERROR_SOUND(str, r) {if(DRSoundError(str, DRRemoveDir(__FILE__), __LINE__, DR_FUNCTION_)) return r;}
@@ -56,9 +59,6 @@
 #define LOG_ERROR_SDL_VOID() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return;}}
 #define LOG_WARNING_SDL() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2) LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__);}
 
-#define GRADTORAD 0.017453292f
-#define RADTOGRAD 57.29577951f
-const double PI = 3.1415926535;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -114,6 +114,7 @@ const double PI = 3.1415926535;
 ENGINE_API extern SDL_Surface* g_pSDLWindow;
 ENGINE_API extern DRVector2  g_v2WindowLength;
 ENGINE_API extern Uint8*    g_piPressed;
+ENGINE_API extern u16       g_CPUCount;
 
 /**	Engine Funktionen
 	Verschieden Init-Funktionen und anderes

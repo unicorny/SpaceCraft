@@ -115,7 +115,7 @@ DRReturn load()
     Uint32 start = SDL_GetTicks();
     generateSphere(5.0f);
     
-    DRLog.writeToLog("%f Sekunden für generate Planet", ((float)SDL_GetTicks()-start)/1000.0f);
+    DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
 
     return DR_OK;
 }
@@ -159,19 +159,11 @@ DRReturn move(float fTime)
 
 DRReturn generateSphere(DRReal radius)
 {
-    sphereList = glGenLists(1);
-    srand(11021989);
-    glNewList(sphereList, GL_COMPILE);     
-    
-    glPushMatrix();      
-    
-    glScalef(radius, radius, radius);
-    glColor3f(0.0f, 1.0f, 1.0f);
     
     float percent = 1.0f;
-    const int iterator = 100;
+    const int iterator = 10000;
     
-    const int totalSegments = 20;
+    const int totalSegments = 500;
     const int currentSegments = (int)((float)totalSegments*percent);
         
     const int vertexCount = currentSegments*currentSegments;
@@ -261,10 +253,15 @@ DRReturn generateSphere(DRReal radius)
     g_tex = new DRTextur(image);
     DRIImage::deleteImage(image);    
    // */
-     
-    //glEnd();
+    
+    sphereList = glGenLists(1);
+    glNewList(sphereList, GL_COMPILE);     
+    
+    glPushMatrix();          
+    glScalef(radius, radius, radius);
+    
     geo.render();
-    //*/
+    
     glPopMatrix();
     
     glEndList();
