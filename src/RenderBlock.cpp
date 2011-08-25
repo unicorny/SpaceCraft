@@ -18,9 +18,9 @@ RenderBlock::RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg)
     
     DRVector2 tileSize = cfg->getVector2(buffer, "tileSize");
     DRVector2 textureSize((DRReal)texture->getWidth(), (DRReal)texture->getHeight());
-    DRLog.writeVector2ToLog(tileSize, "tileSize");
+    //DRLog.writeVector2ToLog(tileSize, "tileSize");
     tileSize /= textureSize;
-    DRLog.writeVector2ToLog(tileSize, "tileSize");    
+    //DRLog.writeVector2ToLog(tileSize, "tileSize");    
     
     DRVector2 tileStarts[8];
     DRString tileNames[] = {"tile", "tileTop", "tileBottom", "tileSides",
@@ -32,7 +32,7 @@ RenderBlock::RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg)
         tileStarts[i] /= textureSize;
         tileStarts[i].y = (1.0f-tileSize.y) - tileStarts[i].y;
         //tileStarts[i].y = texture->getWidth()-tileStarts[i].y-tileSize.y;
-        DRLog.writeVector2ToLog(tileStarts[i], "tile");
+        //DRLog.writeVector2ToLog(tileStarts[i], "tile");
     }
     
     

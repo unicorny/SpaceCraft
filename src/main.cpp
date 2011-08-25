@@ -5,13 +5,11 @@ Player g_Player;
 RenderBlockLoader g_RenderBlockLoader;
 Camera g_cam(DRVector3(0.0f, -5.0f, 0.0f), DRVector3(0.0f));
 DRFont* g_Font = NULL;
+DRTextur* g_tex = NULL;
 int blockCount = 100;
 
 GLint sphereList = 0;
 
-#define GRADTORAD 0.017453292f
-#define RADTOGRAD 57.29577951f
-const double PI = 3.1415926535;
 
 
 void test()
@@ -62,20 +60,21 @@ DRReturn load()
     if(EnInit_Simple())
         return DR_ERROR;
     DRFileManager::Instance().addOrdner("data/blockView");
-    test();
-    
+ //   test();
+        
     DRRandom r;
     if(g_Player.init())
         LOG_ERROR("Fehler bei Player::init", DR_ERROR);
+       
     if(g_RenderBlockLoader.init())
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
-     
+      
     if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
         LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);
+    
     glClearColor(0.1, 0.2, 0.0, 0);
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
-    
     
   //  glShadeModel(GL_SMOOTH);
   //  glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
@@ -123,6 +122,7 @@ DRReturn load()
 
 void ende()
 {
+    DR_SAVE_DELETE(g_tex);
     glDeleteLists(sphereList, 1);
     DR_SAVE_DELETE(g_Font);
     g_RenderBlockLoader.exit();
@@ -133,7 +133,7 @@ void ende()
 DRReturn move(float fTime)
 {
 
-    float fRotSpeed = 1.0f;
+    float fRotSpeed = 2.0f;
     float fSpeed = 20.0f;
     //Kamera
     Uint8 *keystate = SDL_GetKeyState(NULL);
@@ -146,7 +146,7 @@ DRReturn move(float fTime)
     // wenn die rechte maustaste gedrückt ist
     if((mousePressed & 4) == 4)
         // wird die Kamera auch abhängig von der Mausposition gedreht
-    g_cam.rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fSpeed);
+    g_cam.rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fRotSpeed);
     // kamera bewegung abhängig von den Tasten a, d (links/rechts), bild up, bild down (hoch/runter), Pfeil hoch und Pfeil runter (vorwärts/rückwärts)
     g_cam.translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
 
@@ -160,129 +160,122 @@ DRReturn move(float fTime)
 DRReturn generateSphere(DRReal radius)
 {
     sphereList = glGenLists(1);
-    glNewList(sphereList, GL_COMPILE); 
+    srand(11021989);
+    glNewList(sphereList, GL_COMPILE);     
     
-    glPushMatrix();
+    glPushMatrix();      
     
     glScalef(radius, radius, radius);
     glColor3f(0.0f, 1.0f, 1.0f);
     
-    float percent = 0.4f;
+    float percent = 1.0f;
+    const int iterator = 100;
     
-    const int totalSegments = 200;
+    const int totalSegments = 20;
     const int currentSegments = (int)((float)totalSegments*percent);
-    const int iSegments = 200;
-    const int segs = 200;
-    DRVector3 points[iSegments*(segs+2)];
-    DRColor color[iSegments*(segs+2)];
-    GLuint indices[2*iSegments-1+2*iSegments*segs];
-    memset(indices, 0, sizeof(GLuint)*iSegments*(segs+2));    
-    memset(color, 1, sizeof(DRColor)*iSegments*(segs+2));
+        
+    const int vertexCount = currentSegments*currentSegments;
+    const int indexCount =  2*currentSegments*currentSegments-2*currentSegments; //2*currentSegments*currentSegments;//2*currentSegments-1+2*currentSegments*currentSegments;
+//    const int iSegments = 200;
+//    const int segs = 200;
+    printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
     
+    DRGeometrieSphere geo;
+    if(geo.initSphere(totalSegments))
+        LOG_ERROR("Fehler bei SphereInit", DR_ERROR);
+    
+    DRVector3* points = geo.getVertexPointer();// new DRVector3[vertexCount];
+    DRColor* color = geo.getColorPointer();// new DRColor[vertexCount];
+    DRColor* heighMap = new DRColor[vertexCount];
+    
+        
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   //  glDisable(GL_CULL_FACE);
     
     //glBegin(GL_LINE_LOOP);
-    for(int i = 0; i < iSegments; i++)
+  
+    
+    const char* path = "data/planet.png";
+    DRIImage* image = DRIImage::newImage();
+    DRReturn ret = image->loadFromFile(path);
+    if(!ret && image->getWidth()*image->getHeight() == vertexCount)
     {
-        DRReal sin = sinf(((PI)/(double)(iSegments-1))*(double)i);
-        DRReal cos = cosf(((PI)/(double)(iSegments-1))*(double)i);        
-
-        points[i] = DRVector3(cos, sin, 0.0f);
-        color[i] = DRColor(1.0f, 1.0f, 0.0f);
-        //glVertex3fv(points[i]);
-        //point = point.normalize();
-        //DRLog.writeToLog("sin: %f, cos: %f, i: %d", sin, cos, i);
-        //DRLog.writeVector3ToLog(points[i], "Punkt");
-    }   
-    for(int j = 1; j <= segs; j++)
+        image->getPixel(color);
+        int size = image->getWidth()*image->getHeight();
+        printf("size: %u\n", size);        
+    }
+    else
     {
-        // PI/segs*2 = 360°
-        // PI/segs = 180°
-        DRMatrix rot = DRMatrix::rotationX((PI/segs*2)*j);
-        for(int i = 0; i < iSegments; i++)
+        geo.makeSphericalLandscape(iterator, 1119);
+        float max = 0.0f, min = 1.0f;
+        for(int i = 0; i < vertexCount; i++)
         {
-            //glVertex3fv(points[i].transformNormal(rot));
-            points[j*iSegments+i] = points[i].transformNormal(rot);//*DRRandom::rReal(1.02, 0.98f);
-            color[j*iSegments+i] = DRColor((float)i/(float)iSegments, (float)j/(float)segs, 0.2f);
-            //glVertex3fv(points[i+iSegments]);
+            float l = 1.0f - points[i].length();
+            if(l > max) max = l;
+            if(l < min) min = l;
         }
-    }
-    for(int j = 0; j < segs; j++)
-    {
-        for(int i = 0; i < iSegments; i++)
+        //einfärben
+        DRLog.writeToLog("min: %f, max: %f", min, max);
+        for(int j = 0; j < vertexCount; j++)
         {
-            indices[i*2+(iSegments*2)*j] = iSegments+i+iSegments*j; 
-            indices[i*2+1+(iSegments*2)*j] = i+iSegments*j;    
-         }
-    }
-    
-    for(int i = 0; i < 8; i++)
-        DRLog.writeVector3ToLog(points[indices[i]]);
-    
-    int iterator =150;
-    int m = 1;
-    float max = 0.0f, min = 1.0f;
-    for(int i = 0; i < iterator; i++)
-    {
-        DRVector3 n = DRRandom::rVector3(1.0f);
-        DRPlane pl(n, n.length());
-        //int m = rand() % 2;
-        //if(!m) m =-1;
-        m = -m;
-        for(int j = 0; j < iSegments*(segs+2); j++)
-        {
+        //    DRLog.writeToLog("\n---------- j:%d -------------", j);
             float d = 1.0f - points[j].length();
-            if(d != 1.0f && d > max) max = d;
-            if(d < min) min = d;
-            if(pl.dotCoords(points[j]) >= 1)
+            heighMap[j] = DRColor((DRReal)(fabs((d+min))/(max+fabs(min))));
+    //        if(j < 10)
+      //          DRLog.writeToLog("heighMapValue: %f, d: %f", fabs((d+min))/(max+fabs(min)), d);
+            d *= -1.0f;
+            //if(j < 10)
+          //      DRLog.writeToLog("d: %f", d);
+            if(d < 0)
             {
-                points[j] = points[j] * (1.0f+(float)m/1000.0f);
+                if(d == -1.0f)
+                    color[j] = color[(int)fabs(vertexCount-currentSegments-j)].interpolate(color[j-currentSegments], 0.5f);
+                else
+                    color[j] = DRColor(0.0f, (1.0f-(d/min))/10.0f, 1.0f-(d/min));
             }
-            else
+            else if(d > 0)
             {
-                points[j] = points[j] * (1.0f-(float)m/1000.0f);
+                if(d > max/2)
+                    color[j] = DRColor((d/max), (d/max)/2.0f, 0.1f);
+                else if(d < max-max/10)
+                    color[j] = DRColor((d/max)/2.0f, (d/max), 0.1f);
+                else
+                    color[j] = DRColor(d/max);
             }
+            //DRLog.writeVector3ToLog(points[j]);
+            //DRLog.writeColorToLog(color[j]);
+           // points[j] = points[j].normalize();
         }
-    }
+        //DRLog.writeToLog("\n-------- ende -------------");
+        printf("%d Pixel in ein %d großes Bild\n", vertexCount, currentSegments * (currentSegments+2));
+        image->setWidth(currentSegments);
+        image->setHeight(currentSegments);
+        image->setImageFormat(-1);
+        image->setPixel(color);
+        image->saveIntoFile(path);    
+        
+        image->setPixel(heighMap);
+        image->saveIntoFile("data/heighmap.png");
+    } 
     
-    //einfärben
-    DRLog.writeToLog("min: %f, max: %f", min, max);
-    for(int j = 0; j < iSegments*(segs+2); j++)
-    {
-        float d = 1.0f - points[j].length();
-        d *= -1.0f;
-        if(j < 10)
-            DRLog.writeToLog("d: %f", d);
-        if(d < 0)
-        {
-            color[j] = DRColor(0.0f, (1.0f-(d/min))/10.0f, 1.0f-(d/min));
-        }
-        else if(d > 0)
-        {
-            if(d > max/2)
-                color[j] = DRColor((d/max), (d/max)/2.0f, 0.1f);
-            else if(d < max-max/10)
-                color[j] = DRColor((d/max)/2.0f, (d/max), 0.1f);
-            else
-                color[j] = DRColor(d/max);
-        }
-    }
-
-
+    g_tex = new DRTextur(image);
+    DRIImage::deleteImage(image);    
+   // */
+     
     //glEnd();
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, points);
-    glColorPointer(4, GL_FLOAT, 0, color);
-    //glDrawArrays(GL_QUADS, 0, iSegments*(segs+2));    
-    glDrawElements(GL_QUAD_STRIP, 2*iSegments+2*iSegments*(segs-1), GL_UNSIGNED_INT, indices);
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    
+    geo.render();
+    //*/
     glPopMatrix();
     
     glEndList();
+    
+ //   DR_SAVE_DELETE_ARRAY(points);
+//    DR_SAVE_DELETE_ARRAY(color);
+//    DR_SAVE_DELETE_ARRAY(indices);
+    DR_SAVE_DELETE_ARRAY(heighMap);
+    
+//    g_tex = new DRTextur(path, GL_NEAREST, GL_NEAREST);
+   
     
     return DR_OK;
 }
@@ -314,16 +307,25 @@ DRReturn render(float fTime)
     GLfloat lightPos1[] = {-1.0f, 0.5f, 0.5f, 0.0f};
     glLightfv(GL_LIGHT1, GL_DIFFUSE, lightColor1);
     glLightfv(GL_LIGHT1, GL_POSITION, lightPos1);
-    glEnable(GL_LIGHT1);    
-
-    glDisable(GL_TEXTURE_2D);
-    glColor3f(0.2f, 0.5f, 0.1f);
+    glEnable(GL_LIGHT1);       
+    
+    if(g_tex)
+        g_tex->bind();
+      
+    //glColor3f(0.2f, 0.5f, 0.1f);
+    glColor3f(1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
+        glTexCoord2f(1.0, 0.0f);
         glVertex3f( 50.0f, 0.0f, -50.0f);
+        glTexCoord2f(0.0, 0.0f);
         glVertex3f(-50.0f, 0.0f, -50.0f);
+        glTexCoord2f(0.0, 1.0f);
         glVertex3f(-50.0f, 0.0f,  50.0f);
+        glTexCoord2f(1.0, 1.0f);
         glVertex3f( 50.0f, 0.0f,  50.0f);
     glEnd();
+    
+    //glDisable(GL_TEXTURE_2D);
     
     glTranslatef(0.0f, 2.0f, 0.0f);
     glBegin(GL_QUADS);
@@ -334,6 +336,8 @@ DRReturn render(float fTime)
         glVertex3f(1.0f, 0.0f, 0.0f);
     glEnd();
     glTranslatef(0.0f, -2.0f, 0.0f);
+    
+  //  printf("bevore renderBlock\n");
     
     glTranslatef(0.0f, 10.0f, 0.0f);
     RenderBlock* rb =  g_RenderBlockLoader.getRenderBlock("dirt");
@@ -348,7 +352,7 @@ DRReturn render(float fTime)
     g_RenderBlockLoader.getRenderBlock("benc")->render();
     
     glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
+    //glDisable(GL_LIGHTING);
     glPushMatrix();
     
     glTranslatef(0.0, 0.0f, -15.0f);
@@ -357,7 +361,8 @@ DRReturn render(float fTime)
     static float sphereRotate = 0;
     glRotatef(sphereRotate, 0.4f, 0.4f, 0.4f);
     
-    glCallList(sphereList);
+    if(sphereList)
+        glCallList(sphereList);
     
     sphereRotate += fTime*10.0f;
       
@@ -439,6 +444,7 @@ int main(int argc, char* argv[])
         printf("Es trat ein Fehler bei load auf, das Programm wird beendet!\n");
         return -1;
     }
+
     if(EnGameLoop(move, render))
     {
         printf("Fehler in der GameLoop\n");

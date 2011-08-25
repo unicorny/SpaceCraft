@@ -5,10 +5,12 @@ class ENGINE_API DRTextur
 {
 public:
     DRTextur();
+    DRTextur(DRIImage* loadedImage, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
     DRTextur(const char* filename, bool keepImage = false, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
     virtual ~DRTextur();
 
     DRReturn load(const char* filename, bool keepImage = false, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
+    DRReturn loadFromMemory(DRColor* colors, DRVector2 size, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
     void unload();
     
     bool isLoaded() {return mSucessfullLoaded;}
@@ -19,6 +21,8 @@ public:
     __inline__ u32 getHeight() {if(mParent) return mParent->getHeight(); LOG_ERROR("parent is zero, set keepImage to true!", -1);}
 
 protected:
+    DRReturn load(GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
+    
     DRIImage* mParent;
     unsigned mTexturID;
     

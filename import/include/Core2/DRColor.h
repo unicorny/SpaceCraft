@@ -19,7 +19,7 @@
  *                                                                       *
  *************************************************************************/
 /*
-Color Klasse, übernommen aus der TriBase-Engine von David Scherfgen
+Color Klasse, ï¿½bernommen aus der TriBase-Engine von David Scherfgen
 */
 
 #ifndef __DR_COLOR__

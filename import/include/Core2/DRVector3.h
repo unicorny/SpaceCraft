@@ -116,8 +116,9 @@ public:
     //! \brief * operator
     //! \param f Skalar mit dem multipliziert wird
     //! \return einen neuen Vektor
-    DRVector3 operator * (const float f)       const {return DRVector3(x*f, y*f, z*f);}
-
+    DRVector3 operator *  (const float f)       const {return DRVector3(x*f, y*f, z*f);}
+    DRVector3 operator *= (const float f)             {return *this * f;}
+ 
     //! \brief transformiert diesen Vektor mit der Matrix m, const
     //! \param die &uuml;bergebende Mtrix m
     //! \return einen neuen, transformierten Vektor

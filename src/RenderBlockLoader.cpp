@@ -38,7 +38,7 @@ RenderBlock* RenderBlockLoader::getRenderBlock(BlockName name)
     {
         return rb;
     }
-    DRLog.writeToLog("try to load block: %c%c%c%c", name.zeichen[0], name.zeichen[1], name.zeichen[2], name.zeichen[3]);
+   // DRLog.writeToLog("try to load block: %c%c%c%c", name.zeichen[0], name.zeichen[1], name.zeichen[2], name.zeichen[3]);
     char buffer[5];
     memcpy(buffer, name.zeichen, 4);
     buffer[4] = '\0';
@@ -47,7 +47,7 @@ RenderBlock* RenderBlockLoader::getRenderBlock(BlockName name)
         filter = GL_NEAREST;
         
     DRTextur* tex = getTexture(mCfg->getStr(buffer, "texture")->data(), filter);
-    DRLog.writeToLog("TexturPointer: %d", (unsigned int)tex);
+  //  DRLog.writeToLog("TexturPointer: %d", (unsigned int)tex);
     rb = new RenderBlock(tex, name, mCfg);
     mRenderBlocks->addByHash(name, rb);    
     return rb;
@@ -60,7 +60,7 @@ DRTextur* RenderBlockLoader::getTexture(const char* filename, GLint filter)
     {
         return tex;
     }
-    DRLog.writeToLog("try to load texture: %s/%s", DRFileManager::Instance().getWholePfad(filename), filename);
+ //   DRLog.writeToLog("try to load texture: %s/%s", DRFileManager::Instance().getWholePfad(filename), filename);
     
     tex = new DRTextur(filename, true, filter, filter);
     mTextures->addByHash(DRMakeStringHash(filename)|filter, tex);

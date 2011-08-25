@@ -56,6 +56,9 @@
 #define LOG_ERROR_SDL_VOID() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return;}}
 #define LOG_WARNING_SDL() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2) LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__);}
 
+#define GRADTORAD 0.017453292f
+#define RADTOGRAD 57.29577951f
+const double PI = 3.1415926535;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -87,9 +90,13 @@
 #include "DRINetwork.h"
 #include "DRIvlc.h"
 #include "DRIImage.h"
+#include "DRRandom.h"
 #include "DRVideoConfig.h"
 #include "DRTextur.h"
+#include "DRGeometrie.h"
+#include "DRGeometrieSphere.h"
 #include "DRText.h"
+
 /*#include "FileFormats.h"
 #include "Utils.h"
 #include "Font.h"
