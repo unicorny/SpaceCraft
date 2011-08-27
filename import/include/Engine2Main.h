@@ -78,6 +78,7 @@ const double PI = 3.1415926535;
 //einbinden von OpenGL
 //#include <GL/glu.h>   // Damit kann Glu32 genutzt werden.
 #include <sdl/SDL_opengl.h>
+#include <sdl/SDL_thread.h>
 
 //----------------------------------------------------------------------------------------------------------------------
 //Eigene Header
@@ -95,6 +96,7 @@ const double PI = 3.1415926535;
 #include "DRTextur.h"
 #include "DRGeometrie.h"
 #include "DRGeometrieSphere.h"
+#include "DRGeometrieIcoSphere.h"
 #include "DRText.h"
 
 /*#include "FileFormats.h"

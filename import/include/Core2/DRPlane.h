@@ -24,7 +24,7 @@
 	 _________        __    _____
 	/\___  ___\      /\_\  /\  __\
 	\/__/\ \__/ _  __\/_/_ \ \ \_\\   ____    _____      __
-	    \ \ \  /\`´__\ /\ \ \ \  __\ /\ __\_ /\  __\   /´__`\
+	    \ \ \  /\`ï¿½__\ /\ \ \ \  __\ /\ __\_ /\  __\   /ï¿½__`\
 	     \ \ \ \ \ \/  \ \ \ \ \ \_\\\ \\_\ \\ \____\ /\  __/
 	      \ \_\ \ \_\   \ \_\ \ \____\\ \___\ \ \____\\ \____\
 	       \/_/  \/_/    \/_/  \/____/ \/__/   \/____/ \/____/
@@ -39,7 +39,7 @@
 	Autor:
 	David Scherfgen
 /*
-Ebenen Klasse, übernommen aus der TriBase-Engine von David Scherfgen
+Ebenen Klasse, ï¿½bernommen aus der TriBase-Engine von David Scherfgen
 */
 
 /********************************************************************/
@@ -98,6 +98,9 @@ public:
     // Funktionen deklarieren
     inline DRPlane	normalize()                     const  	{return *this / DRVector3(a,b,c).length();}
     inline DRReal	dotNormal(const DRVector3& v)	const	{return a * v.x + b * v.y + c * v.z;}
+    //! \brief check if point is on plane
+    //! 
+    //! \return 0 if point is on plane, > 1 is point over the plane and < 1 is pointer underneat the plane
     inline DRReal	dotCoords(const DRVector3& v)	const	{return a * v.x + b * v.y + c * v.z + d;}
 
     static inline DRPlane	fromPointNormal(const DRVector3& p, const DRVector3& n)	{return DRPlane(n, -n.x * p.x - n.y * p.y - n.z * p.z);}

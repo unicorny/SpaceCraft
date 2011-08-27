@@ -26,6 +26,7 @@ public:
      * */
     DRReturn init(u32 vertexCount, u32 indexCount = 0, u32 textureCount = 0, bool color = false);
     
+    void setRenderMode(GLenum renderMode) {mRenderMode = renderMode;}
     DRReturn render();
     
     DRVector3* getVertexPointer() {return mVertices;}

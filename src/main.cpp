@@ -156,6 +156,7 @@ DRReturn move(float fTime)
 
     return DR_OK;
 }
+const float tao = 1.61803399;
 
 DRReturn generateSphere(DRReal radius)
 {
@@ -163,7 +164,7 @@ DRReturn generateSphere(DRReal radius)
     float percent = 1.0f;
     const int iterator = 10000;
     
-    const int totalSegments = 500;
+    const int totalSegments = 100;
     const int currentSegments = (int)((float)totalSegments*percent);
         
     const int vertexCount = currentSegments*currentSegments;
@@ -172,23 +173,29 @@ DRReturn generateSphere(DRReal radius)
 //    const int segs = 200;
     printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
     
-    DRGeometrieSphere geo;
-    if(geo.initSphere(totalSegments))
-        LOG_ERROR("Fehler bei SphereInit", DR_ERROR);
+    DRGeometrieIcoSphere geo;
+    geo.initIcoSphere(2);
+    
+    
+    //if(geo.initSphere(totalSegments))
+      //  LOG_ERROR("Fehler bei SphereInit", DR_ERROR);
     
     DRVector3* points = geo.getVertexPointer();// new DRVector3[vertexCount];
     DRColor* color = geo.getColorPointer();// new DRColor[vertexCount];
     DRColor* heighMap = new DRColor[vertexCount];
+    GLuint*  indices = geo.getIndexPointer();
     
-        
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  //  glDisable(GL_CULL_FACE);
+    
+    //*/
+            
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glDisable(GL_CULL_FACE);
     
     //glBegin(GL_LINE_LOOP);
   
     
     const char* path = "data/planet.png";
-    DRIImage* image = DRIImage::newImage();
+ /*   DRIImage* image = DRIImage::newImage();
     DRReturn ret = image->loadFromFile(path);
     if(!ret && image->getWidth()*image->getHeight() == vertexCount)
     {
@@ -259,7 +266,7 @@ DRReturn generateSphere(DRReal radius)
     
     glPushMatrix();          
     glScalef(radius, radius, radius);
-    
+    glColor3f(1.0f, 0.0f, 0.0f);
     geo.render();
     
     glPopMatrix();
@@ -356,12 +363,12 @@ DRReturn render(float fTime)
     //renderSphere(5.0f);
     
     static float sphereRotate = 0;
-    glRotatef(sphereRotate, 0.4f, 0.4f, 0.4f);
+    glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
     
     if(sphereList)
         glCallList(sphereList);
     
-    sphereRotate += fTime*10.0f;
+   // sphereRotate += fTime*10.0f;
       
     
     glPopMatrix();
