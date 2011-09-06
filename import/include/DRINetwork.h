@@ -28,7 +28,7 @@
 #define __NETWORK_DLL_NAME_ "libNetwork.so"
 #endif
 /*
-Netzwerk klasse für das einfache arbeiten mit sockets
+Netzwerk klasse fï¿½r das einfache arbeiten mit sockets
 Autor: Dario Rekowski
 Datum: 16.09.09
 */
@@ -44,7 +44,7 @@ enum DRNet_Status
     NET_ERROR    = -1 // Fehler
 };
 
-#ifdef _WIN32
+#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
 enum ENGINE_API DRNet_Status;
 #endif
 
@@ -54,11 +54,11 @@ enum DRNet_RequestTyp
     NET_GET = 2
 };
 
-#ifdef _WIN32
+#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
 enum ENGINE_API DRNet_RequestTyp;
 #endif
 
-// Interface klasse für Netzwerk, implementierung erfolgt in Network.dll
+// Interface klasse fï¿½r Netzwerk, implementierung erfolgt in Network.dll
 class ENGINE_API DRINetwork : public DRInterface
 {
 public:
@@ -77,7 +77,7 @@ public:
     // zugriff/arbeits funktionen
     //! \brief baut eine verbindung auf
     //! \param host_ip histname oder ip adresse (durch . getrennnte ziffern)
-    //! \param port port number, 80 für http
+    //! \param port port number, 80 fï¿½r http
     //! \return verbindungs ID oder null bei Fehler
     virtual int connect(const char* host_ip, int port);
 
@@ -91,7 +91,7 @@ public:
     //! \brief zum erhalen der antworten/ read answears
     //! \param dataIndex die nummer des datenaustausches
     //! \param buffer buffer des aufrufers zum erhalten der daten
-    //! \param bufferSize die Größe des Buffers des Aufrufers
+    //! \param bufferSize die Grï¿½ï¿½e des Buffers des Aufrufers
     virtual DRNet_Status getData(int dataIndex, void* buffer, int bufferSize);
 
 protected:

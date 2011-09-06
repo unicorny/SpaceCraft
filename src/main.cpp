@@ -173,8 +173,10 @@ DRReturn generateSphere(DRReal radius)
 //    const int segs = 200;
     printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
     
-    DRGeometrieIcoSphere geo;
-    geo.initIcoSphere(2);
+    //DRGeometrieIcoSphere geo;
+    DRGeometrieSphere geo;    
+    //geo.initIcoSphere(2);
+    geo.initSphere(120);
     
     
     //if(geo.initSphere(totalSegments))
@@ -439,7 +441,9 @@ DRReturn render(float fTime)
     return DR_OK;
 }
 
-
+#ifdef _WIN32
+#undef main
+#endif
 int main(int argc, char* argv[])
 {
     printf("Bitte warten, waehrend SpaceCraft geladen wird\n");

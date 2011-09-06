@@ -114,7 +114,8 @@ enum /*CORE_API*/ DRReturn
 	DR_RENDER = 4
 };
 
-#ifdef _WIN32
+#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
+   // ... Do VC9/Visual Studio 2008 specific stuff
 enum CORE2_API DRReturn;
 #endif
 
@@ -128,7 +129,7 @@ enum CORE2_API DRReturn;
 #include "DRObjekt.h"
 #include "DRIni.h"
 #include "DRDampingSpring.h"
-#include "DRGeometrieGenerator.h"
+//#include "DRGeometrieGenerator.h"
 #include "DRHash.hpp"
 #include "DRHashList.hpp"
 #include "DRUtils.h"

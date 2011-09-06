@@ -37,8 +37,8 @@ enum DRTEXTFlags
 	DR_FF_RELATIVSCALING = 64//Skalierung ist relativ
 };
 
-#ifdef _WIN32
-enum ENGINE_API DRFontFlags;
+#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
+enum ENGINE_API DRTEXTFlags;
 #endif
 
 /*! \brief eine Hilfs-Klasse zum text rendern mittels OpenGL
