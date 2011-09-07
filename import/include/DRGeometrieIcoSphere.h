@@ -5,18 +5,18 @@
  * Created on 26. August 2011, 08:59
  */
 
-#ifndef _DR_GEOMETRIE_ICO_SPHERE_H
-#define	_DR_GEOMETRIE_ICO_SPHERE_H
+#ifndef __DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
+#define	__DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
 
-class DRGeometrieIcoSphere : public DRGeometrieSphere
+
+class ENGINE_API DRGeometrieIcoSphere : public DRGeometrieSphere
 {
 public:
     DRGeometrieIcoSphere();
-    
-    
     virtual ~DRGeometrieIcoSphere();
     
     DRReturn initIcoSphere(GLuint subdivide = 0);
+    
 private:
     DRGeometrieIcoSphere(const DRGeometrieIcoSphere& orig) {LOG_WARNING("Not exist");}
     
@@ -38,6 +38,6 @@ private:
     std::list<IcoSphereFace*>           mBorderFaces;
 
 };
-
-#endif	/* _DR_GEOMETRIE_ICO_SPHERE_H */
+//*/
+#endif	/* __DR_ENGINE_GEOMETRIE_ICO_SPHERE_H */
 

@@ -160,11 +160,10 @@ const float tao = 1.61803399;
 
 DRReturn generateSphere(DRReal radius)
 {
-    
     float percent = 1.0f;
     const int iterator = 10000;
     
-    const int totalSegments = 100;
+    const int totalSegments = 200;
     const int currentSegments = (int)((float)totalSegments*percent);
         
     const int vertexCount = currentSegments*currentSegments;
@@ -173,10 +172,11 @@ DRReturn generateSphere(DRReal radius)
 //    const int segs = 200;
     printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
     
-    //DRGeometrieIcoSphere geo;
-    DRGeometrieSphere geo;    
-    //geo.initIcoSphere(2);
-    geo.initSphere(120);
+    DRGeometrieIcoSphere geo;
+    //DRGeometrieSphere geo;    
+    geo.initIcoSphere(2);
+    //geo.initSphere(totalSegments);
+    //geo.makeSphericalLandscape(iterator, 911818);
     
     
     //if(geo.initSphere(totalSegments))
@@ -185,8 +185,7 @@ DRReturn generateSphere(DRReal radius)
     DRVector3* points = geo.getVertexPointer();// new DRVector3[vertexCount];
     DRColor* color = geo.getColorPointer();// new DRColor[vertexCount];
     DRColor* heighMap = new DRColor[vertexCount];
-    GLuint*  indices = geo.getIndexPointer();
-    
+    GLuint*  indices = geo.getIndexPointer();    
     
     //*/
             
@@ -197,7 +196,8 @@ DRReturn generateSphere(DRReal radius)
   
     
     const char* path = "data/planet.png";
- /*   DRIImage* image = DRIImage::newImage();
+    /*
+    DRIImage* image = DRIImage::newImage();
     DRReturn ret = image->loadFromFile(path);
     if(!ret && image->getWidth()*image->getHeight() == vertexCount)
     {
@@ -370,7 +370,7 @@ DRReturn render(float fTime)
     if(sphereList)
         glCallList(sphereList);
     
-   // sphereRotate += fTime*10.0f;
+    sphereRotate += fTime*10.0f;
       
     
     glPopMatrix();

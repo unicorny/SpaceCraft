@@ -12,10 +12,10 @@ SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../incl
 
 SET(PA ../import/bin ../import/lib)
 find_library(SDL_LIB SDL PATHS ${PA})
-find_library(ENGINE2_LIB Engine2 PATHS ${PA} REQUIRED)
-find_library(CORE2_LIB Core2 PATHS ${PA} REQUIRED)
+find_library(DR_ENGINE2_LIB Engine2 PATHS ${PA} REQUIRED)
+find_library(DR_CORE2_LIB Core2 PATHS ${PA} REQUIRED)
 if(WIN32)
-SET(SpaceCraftLibs ${SDL_LIB} ${ENGINE2_LIB} ${CORE2_LIB} glu32 opengl32)
+SET(SpaceCraftLibs ${SDL_LIB} ${DR_ENGINE2_LIB} ${DR_CORE2_LIB} glu32 opengl32)
 else()
 SET(SpaceCraftLibs ${SDL_LIB} Engine2 Core2 GLEW glut)
 endif()

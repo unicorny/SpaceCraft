@@ -5,8 +5,8 @@
  * Created on 25. August 2011, 12:33
  */
 
-#ifndef _DR_ENGINE_GEOMETRIE_SPHERE_H
-#define	_DR_ENGINE_GEOMETRIE_SPHERE_H
+#ifndef __DR_ENGINE_GEOMETRIE_SPHERE_H
+#define	__DR_ENGINE_GEOMETRIE_SPHERE_H
 
 class DRGeometrie;
 
@@ -20,7 +20,6 @@ public:
      *  \param segmentSize  gesamt vertexCount = segmentSize²
      * */
     DRReturn initSphere(GLuint segmentSize);
-    
     
     /*! \brief manipulate a sphere, to make a landscape from it
      *  \param numIterations iteration count, for every iteration,<br>
@@ -62,5 +61,5 @@ private:
     };
 };
 
-#endif	/* _DR_ENGINE_GEOMETRIE_SPHERE_H */
+#endif	/* __DR_ENGINE_GEOMETRIE_SPHERE_H */
 

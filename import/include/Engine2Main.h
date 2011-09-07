@@ -25,19 +25,20 @@
 #define __DR_ENGINE2MAIN__
 
 //Export Makro
+//#if (_MSC_VER >= 1200 && _MSC_VER < 1310)
 #ifdef _WIN32
     #ifndef BUILD_ENGINE_DLL
         #define ENGINE_API __declspec(dllimport)
     #else
         #define ENGINE_API __declspec(dllexport)
     #endif
-#else
+#else //_WIN32
     #ifdef BUILD_ENGINE_DLL
         #define ENGINE_API
     #else
         #define ENGINE_API
     #endif
-#endif
+#endif //_WIN32
 
 #define XWIDTH g_v2WindowLength.x
 #define YHEIGHT g_v2WindowLength.y

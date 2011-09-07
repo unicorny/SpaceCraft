@@ -115,8 +115,7 @@ enum /*CORE_API*/ DRReturn
 };
 
 #if (_MSC_VER >= 1200 && _MSC_VER < 1310)
-   // ... Do VC9/Visual Studio 2008 specific stuff
-enum CORE2_API DRReturn;
+ enum CORE2_API DRReturn;
 #endif
 
 
