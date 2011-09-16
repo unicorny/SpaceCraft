@@ -12,30 +12,53 @@
 class ENGINE_API DRGeometrieIcoSphere : public DRGeometrieSphere
 {
 public:
-    DRGeometrieIcoSphere();
+    //! \param maxFaceBuffer count of keeping free memory for IceSphereFace
+    DRGeometrieIcoSphere(GLuint maxFaceBuffer = 100);
     virtual ~DRGeometrieIcoSphere();
     
-    DRReturn initIcoSphere(GLuint subdivide = 0);
+    /*! \param maxEbene höchste zu erstellende Ebene <br> \
+     *  (z.B. VY Canis Majoris = 51, Erde = 23)
+     * 
+     */
+    DRReturn initIcoSphere(u8 maxEbene = 0);
     
 private:
     DRGeometrieIcoSphere(const DRGeometrieIcoSphere& orig) {LOG_WARNING("Not exist");}
     
     struct IcoSphereFace
     {
+        IcoSphereFace();
+        ~IcoSphereFace() {reset();}
+        void reset(DRGeometrieIcoSphere* sphere = NULL);
+        bool   hasChilds();
+        IcoSphereFace* getChildAtBorder(GLuint borderIndices[2], IcoSphereFace* caller = NULL);
+        
         IcoSphereFace* mNeighbors[3];
+        IcoSphereFace* mChilds[4];
+        IcoSphereFace* mParent;
         GLuint         mIndices[3];
     };
     
-    IcoSphereFace* addNewFace(GLuint index1, GLuint index2, GLuint index3); 
-    IcoSphereFace* addNewFace(GLuint index[3]); 
-    DRReturn addNewFacesAtBorder();
-    DRReturn grabIndicesFromFaces();
+    IcoSphereFace* newFace();
+    IcoSphereFace* newChildFace(IcoSphereFace* parent, int childCursor);
+    void deleteFace(IcoSphereFace* face);
+    
+    //achtung! rekursive funktion!
+    void subdivide(IcoSphereFace* current = NULL);
+    
+    //achtung! rekursive funktion!  
+    DRReturn grabIndicesFromFaces(IcoSphereFace* current = NULL);
+    void reset();
     
     
-    // neue Faces (Rand) stehen am Anfang der Liste (start bei top, bzw freeCount)
-    DRMemoryList<IcoSphereFace>* mFaceMemoryList;
-    //
-    std::list<IcoSphereFace*>           mBorderFaces;
+    std::list<IcoSphereFace*>           mFreeIcoFaceMemory;
+    IcoSphereFace                       mRootSphereFaces[20];
+    u8                                  mMaxEbene;
+    GLuint                              mMaxFaceBuffer;
+    
+    static float                        mVektorLength;          
+    unsigned int                        mVertexCursor;      
+    unsigned int                        mEbeneNeighborCount;
 
 };
 //*/

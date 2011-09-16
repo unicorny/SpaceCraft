@@ -25,6 +25,11 @@ public:
      * \return DR_OK wenn alles okay ist, oder DR_ERROR bei Fehler 
      * */
     DRReturn init(u32 vertexCount, u32 indexCount = 0, u32 textureCount = 0, bool color = false);
+    DRReturn initVertexBuffer();
+    
+    //! \param clearData if set to true, after copying data to vertexbuffer, local copy will be deleted
+    DRReturn copyDataToVertexBuffer(GLenum usage = GL_STATIC_DRAW_ARB, bool clearData = false);
+    DRReturn updateIndexDataIntoVertexBuffer(int from = 0, int to = 0, GLenum usage = GL_STATIC_DRAW_ARB);
     
     void setRenderMode(GLenum renderMode) {mRenderMode = renderMode;}
     DRReturn render();
@@ -32,6 +37,9 @@ public:
     DRVector3* getVertexPointer() {return mVertices;}
     DRColor*   getColorPointer()  {return mColors;}
     GLuint*    getIndexPointer()  {return mIndices;}
+    
+    void clearData();
+    void releaseVertexBuffer();
     
 protected:
     DRVector3*  mVertices;
@@ -41,6 +49,9 @@ protected:
     u32         mVertexCount;
     u32         mIndexCount;
     u32         mNumTextureCoords;
+    
+    GLuint      mVertexBufferObjects[4];
+    bool        mRenderVertexBuffer;
     
     GLenum      mRenderMode;
        

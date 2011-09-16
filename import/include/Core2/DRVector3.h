@@ -138,6 +138,9 @@ public:
     //! \brief berechnet die L&auml;nge des Vektors, const
     //! \return die l&auml;nge des Vektors
     float   length()                         const {return sqrtf(x*x + y*y + z*z);}
+    //! \brief berechnet die quadratische L&auml;nge des Vektors, const
+    //! \return die l&auml;nge des Vektors
+    float   lengthSq()                       const {return (x*x + y*y + z*z);}
 
     //! \brief gibt den Vektor auf die Konsole aus, const
     //! \param name wenn angegeben, wird name mit auf der Konsole ausgegeben

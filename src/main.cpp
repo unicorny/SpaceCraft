@@ -7,10 +7,16 @@ Camera g_cam(DRVector3(0.0f, -5.0f, 0.0f), DRVector3(0.0f));
 DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 int blockCount = 100;
+//DRGeometrieIcoSphere g_geo;
 
 GLint sphereList = 0;
 
-
+int rekursionTest(int zahl)
+{
+    int z[20];
+    if(zahl > 10000) return zahl;
+    return rekursionTest(++zahl);
+}
 
 void test()
 {
@@ -33,8 +39,11 @@ void test()
     DRLog.writeMatrixToLog(m2);
     DRLog.writeMatrixToLog(m3);
     
+    DRLog.writeToLog("RekursionTest: %d", rekursionTest(0));
+    
+    
     //Speicher test
-  /*  LOG_INFO("Speichertest");
+/*  LOG_INFO("Speichertest");
     std::list<void*> pointer;
     void* t = NULL;
     u32 count = 0;
@@ -52,7 +61,7 @@ void test()
     for(std::list<void*>::iterator it = pointer.begin(); it != pointer.end(); it++)
         free(*it);
     pointer.clear();
-   * */
+   //* */
 }
 DRReturn generateSphere(DRReal radius);
 DRReturn load()
@@ -60,7 +69,7 @@ DRReturn load()
     if(EnInit_Simple())
         return DR_ERROR;
     DRFileManager::Instance().addOrdner("data/blockView");
- //   test();
+    test();
         
     DRRandom r;
     if(g_Player.init())
@@ -68,10 +77,11 @@ DRReturn load()
        
     if(g_RenderBlockLoader.init())
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
-      
-    if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
-        LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);
-    
+     
+    //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
+    if(EnInit_INI("data/config.ini"))
+        LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);    
+
     glClearColor(0.1, 0.2, 0.0, 0);
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
@@ -132,7 +142,6 @@ void ende()
 
 DRReturn move(float fTime)
 {
-
     float fRotSpeed = 2.0f;
     float fSpeed = 20.0f;
     //Kamera
@@ -163,7 +172,7 @@ DRReturn generateSphere(DRReal radius)
     float percent = 1.0f;
     const int iterator = 10000;
     
-    const int totalSegments = 200;
+    const int totalSegments = 1000;
     const int currentSegments = (int)((float)totalSegments*percent);
         
     const int vertexCount = currentSegments*currentSegments;
@@ -172,11 +181,12 @@ DRReturn generateSphere(DRReal radius)
 //    const int segs = 200;
     printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
     
-    DRGeometrieIcoSphere geo;
+    //DRGeometrieIcoSphere geo2;        
+    DRGeometrieIcoSphere geo;        
     //DRGeometrieSphere geo;    
     geo.initIcoSphere(2);
     //geo.initSphere(totalSegments);
-    //geo.makeSphericalLandscape(iterator, 911818);
+    //geo.makeSphericalLandscape(iterator, 7157);
     
     
     //if(geo.initSphere(totalSegments))
@@ -189,14 +199,14 @@ DRReturn generateSphere(DRReal radius)
     
     //*/
             
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //glDisable(GL_CULL_FACE);
     
     //glBegin(GL_LINE_LOOP);
   
-    
-    const char* path = "data/planet.png";
     /*
+    const char* path = "data/planet.png";
+  
     DRIImage* image = DRIImage::newImage();
     DRReturn ret = image->loadFromFile(path);
     if(!ret && image->getWidth()*image->getHeight() == vertexCount)
@@ -369,6 +379,7 @@ DRReturn render(float fTime)
     
     if(sphereList)
         glCallList(sphereList);
+    //g_geo.render();
     
     sphereRotate += fTime*10.0f;
       

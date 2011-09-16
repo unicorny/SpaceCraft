@@ -88,6 +88,7 @@ const double PI = 3.1415926535;
 
 //----------------------------------------------------------------------------------------------------------------------
 //Interne Header
+#include "glExtensions.h"
 #include "DRInterface.h"
 #include "DRINetwork.h"
 #include "DRIvlc.h"
@@ -127,6 +128,7 @@ ENGINE_API extern u16       g_CPUCount;
 */
 ENGINE_API DRReturn EnInit_Simple(DRReal fVersion = 1.0f, bool initSound = false);
 ENGINE_API DRReturn EnInit(DRReal fVersion = 1.0f, bool initSound = false);
+ENGINE_API DRReturn EnInit_INI(const char* iniFileName);
 ENGINE_API DRReturn EnInit_OpenGL(DRReal fVersion = 1.0f, DRVideoConfig video = DRVideoConfig(), const char* pcTitel = "OpenGL Render Fenster", const char* pcBMPIcon = NULL, bool bInitSound = true);
 ENGINE_API DRReturn	EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRReal), bool bExitByEsc = true);
 ENGINE_API void     EnExit();

@@ -44,6 +44,9 @@ public:
     //! \param stencilBuffer Stencil-Buffer Tiefe, default is 0 (disabled)
     //! \param multiSampling default is 0 (disabled)
     DRVideoConfig(int width = 640, int height = 480, int bpp = 32, int fullscreen = 0, int zbuffer = 8, int stencilBuffer = 0, int multiSampling = 0);
+    
+    //Kopierkonstruktor
+    DRVideoConfig(const DRVideoConfig& cfg);
 
     //! \brief Standard Dekonstruktor
     ~DRVideoConfig();
@@ -60,6 +63,14 @@ public:
 
     // get and setter
     __inline__ DRVector2 getResolution() {return DRVector2((DRReal)mWidth, (DRReal)mHeight);}
+    
+    __inline__ void setWidth(int width) {mWidth = width;}
+    __inline__ void setHeight(int height) {mHeight = height;}
+    __inline__ void setPixelDeep(int pixelDeep) {mPixelDeep = pixelDeep;}
+    __inline__ void setFullscreen(int fullscreen) {mFullscreen = fullscreen;}
+    __inline__ void setZBuffer(int ZBuffer) {mZBuffer = ZBuffer;}
+    __inline__ void setStencilBuffer(int stencilBuffer) {mStencilBuffer = stencilBuffer;}
+    __inline__ void setMultiSampling(int multiSampling) {mMultiSampling = multiSampling;}
 
 private:
     DRReal mVersion;
