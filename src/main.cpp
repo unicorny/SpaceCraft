@@ -94,7 +94,7 @@ DRReturn load()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(40.0f, (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 300.0f);
+    gluPerspective(40.0f, (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
     glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
 
     glLoadIdentity();                    // Reset (init) the modelview matrix
@@ -123,7 +123,7 @@ DRReturn load()
     glDisable(GL_FOG);
     
     Uint32 start = SDL_GetTicks();
-    generateSphere(5.0f);
+    generateSphere(1000.0f);
     
     DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
 
@@ -170,9 +170,9 @@ const float tao = 1.61803399;
 DRReturn generateSphere(DRReal radius)
 {
     float percent = 1.0f;
-    const int iterator = 10000;
+    const int iterator = 0;
     
-    const int totalSegments = 1000;
+    const int totalSegments = 28;
     const int currentSegments = (int)((float)totalSegments*percent);
         
     const int vertexCount = currentSegments*currentSegments;
@@ -184,7 +184,7 @@ DRReturn generateSphere(DRReal radius)
     //DRGeometrieIcoSphere geo2;        
     DRGeometrieIcoSphere geo;        
     //DRGeometrieSphere geo;    
-    geo.initIcoSphere(2);
+    geo.initIcoSphere(7);
     //geo.initSphere(totalSegments);
     //geo.makeSphericalLandscape(iterator, 7157);
     
@@ -198,8 +198,7 @@ DRReturn generateSphere(DRReal radius)
     GLuint*  indices = geo.getIndexPointer();    
     
     //*/
-            
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //glDisable(GL_CULL_FACE);
     
     //glBegin(GL_LINE_LOOP);
@@ -371,7 +370,7 @@ DRReturn render(float fTime)
     //glDisable(GL_LIGHTING);
     glPushMatrix();
     
-    glTranslatef(0.0, 0.0f, -15.0f);
+    glTranslatef(0.0, 0.0f, -2100.0f);
     //renderSphere(5.0f);
     
     static float sphereRotate = 0;
@@ -381,7 +380,7 @@ DRReturn render(float fTime)
         glCallList(sphereList);
     //g_geo.render();
     
-    sphereRotate += fTime*10.0f;
+    //sphereRotate += fTime*10.0f;
       
     
     glPopMatrix();
