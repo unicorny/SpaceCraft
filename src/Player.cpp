@@ -27,7 +27,7 @@ DRReturn Player::init()
     
     mCurrentSektor = new Sektor(0);
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
-    Vector3Unit position(0, LIGHTYEAR);
+    Vector3Unit position(Unit(0, LIGHTYEAR));
     srand(SDL_GetTicks());
     int seed = rand();
     Unit radius(DRRandom::rDouble(72000, 1000), KM);

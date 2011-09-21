@@ -286,7 +286,7 @@ DRReturn generateSphere(DRReal radius)
             if(d < 0)
             {
                 if(d == -1.0f)
-                    color[j] = color[(int)fabs(vertexCount-currentSegments-j)].interpolate(color[j-currentSegments], 0.5f);
+                    color[j] = color[(int)fabs((float)(vertexCount-currentSegments-j))].interpolate(color[j-currentSegments], 0.5f);
                 else
                     color[j] = DRColor(0.0f, (1.0f-(d/min))/10.0f, 1.0f-(d/min));
             }
@@ -316,7 +316,6 @@ DRReturn generateSphere(DRReal radius)
     } 
     
     g_tex = new DRTextur(image);
-    DRIImage::deleteImage(image);    
    // */
     geo.copyDataToVertexBuffer();
     sphereList = glGenLists(1);

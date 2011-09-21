@@ -57,11 +57,14 @@ Sektor* Server::getHome()
         Unit radius(DRRandom::rDouble(72000, 1000), KM);
         temp->addStellarBody(new Planet(radius, position, seed, temp));
         mSektoren.insert(SEKTOR_ENTRY(0, temp));
+		return temp;
     }
+	return NULL;
+	
     
 }
 
 DRReturn Server::saveHome(Sektor* home)
 {
-    
+    return DR_OK;
 }
