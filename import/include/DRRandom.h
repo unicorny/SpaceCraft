@@ -15,6 +15,10 @@ public:
     DRRandom() {/*srand(time(NULL));*/}
     
     static u64 r64() { return rand();}// + ((long long)rand()) << 32;}
+    static double rDouble(double max, double min) 
+    {
+        return min + (max - min) * ((double)(rand() % 10001) / 10000.0);                
+    }
     static DRReal rReal(DRReal fMax, DRReal fMin)
     {
             return fMin + (fMax - fMin) * ((DRReal)(rand() % 10001) / 10000.0f);

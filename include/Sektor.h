@@ -13,17 +13,16 @@ struct SektorID
 {
     SektorID(u64 id) : id(id) {}
     
+    bool operator() (const SektorID& x, const SektorID& y) const {return x.id<y.id;}
+    
     union
     {
         struct
         {
-            u8 left;
-            u8 right;
-            u8 front;
-            u8 back;
-            u8 top;
-            u8 bottom;
-            u8 empty[2];
+            s16 x;
+            s16 y;
+            s16 z;
+            s16 empty;
         };
         u64 id;
     };
@@ -32,11 +31,18 @@ struct SektorID
 
 class Sektor {
 public:
-    Sektor();
+    Sektor(SektorID id = SektorID(0));
     Sektor(const Sektor& orig);
     virtual ~Sektor();
+    
+    void addStellarBody(StellarBody* newBody);
+    DRReturn save(DRFile* openFile);
+    
+    DRReturn render(float fTime, Camera* camera);
+    
 private:
-
+    std::list<StellarBody*> mStellarBodys;
+    SektorID mID;
 };
 
 #endif	/* SEKTOR_H */

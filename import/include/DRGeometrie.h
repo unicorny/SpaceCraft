@@ -38,6 +38,8 @@ public:
     DRColor*   getColorPointer()  {return mColors;}
     GLuint*    getIndexPointer()  {return mIndices;}
     
+    u32         getVertexCount() {return mVertexCount;}
+    
     void clearData();
     void releaseVertexBuffer();
     

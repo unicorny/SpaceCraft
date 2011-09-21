@@ -45,7 +45,7 @@ public:
     //! \brief Standardkonstruktor
     //! \param position die Ausgangsposition des Objektes
     //! \param rotation die Ausgangsrotation des Objektes
-    DRObjekt(const DRVector3& position, const DRVector3& rotation);
+    DRObjekt(const DRVector3& position);
 
     //! Konstruktor welcher ohne Parameter auskommt
     //! \brief Standardkonstruktor, setzte alles auf Null
@@ -76,17 +76,25 @@ public:
     //! \return eine konstante Referenz auf die DRObjekt position,
     //!     es knnen nur als const deklarierte Funktionen von Vector3 dran aufgerufen werden
     const DRVector3& getPosition() const {return mPosition;}
-
+    void setPosition(DRVector3 newPosition) {mPosition = newPosition;}
+    
     const DRVector3& getYAxis() const {return mYAxis;}
     const DRVector3& getXAxis() const {return mXAxis;}
     const DRVector3& getZAxis() const {return mZAxis;}
+    
+    void setAxis(DRVector3 XAxis, DRVector3 YAxis, DRVector3 ZAxis)
+    {
+        mXAxis = XAxis;
+        mYAxis = YAxis;
+        mZAxis = ZAxis;
+        update();
+    }
 
 protected:
     //! berechnet die Matrix neu
     void update();
 
     DRVector3 mPosition;
-    DRVector3 mRotation;
 
     DRVector3 mXAxis;
     DRVector3 mYAxis;

@@ -11,8 +11,8 @@ Camera::Camera()
 {
 }
 
-Camera::Camera(const DRVector3& position, const DRVector3& rotation) 
-: DRObjekt(position, rotation)
+Camera::Camera(const DRVector3& position) 
+: DRObjekt(position)
 {
 }
 
@@ -24,7 +24,7 @@ void Camera::setKameraMatrix()
 {
     glMultMatrixf(mMatrix.transpose());
 }
-
+/*
 void Camera::rotateAbs(const DRVector3& rotation)
 {
     // Rotation um die x-Achse
@@ -66,3 +66,4 @@ void Camera::rotateRel(const DRVector3& rotation)
 	// Matrizen aktualisieren
 	update();
 }
+ * //*/

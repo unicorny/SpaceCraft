@@ -16,6 +16,7 @@ RenderBlockLoader::RenderBlockLoader()
 
 RenderBlockLoader::RenderBlockLoader(const RenderBlockLoader& orig) 
 {
+    LOG_WARNING("not implentet yet");
 }
 
 RenderBlockLoader::~RenderBlockLoader() 

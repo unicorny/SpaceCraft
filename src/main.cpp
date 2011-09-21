@@ -3,7 +3,7 @@
 // Globale Variablen
 Player g_Player;
 RenderBlockLoader g_RenderBlockLoader;
-Camera g_cam(DRVector3(0.0f, -5.0f, 0.0f), DRVector3(0.0f));
+Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 int blockCount = 100;
@@ -72,15 +72,11 @@ DRReturn load()
     test();
         
     DRRandom r;
-    if(g_Player.init())
-        LOG_ERROR("Fehler bei Player::init", DR_ERROR);
-       
-    if(g_RenderBlockLoader.init())
-        LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
+    srand(77111);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
-        LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);    
+        LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
 
     glClearColor(0.1, 0.2, 0.0, 0);
     g_Font = new DRFont();
@@ -122,8 +118,15 @@ DRReturn load()
     //glEnable(GL_LIGHTING);
     glDisable(GL_FOG);
     
+    if(g_Player.init())
+        LOG_ERROR("Fehler bei Player::init", DR_ERROR);
+    g_cam = g_Player.getCamera();
+       
+    if(g_RenderBlockLoader.init())
+        LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
+    
     Uint32 start = SDL_GetTicks();
-    generateSphere(1000.0f);
+    generateSphere(2.0f);
     
     DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
 
@@ -134,9 +137,9 @@ void ende()
 {
     DR_SAVE_DELETE(g_tex);
     glDeleteLists(sphereList, 1);
+    g_Player.exit();
     DR_SAVE_DELETE(g_Font);
     g_RenderBlockLoader.exit();
-    g_Player.exit();
     EnExit();
 }
 
@@ -151,13 +154,13 @@ DRReturn move(float fTime)
     Uint8 mousePressed = SDL_GetRelativeMouseState(&mouseMove_x, &mouseMove_y);
 
      // die Kamera wird rotiert, gesteuert durch die Tasten w, s (x Achse, hoch/runter), <-, -> (y Achse links/rechts), e und q (z Achse seitlich)
-    g_cam.rotateRel(DRVector3(keystate[SDLK_w]-keystate[SDLK_s], keystate[SDLK_LEFT]-keystate[SDLK_RIGHT], keystate[SDLK_e]-keystate[SDLK_q])*fTime);
+    g_cam->rotateRel(DRVector3(keystate[SDLK_w]-keystate[SDLK_s], keystate[SDLK_LEFT]-keystate[SDLK_RIGHT], keystate[SDLK_e]-keystate[SDLK_q])*fTime);
     // wenn die rechte maustaste gedrückt ist
     if((mousePressed & 4) == 4)
         // wird die Kamera auch abhängig von der Mausposition gedreht
-    g_cam.rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fRotSpeed);
+    g_cam->rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fRotSpeed);
     // kamera bewegung abhängig von den Tasten a, d (links/rechts), bild up, bild down (hoch/runter), Pfeil hoch und Pfeil runter (vorwärts/rückwärts)
-    g_cam.translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
+    g_cam->translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
 
         
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
@@ -170,32 +173,38 @@ const float tao = 1.61803399;
 DRReturn generateSphere(DRReal radius)
 {
     float percent = 1.0f;
-    const int iterator = 0;
+    const int iterator = 10;
     
-    const int totalSegments = 28;
-    const int currentSegments = (int)((float)totalSegments*percent);
+    int totalSegments = 1000;
+    int currentSegments = (int)((float)totalSegments*percent);
         
-    const int vertexCount = currentSegments*currentSegments;
-    const int indexCount =  2*currentSegments*currentSegments-2*currentSegments; //2*currentSegments*currentSegments;//2*currentSegments-1+2*currentSegments*currentSegments;
+    int vertexCount = currentSegments*currentSegments;
+    int indexCount =  2*currentSegments*currentSegments-2*currentSegments; //2*currentSegments*currentSegments;//2*currentSegments-1+2*currentSegments*currentSegments;
 //    const int iSegments = 200;
 //    const int segs = 200;
     printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
     
     //DRGeometrieIcoSphere geo2;        
-    DRGeometrieIcoSphere geo;        
-    //DRGeometrieSphere geo;    
-    geo.initIcoSphere(7);
+   DRGeometrieIcoSphere geo;        
+   // DRGeometrieSphere geo;    
+    geo.initIcoSphere(2);
     //geo.initSphere(totalSegments);
     //geo.makeSphericalLandscape(iterator, 7157);
+    //geo.copyDataToVertexBuffer();
     
     
     //if(geo.initSphere(totalSegments))
       //  LOG_ERROR("Fehler bei SphereInit", DR_ERROR);
+    vertexCount = geo.getVertexCount();
+    currentSegments = sqrtf(vertexCount);
+    printf("currentSegments: %d ", currentSegments);
     
     DRVector3* points = geo.getVertexPointer();// new DRVector3[vertexCount];
     DRColor* color = geo.getColorPointer();// new DRColor[vertexCount];
     DRColor* heighMap = new DRColor[vertexCount];
     GLuint*  indices = geo.getIndexPointer();    
+    
+    
     
     //*/
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -203,11 +212,12 @@ DRReturn generateSphere(DRReal radius)
     
     //glBegin(GL_LINE_LOOP);
   
-    /*
+    
     const char* path = "data/planet.png";
   
     DRIImage* image = DRIImage::newImage();
     DRReturn ret = image->loadFromFile(path);
+    float vektorLenght = 1.0f;
     if(!ret && image->getWidth()*image->getHeight() == vertexCount)
     {
         image->getPixel(color);
@@ -216,11 +226,13 @@ DRReturn generateSphere(DRReal radius)
     }
     else
     {
-        geo.makeSphericalLandscape(iterator, 1119);
+        geo.makeSphericalLandscape(iterator, 9312);
         float max = 0.0f, min = 1.0f;
         for(int i = 0; i < vertexCount; i++)
         {
-            float l = 1.0f - points[i].length();
+            float l = vektorLenght - points[i].length();
+            if(l == vektorLenght) continue;
+           // printf("%d: length: %f\n",i, points[i].length());
             if(l > max) max = l;
             if(l < min) min = l;
         }
@@ -229,7 +241,7 @@ DRReturn generateSphere(DRReal radius)
         for(int j = 0; j < vertexCount; j++)
         {
         //    DRLog.writeToLog("\n---------- j:%d -------------", j);
-            float d = 1.0f - points[j].length();
+            float d = vektorLenght - points[j].length();
             heighMap[j] = DRColor((DRReal)(fabs((d+min))/(max+fabs(min))));
     //        if(j < 10)
       //          DRLog.writeToLog("heighMapValue: %f, d: %f", fabs((d+min))/(max+fabs(min)), d);
@@ -271,7 +283,7 @@ DRReturn generateSphere(DRReal radius)
     g_tex = new DRTextur(image);
     DRIImage::deleteImage(image);    
    // */
-    
+    geo.copyDataToVertexBuffer();
     sphereList = glGenLists(1);
     glNewList(sphereList, GL_COMPILE);     
     
@@ -283,7 +295,7 @@ DRReturn generateSphere(DRReal radius)
     glPopMatrix();
     
     glEndList();
-    
+        
  //   DR_SAVE_DELETE_ARRAY(points);
 //    DR_SAVE_DELETE_ARRAY(color);
 //    DR_SAVE_DELETE_ARRAY(indices);
@@ -302,7 +314,10 @@ DRReturn render(float fTime)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity ();             //a clear the matrix
-    g_cam.setKameraMatrix();
+    g_cam->setKameraMatrix();
+    
+    if(g_Player.getSektor()->render(fTime, g_cam))
+        LOG_ERROR("Fehler bei render sektor", DR_ERROR);
     
     //light
     //Add ambient light
@@ -370,14 +385,16 @@ DRReturn render(float fTime)
     //glDisable(GL_LIGHTING);
     glPushMatrix();
     
-    glTranslatef(0.0, 0.0f, -2100.0f);
+    glTranslatef(0.0, 0.0f, -15.0f);
     //renderSphere(5.0f);
     
     static float sphereRotate = 0;
     glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
     
+   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     if(sphereList)
         glCallList(sphereList);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     //g_geo.render();
     
     //sphereRotate += fTime*10.0f;

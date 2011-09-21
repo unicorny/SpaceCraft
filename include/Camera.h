@@ -14,11 +14,11 @@ class Camera : public DRObjekt
 {
 public:
     Camera();
-    Camera(const DRVector3& position, const DRVector3& rotation);
+    Camera(const DRVector3& position);
     virtual ~Camera();
     
-    void rotateAbs(const DRVector3& rotation);
-    void rotateRel(const DRVector3& rotation);
+    //void rotateAbs(const DRVector3& rotation);
+    //void rotateRel(const DRVector3& rotation);
     
      //! diese Funktion sollte vorm rendern aller anderen Objekte aufgerufen werden
     //! \brief setzt die Objekt Matrix als Kameramatrix
