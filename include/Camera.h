@@ -23,7 +23,11 @@ public:
      //! diese Funktion sollte vorm rendern aller anderen Objekte aufgerufen werden
     //! \brief setzt die Objekt Matrix als Kameramatrix
     void setKameraMatrix();
+    
+    __inline__ Vector3Unit getAbsPosition() const {return mAbsPosition;}
+    __inline__ void setAbsPosition(Vector3Unit absPosition) {mAbsPosition = absPosition;}
 private:
+    Vector3Unit mAbsPosition;
 
 };
 

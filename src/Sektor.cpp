@@ -47,5 +47,9 @@ DRReturn Sektor::save(DRFile* openFile)
 
 DRReturn Sektor::render(float fTime, Camera* camera)
 {
+    for(std::list<StellarBody*>::iterator it = mStellarBodys.begin(); it != mStellarBodys.end(); it++)
+    {
+        (*it)->render(fTime);
+    }
     return DR_OK;
 }

@@ -8,12 +8,12 @@
 #include "main.h"
 
 Player::Player()
-: mServerID(0), mSektorID(0), mCameraFOV(45), mCurrentSektor(NULL)
+: mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mCurrentSektor(NULL)
 {
 }
 
 Player::Player(const Player& orig) 
-: mServerID(orig.mServerID), mSektorID(orig.mSektorID), mCurrentSektor(orig.mCurrentSektor)
+: mServerID(orig.mServerID), mSektorID(orig.mSektorID), mPosition(), mCurrentSektor(orig.mCurrentSektor)
 {
 }
 
@@ -27,11 +27,9 @@ DRReturn Player::init()
     
     mCurrentSektor = new Sektor(0);
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
-    Unit position[3];
+    Vector3Unit position(0, LIGHTYEAR);
     srand(SDL_GetTicks());
     int seed = rand();
-    for(int i = 0; i < 3; i++)
-        position[i] = Unit(0, LIGHTYEAR);
     Unit radius(DRRandom::rDouble(72000, 1000), KM);
     mCurrentSektor->addStellarBody(new Planet(radius, position, seed, mCurrentSektor));
     return DR_OK;
@@ -65,6 +63,11 @@ DRReturn Player::loadFromFile(const char* file)
     mCamera.setPosition(temp[0]);
     mCamera.setAxis(temp[1], temp[2], temp[3]);
     
+    f.read(&mPosition, sizeof(Vector3Unit), 1);
+    Vector3Unit t;
+    f.read(&t, sizeof(Vector3Unit), 1);
+    mCamera.setAbsPosition(t);
+    
     f.close();
     
     return DR_OK;
@@ -73,7 +76,7 @@ DRReturn Player::loadFromFile(const char* file)
 DRReturn Player::saveIntoFile(const char* file)
 {
     DRFile f(file, "wb");
-    if(!f.isOpen()) LOG_ERROR("Fehler beim Öffnen der Datei, ist sie vielleicht nicht vorhanden?", DR_ERROR);
+    if(!f.isOpen()) LOG_ERROR("Fehler beim Öffnen der Datei", DR_ERROR);
     
     int version = PLAYER_SAVE_VERSION;
     
@@ -85,6 +88,9 @@ DRReturn Player::saveIntoFile(const char* file)
     f.write(mCamera.getXAxis().c, sizeof(float), 3);
     f.write(mCamera.getYAxis().c, sizeof(float), 3);
     f.write(mCamera.getZAxis().c, sizeof(float), 3);
+    f.write(&mPosition, sizeof(Vector3Unit), 1);
+    Vector3Unit temp = mCamera.getAbsPosition();
+    f.write(&temp, sizeof(Vector3Unit), 1);
     
     f.close();
     LOG_INFO("Player sucessfull saved");

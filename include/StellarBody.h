@@ -14,7 +14,7 @@ class Sektor;
 class StellarBody
 {
 public:
-    StellarBody(Unit radius, Unit position[3], int seed = 0, Sektor* parent = NULL);
+    StellarBody(Unit radius, Vector3Unit position, int seed = 0, Sektor* parent = NULL);
     virtual ~StellarBody();
     
     DRReturn render(float fTime);
@@ -22,7 +22,7 @@ public:
 protected:
     Sektor* mParent;
     Unit mRadius;
-    Unit mPosition[3];
+    Vector3Unit mPosition;
     int mSeed;
     
     //not to save

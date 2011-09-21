@@ -11,7 +11,7 @@
 class Planet : public StellarBody
 {
 public:
-    Planet(Unit radius, Unit position[3], int seed, Sektor* parent = NULL);
+    Planet(Unit radius, Vector3Unit position, int seed, Sektor* parent = NULL);
     ~Planet();
 private:
 };

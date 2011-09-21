@@ -10,7 +10,7 @@
 
 #include "Sektor.h"
 
-#define PLAYER_SAVE_VERSION 3
+#define PLAYER_SAVE_VERSION 4
 
 
 class Player {
@@ -37,6 +37,7 @@ private:
     u64 mServerID;
     SektorID mSektorID;
     Camera mCamera;
+    Vector3Unit mPosition;
     
     //einstellungen
     //! kamera winkel in Grad

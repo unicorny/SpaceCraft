@@ -6,6 +6,7 @@
 
 // Tools
 #include "Unit.h"
+#include "Vector3Unit.h"
 
 // View
 #include "Block.h"

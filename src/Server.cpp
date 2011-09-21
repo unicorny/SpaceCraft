@@ -52,9 +52,7 @@ Sektor* Server::getHome()
     {
         LOG_WARNING("home not exist, create new one");
         Sektor* temp = new Sektor(0);
-        Unit position[3];
-        for(int i = 0; i < 3; i++)
-            position[i] = Unit(0, LIGHTYEAR);
+        Vector3Unit position(0, LIGHTYEAR);
         int seed = 7;
         Unit radius(DRRandom::rDouble(72000, 1000), KM);
         temp->addStellarBody(new Planet(radius, position, seed, temp));

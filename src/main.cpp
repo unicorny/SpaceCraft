@@ -62,6 +62,41 @@ void test()
         free(*it);
     pointer.clear();
    //* */
+    
+    // Unit test
+    printf("\n");
+    Unit parsec(1.0, PARSEC);
+    Unit lj = parsec.convertTo(LIGHTYEAR);
+    DRLog.writeToLog("%s -> %s", parsec.print().data(), lj.print().data());    
+    lj = Unit(1.0, LIGHTYEAR);
+    parsec = lj.convertTo(PARSEC);
+    DRLog.writeToLog("%s -> %s", lj.print().data(), parsec.print().data());    
+    Unit ae = lj.convertTo(AE);
+    DRLog.writeToLog("%s -> %s", lj.print().data(), ae.print().data());    
+    ae = parsec.convertTo(AE);
+    DRLog.writeToLog("%s -> %s", parsec.print().data(), ae.print().data());    
+    parsec = ae.convertTo(PARSEC);
+    DRLog.writeToLog("%s -> %s", ae.print().data(), parsec.print().data());    
+    Unit m = parsec.convertTo(M);
+    DRLog.writeToLog("%s -> %s", parsec.print().data(), m.print().data());    
+    Unit kpc(1.0, KILOPARSEC);
+    m = kpc.convertTo(M);
+    DRLog.writeToLog("%s -> %s", kpc.print().data(), m.print().data());    
+    m = Unit(1.0, M);
+    kpc = m.convertTo(KILOPARSEC);
+    DRLog.writeToLog("%s -> %s", m.print().data(), kpc.print().data());    
+    printf("\n");
+    
+    //Vector Unit Test
+    Vector3Unit u1(100, 200, 70, M), u2(1, 0, 0, KILOPARSEC), u3(100, 20, 17, LIGHTYEAR);
+    u1.print("u1");
+    u2.print("u2");
+    u3.print("u3");
+    
+    Vector3Unit(u1 + u2).print("u1+u2");
+    Vector3Unit(u2+u3).print("u2+u3");
+    Vector3Unit(u1*Unit(1, LIGHTYEAR)).print("u1*1 Lichtjahr");
+        
 }
 DRReturn generateSphere(DRReal radius);
 DRReturn load()
@@ -473,13 +508,14 @@ DRReturn render(float fTime)
 #endif
 int main(int argc, char* argv[])
 {
+    
     printf("Bitte warten, waehrend SpaceCraft geladen wird\n");
     if(load())
     {
         printf("Es trat ein Fehler bei load auf, das Programm wird beendet!\n");
         return -1;
     }
-
+/*
     if(EnGameLoop(move, render))
     {
         printf("Fehler in der GameLoop\n");
