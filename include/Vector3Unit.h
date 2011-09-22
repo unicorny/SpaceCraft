@@ -29,6 +29,7 @@ public:
     //! \brief Kopierkonstruktor
     //! \param v Vektor von dem die Koordinaten kopiert werden
     Vector3Unit(const Vector3Unit& v): x(v.x), y(v.y), z(v.z) {}
+    Vector3Unit(DRVector3 v, UnitTypes type = M): x(v.x, type), y(v.y, type), z(v.z, type) {}
     //!  setzt alle werte auf die Werte des &uuml;bergebenden Arrays
     //! \brief Konstruktor
     //! \param ar ein Zeiger auf ein Unit array, mind. L&auml;nge 3
@@ -48,6 +49,8 @@ public:
     //! \return eine Kopie des Wertes, kann gefahrlos ver&auml;ndert werden
     Unit operator [] (int index) const {switch(index){case 0: return x; case 1: return y; case 2: return z; default: return Unit();}}
 
+    //operator DRVector3() {return DRVector3((float)x, (float)y, (float)z);}
+    DRVector3 getVector3() {return DRVector3((float)x, (float)y, (float)z);}
 
     //!  addiert auf den aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors hinzu
     //! \brief additions operator
@@ -59,11 +62,12 @@ public:
     //! \param v der Vektor mit dem addiert wird
     //! \return einen neuen Vektor
     Vector3Unit operator +  (const Vector3Unit& v) const {return Vector3Unit(x+v.x, y+v.y, z+v.z);}
+    
+    Vector3Unit operator -= (const Vector3Unit& v) {x -= v.x; y -= v.y; z -= v.z; return *this;}
     //! subtrahiert den Vektor vom &uuml;bergebenden und liefert den neuen Vektor zur&uuml;ck
     //! \brief subtraktions operator
     //! \param v der Vektor der subtrahiert wird
     //! \return einen neuen Vektor
-    
     Vector3Unit operator - (const Vector3Unit& v) const {return Vector3Unit(x-v.x, y-v.y, z-v.z);}
     //!  weist dem Vektor den Wert des &uuml;bergebenden zu
     //! \brief Zuweisungsoperator
@@ -105,6 +109,8 @@ public:
     //! \brief berechnet die quadratische L&auml;nge des Vektors, const
     //! \return die l&auml;nge des Vektors
     Unit   lengthSq()                       const {return (x*x + y*y + z*z);}
+    
+    Vector3Unit convertTo(UnitTypes type) const {return Vector3Unit(x.convertTo(type), y.convertTo(type), z.convertTo(type));}
 
     //! \brief gibt den Vektor auf die Konsole aus, const
     //! \param name wenn angegeben, wird name mit auf der Konsole ausgegeben
@@ -124,6 +130,7 @@ public:
         if(x != a.x || y != a.y || z != a.z) return true;
         return false;
     }
+    
    /* //! \brief standard value x Achse (1,0,0)
     static const Vector3Unit Vector3Unit::X_AXIS;
     //! \brief standard value y Achse (0,1,0)

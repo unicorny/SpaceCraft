@@ -48,10 +48,12 @@ public:
     __inline__ bool operator == (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return true; return false;}
     __inline__ bool operator != (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return false; return true;}
     
-    __inline__ operator double() const {return this->mValue;}
+    //__inline__ operator double() const {return this->mValue;}
     
     static const char* getUnitTypeName(UnitTypes unitType);
     __inline__ UnitTypes getType() const {return mUnitType;}
+    
+    operator double() {return mValue;}
 private:
     //!
     static double getConversionFaktor(UnitTypes a, UnitTypes b);

@@ -31,7 +31,7 @@ struct SektorID
 
 class Sektor {
 public:
-    Sektor(SektorID id = SektorID(0));
+    Sektor(SektorID id = SektorID(0), int seed = 0);
     Sektor(const Sektor& orig);
     virtual ~Sektor();
     
@@ -39,10 +39,15 @@ public:
     DRReturn save(DRFile* openFile);
     
     DRReturn render(float fTime, Camera* camera);
+    DRReturn move(float fTime, Camera* camera);
     
 private:
     std::list<StellarBody*> mStellarBodys;
     SektorID mID;
+    int mSeed;
+    
+    // only for render, not for save
+    Vector3Unit mLastPosition;
 };
 
 #endif	/* SEKTOR_H */

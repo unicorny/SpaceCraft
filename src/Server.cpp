@@ -39,6 +39,9 @@ u64 Server::createNewServer()
     s << "./data/_" << newID;
     if(DRFileManager::addFolderToFileSystem(s.str().data()))
         LOG_ERROR("neuer Server Ordner konnte nicht angelegt werden!", 0);
+    s << "/home";
+    if(DRFileManager::addFolderToFileSystem(s.str().data()))
+        LOG_ERROR("home Ordner im Server Ordner konnte nicht angelegt werden!", 0);
     
     return newID;
 }
@@ -54,6 +57,7 @@ Sektor* Server::getHome()
         Sektor* temp = new Sektor(0);
         Vector3Unit position(0, LIGHTYEAR);
         int seed = 7;
+        srand(seed);
         Unit radius(DRRandom::rDouble(72000, 1000), KM);
         temp->addStellarBody(new Planet(radius, position, seed, temp));
         mSektoren.insert(SEKTOR_ENTRY(0, temp));

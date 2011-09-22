@@ -117,7 +117,7 @@ public:
     //! \param f Skalar mit dem multipliziert wird
     //! \return einen neuen Vektor
     DRVector3 operator *  (const float f)       const {return DRVector3(x*f, y*f, z*f);}
-    DRVector3 operator *= (const float f)             {return *this * f;}
+    DRVector3 operator *= (const float f)             {*this = *this * f; return *this;}
  
     //! \brief transformiert diesen Vektor mit der Matrix m, const
     //! \param die &uuml;bergebende Mtrix m
@@ -126,6 +126,9 @@ public:
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
     DRVector3 normalize()                      const  {return *this / length();}
+    
+    DRVector3 normalzeEx()                     const  {return *this / (length()+0.00001f);}
+    
     //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
     //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll
     //! \return einen neuen Vektor, das Kreuzprodukt aus diesem und dem &uuml;bergebendem Vektor

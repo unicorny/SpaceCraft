@@ -7,6 +7,7 @@ Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 int blockCount = 100;
+int controlMode = 1;
 //DRGeometrieIcoSphere g_geo;
 
 GLint sphereList = 0;
@@ -87,6 +88,9 @@ void test()
     DRLog.writeToLog("%s -> %s", m.print().data(), kpc.print().data());    
     printf("\n");
     
+    Unit aes(0.005, AE);
+    DRLog.writeToLog("%s -> %s", aes.print().data(), aes.convertTo(KM).print().data());
+    
     //Vector Unit Test
     Vector3Unit u1(100, 200, 70, M), u2(1, 0, 0, KILOPARSEC), u3(100, 20, 17, LIGHTYEAR);
     u1.print("u1");
@@ -96,6 +100,14 @@ void test()
     Vector3Unit(u1 + u2).print("u1+u2");
     Vector3Unit(u2+u3).print("u2+u3");
     Vector3Unit(u1*Unit(1, LIGHTYEAR)).print("u1*1 Lichtjahr");
+    
+    DRVector3 v(1.0f, 7.0f, 2.0f);
+    DRLog.writeVector3ToLog(v, "init");
+    v = v.normalize();
+    DRLog.writeVector3ToLog(v, "normalized");
+    v *= 7.0f;
+    DRLog.writeVector3ToLog(v, "multiplikator");
+    
         
 }
 DRReturn generateSphere(DRReal radius);
@@ -104,7 +116,7 @@ DRReturn load()
     if(EnInit_Simple())
         return DR_ERROR;
     DRFileManager::Instance().addOrdner("data/blockView");
-    test();
+    //test();
         
     DRRandom r;
     srand(77111);
@@ -188,18 +200,34 @@ DRReturn move(float fTime)
     // holen der Maus bewegung seit letztem frame und der bitmaks welche Tasten gedrückt sind
     Uint8 mousePressed = SDL_GetRelativeMouseState(&mouseMove_x, &mouseMove_y);
 
-     // die Kamera wird rotiert, gesteuert durch die Tasten w, s (x Achse, hoch/runter), <-, -> (y Achse links/rechts), e und q (z Achse seitlich)
-    g_cam->rotateRel(DRVector3(keystate[SDLK_w]-keystate[SDLK_s], keystate[SDLK_LEFT]-keystate[SDLK_RIGHT], keystate[SDLK_e]-keystate[SDLK_q])*fTime);
-    // wenn die rechte maustaste gedrückt ist
-    if((mousePressed & 4) == 4)
-        // wird die Kamera auch abhängig von der Mausposition gedreht
-    g_cam->rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fRotSpeed);
+    if(controlMode != 0 )
+    {
+         // die Kamera wird rotiert, gesteuert durch die Tasten w, s (x Achse, hoch/runter), <-, -> (y Achse links/rechts), e und q (z Achse seitlich)
+        g_cam->rotateRel(DRVector3(keystate[SDLK_w]-keystate[SDLK_s], keystate[SDLK_LEFT]-keystate[SDLK_RIGHT], keystate[SDLK_e]-keystate[SDLK_q])*fTime);
+        // wenn die rechte maustaste gedrückt ist
+        if((mousePressed & 4) == 4)
+            // wird die Kamera auch abhängig von der Mausposition gedreht
+        g_cam->rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fRotSpeed);
+    }
+    if(controlMode == 1)
     // kamera bewegung abhängig von den Tasten a, d (links/rechts), bild up, bild down (hoch/runter), Pfeil hoch und Pfeil runter (vorwärts/rückwärts)
-    g_cam->translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
-
+        g_cam->translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
+    else if(controlMode == 2)
+        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*1000.0f, KM);
+    else if(controlMode == 3)
+        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*0.005f, AE);
+        
+    
+    //set control mode
+     if(EnIsButtonPressed(SDLK_1)) controlMode = 1;
+     else if(EnIsButtonPressed(SDLK_2)) controlMode = 2;
+     else if(EnIsButtonPressed(SDLK_3)) controlMode = 3;
         
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
     if(keystate[SDLK_z]) blockCount++;
+    
+    if(g_Player.getSektor()->move(fTime, g_cam))
+        LOG_ERROR("Fehler bei move sektor", DR_ERROR);
 
     return DR_OK;
 }
@@ -345,13 +373,23 @@ DRReturn render(float fTime)
 {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity ();             //a clear the matrix
-    g_cam->setKameraMatrix();
     
-    if(g_Player.getSektor()->render(fTime, g_cam))
+    if(g_Player.getSektor()->render(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
+    
+    glClear (GL_DEPTH_BUFFER_BIT);
+    
+    //Reseten der Matrixen
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    gluPerspective(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
+    glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
+
+    glLoadIdentity();                    // Reset (init) the modelview matrix
+    
+    g_cam->setKameraMatrix();
+    glEnable(GL_DEPTH_TEST);             // Enables depth test
     
     //light
     //Add ambient light
@@ -494,6 +532,17 @@ DRReturn render(float fTime)
     text.setPosition(DRVector2(0.1f, 0.0f));
     text.drawText();
     
+    switch(controlMode)
+    {
+        case 0: text.setText("Steuerung: (NONE)"); break;
+        case 1: text.setText("Steuerung: 1 - 20 m/s"); break;
+        case 2: text.setText("Steuerung: 2 - 20.000 km/s"); break;
+        case 3: text.setText("Steuerung: 3 - 0.005 AE/s"); break;
+        default: text.setText("Steuerung: (default)");
+    }
+    text.setPosition(DRVector2(0.0f, 0.08f));
+    text.drawText();
+    
     g_Font->end();
     
     start = SDL_GetTicks();
@@ -514,7 +563,7 @@ int main(int argc, char* argv[])
         printf("Es trat ein Fehler bei load auf, das Programm wird beendet!\n");
         return -1;
     }
-/*
+
     if(EnGameLoop(move, render))
     {
         printf("Fehler in der GameLoop\n");

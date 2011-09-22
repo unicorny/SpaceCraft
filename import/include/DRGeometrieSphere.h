@@ -35,8 +35,8 @@ private:
     
     struct PlaneData
     {
-        PlaneData(GLuint gesPlaneCount) 
-        : mutex(NULL), planes(NULL), planeCount(0), absPlaneCount(gesPlaneCount)
+        PlaneData(GLuint gesPlaneCount, int _seed) 
+        : mutex(NULL), planes(NULL), planeCount(0), absPlaneCount(gesPlaneCount), seed(_seed)
         {
             mutex = SDL_CreateMutex();
             planes = new DRPlane[gesPlaneCount];
@@ -48,6 +48,7 @@ private:
         DRPlane*   planes;
         GLuint        planeCount;
         GLuint        absPlaneCount;
+        int            seed;
         
         void lock() {SDL_mutexP(mutex);}
         void unlock() {SDL_mutexV(mutex);}

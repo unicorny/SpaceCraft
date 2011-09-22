@@ -8,12 +8,13 @@
 #include "main.h"
 
 Player::Player()
-: mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mCurrentSektor(NULL)
+: mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
 {
 }
 
 Player::Player(const Player& orig) 
-: mServerID(orig.mServerID), mSektorID(orig.mSektorID), mPosition(), mCurrentSektor(orig.mCurrentSektor)
+: mServerID(orig.mServerID), mSektorID(orig.mSektorID), mPosition(orig.mPosition),
+  mCameraFOV(orig.mCameraFOV), mSeed(orig.mSeed), mCurrentSektor(orig.mCurrentSektor)
 {
 }
 
@@ -22,16 +23,29 @@ Player::~Player() {
 
 DRReturn Player::init()
 {
+    bool newPlayer = false;
+    mSeed = SDL_GetTicks();
     if(loadFromFile())
+    {
         mServerID = Server::createNewServer();
+        newPlayer = true;
+    }
     
-    mCurrentSektor = new Sektor(0);
+    srand(mSeed);
+    mCurrentSektor = new Sektor(0, mSeed);
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
-    Vector3Unit position(Unit(0, LIGHTYEAR));
-    srand(SDL_GetTicks());
+    Vector3Unit position(DRRandom::rVector3(1.0f), AE);
+    position = position.normalize();
+   // position.print("Planeten position");
+    
+    if(newPlayer)
+        mCamera.lookAt(position.getVector3());
+    
     int seed = rand();
     Unit radius(DRRandom::rDouble(72000, 1000), KM);
     mCurrentSektor->addStellarBody(new Planet(radius, position, seed, mCurrentSektor));
+    //mCamera.setAbsPosition(Unit(0.0, KM));
+    mCameraFOV = 45.0f;
     return DR_OK;
 }
 
@@ -51,7 +65,7 @@ DRReturn Player::loadFromFile(const char* file)
     f.read(&version, sizeof(int), 1);
     if( version != PLAYER_SAVE_VERSION)
         LOG_ERROR("Fehler, falsche Version!", DR_ERROR);
-    
+    f.read(&mSeed, sizeof(int), 1);
     f.read(&mServerID, sizeof(long long), 1);
     f.read(&mSektorID, sizeof(SektorID), 1);    
     f.read(&mCameraFOV, sizeof(float), 1);
@@ -81,6 +95,7 @@ DRReturn Player::saveIntoFile(const char* file)
     int version = PLAYER_SAVE_VERSION;
     
     f.write(&version, sizeof(int), 1);
+    f.write(&mSeed, sizeof(int), 1);
     f.write(&mServerID, sizeof(long long), 1);
     f.write(&mSektorID, sizeof(SektorID), 1);    
     f.write(&mCameraFOV, sizeof(float), 1);

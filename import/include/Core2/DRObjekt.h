@@ -78,6 +78,8 @@ public:
     const DRVector3& getPosition() const {return mPosition;}
     void setPosition(DRVector3 newPosition) {mPosition = newPosition;}
     
+    void lookAt(DRVector3 targetPosition, DRVector3 upVector = DRVector3(0.0f, 1.0f, 0.0f));
+    
     const DRVector3& getYAxis() const {return mYAxis;}
     const DRVector3& getXAxis() const {return mXAxis;}
     const DRVector3& getZAxis() const {return mZAxis;}

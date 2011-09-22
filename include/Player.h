@@ -10,7 +10,7 @@
 
 #include "Sektor.h"
 
-#define PLAYER_SAVE_VERSION 4
+#define PLAYER_SAVE_VERSION 5
 
 
 class Player {
@@ -37,11 +37,13 @@ private:
     u64 mServerID;
     SektorID mSektorID;
     Camera mCamera;
+    // current position of player in current sektor in sektor coordinates (for exapmle, in AE)
     Vector3Unit mPosition;
     
     //einstellungen
     //! kamera winkel in Grad
     float mCameraFOV;
+    int mSeed;
     
     
     //runtime (not to save)

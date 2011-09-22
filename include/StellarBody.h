@@ -17,7 +17,7 @@ public:
     StellarBody(Unit radius, Vector3Unit position, int seed = 0, Sektor* parent = NULL);
     virtual ~StellarBody();
     
-    DRReturn render(float fTime);
+    DRReturn render(float fTime, Vector3Unit absCameraPosition);
     
 protected:
     Sektor* mParent;
