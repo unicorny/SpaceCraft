@@ -44,7 +44,7 @@
 #define YHEIGHT g_v2WindowLength.y
 #define GRADTORAD 0.017453292f
 #define RADTOGRAD 57.29577951f
-const double PI = 3.1415926535;
+const float PI = 3.1415926535f;
 
 /*#define LOG_SOUND_INTERN(text, f, l, fu) DRLog.WriteToLog("<tr><td><font size=\"2\"><b><font color=\"#F8900\">OpenAL Fehler:</font></b> %s</font></td><td><font size=\"2\"> (<i>%s</i>, Zeile <i>%d</i>, Funktion <i>%s</i>)</font></td></tr>", text, f, l, fu)
 #define LOG_ERROR_SOUND(str, r) {if(DRSoundError(str, DRRemoveDir(__FILE__), __LINE__, DR_FUNCTION_)) return r;}

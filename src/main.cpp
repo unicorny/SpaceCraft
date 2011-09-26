@@ -236,7 +236,7 @@ const float tao = 1.61803399;
 DRReturn generateSphere(DRReal radius)
 {
     float percent = 1.0f;
-    const int iterator = 10;
+    const int iterator = 100;
     
     int totalSegments = 1000;
     int currentSegments = (int)((float)totalSegments*percent);
@@ -250,7 +250,8 @@ DRReturn generateSphere(DRReal radius)
     //DRGeometrieIcoSphere geo2;        
    DRGeometrieIcoSphere geo;        
    // DRGeometrieSphere geo;    
-    geo.initIcoSphere(2);
+    geo.initIcoSphere(7);
+	geo.changeGeometrieTo(4, true);
     //geo.initSphere(totalSegments);
     //geo.makeSphericalLandscape(iterator, 7157);
     //geo.copyDataToVertexBuffer();
@@ -265,12 +266,10 @@ DRReturn generateSphere(DRReal radius)
     DRVector3* points = geo.getVertexPointer();// new DRVector3[vertexCount];
     DRColor* color = geo.getColorPointer();// new DRColor[vertexCount];
     DRColor* heighMap = new DRColor[vertexCount];
-    GLuint*  indices = geo.getIndexPointer();    
-    
-    
+    GLuint*  indices = geo.getIndexPointer();        
     
     //*/
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     //glDisable(GL_CULL_FACE);
     
     //glBegin(GL_LINE_LOOP);
@@ -463,7 +462,7 @@ DRReturn render(float fTime)
     static float sphereRotate = 0;
     glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
     
-   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     if(sphereList)
         glCallList(sphereList);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

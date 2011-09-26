@@ -44,18 +44,26 @@ public:
     void releaseVertexBuffer();
     
 protected:
+
     DRVector3*  mVertices;
     GLuint*     mIndices;
     DRColor*    mColors;
     DRVector2** mTextureCoords;
     u32         mVertexCount;
     u32         mIndexCount;
+	u32         mMaxVertexCount;
+	u32         mMaxIndexCount;
     u32         mNumTextureCoords;
     
     GLuint      mVertexBufferObjects[4];
     bool        mRenderVertexBuffer;
     
     GLenum      mRenderMode;
+
+private:
+	void lock() {if(mBufferMutex) SDL_mutexP(mBufferMutex);}
+	void unlock() {if(mBufferMutex) SDL_mutexV(mBufferMutex);}
+	SDL_mutex*	mBufferMutex;
        
 };
 

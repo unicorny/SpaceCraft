@@ -58,7 +58,7 @@ DRReturn Sektor::render(float fTime, Camera* camera)
     camera->setKameraMatrixRotation();
     
     //glDisable(GL_DEPTH_TEST);             // Enables depth test
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
     
     //glScalef(10.0f, 10.0f, 10.0f);
