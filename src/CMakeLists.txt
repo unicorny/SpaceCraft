@@ -3,13 +3,13 @@ PROJECT(SpaceCraft CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(spaceCraftSrc main Player Sektor Server Camera RenderBlockLoader RenderBlock BlockLoader Block
-				  SektorChunk StellarBody Unit Planet)
+				  SektorChunk StellarBody Unit Planet GlobalRenderer)
 #IF(WIN32)
 SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/Sektor.h ../include/Server.h
 								   ../include/Camera.h ../include/RenderBlockLoader.h ../include/RenderBlock.h
 								   ../include/BlockLoader.h ../include/Block.h ../include/SektorChunk.h
                                                                    ../include/StellarBody.h ../include/Unit.h ../include/Planet.h
-                                                                   ../include/Vector3Unit.h)
+                                                                   ../include/Vector3Unit.h ../include/GlobalRenderer.h)
 #ENDIF(WIN32)
 
 SET(PA ../import/bin ../import/lib)

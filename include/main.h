@@ -19,6 +19,8 @@
 #include "StellarBody.h"
 #include "Planet.h"
 
+#include "GlobalRenderer.h"
+
 #include "Camera.h"
 #include "Sektor.h"
 #include "Server.h"

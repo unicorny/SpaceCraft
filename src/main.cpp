@@ -6,6 +6,7 @@ RenderBlockLoader g_RenderBlockLoader;
 Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
+DRTextur* g_terrain = NULL;
 int blockCount = 100;
 int controlMode = 1;
 //DRGeometrieIcoSphere g_geo;
@@ -168,13 +169,16 @@ DRReturn load()
     if(g_Player.init())
         LOG_ERROR("Fehler bei Player::init", DR_ERROR);
     g_cam = g_Player.getCamera();
+    
+    if(GlobalRenderer::getSingleton().init())
+        LOG_ERROR("error by init GlobalRenderer", DR_ERROR);
        
     if(g_RenderBlockLoader.init())
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
     
     Uint32 start = SDL_GetTicks();
     generateSphere(2.0f);
-    
+    g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
     DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
 
     return DR_OK;
@@ -186,7 +190,10 @@ void ende()
     glDeleteLists(sphereList, 1);
     g_Player.exit();
     DR_SAVE_DELETE(g_Font);
+    DR_SAVE_DELETE(g_terrain);
+    GlobalRenderer::getSingleton().exit();
     g_RenderBlockLoader.exit();
+    Server::freeAllServer();
     EnExit();
 }
 
@@ -216,12 +223,14 @@ DRReturn move(float fTime)
         g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*1000.0f, KM);
     else if(controlMode == 3)
         g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*0.005f, AE);
-        
+    else if(controlMode == 4)
+        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*50.0f, KM);
     
     //set control mode
      if(EnIsButtonPressed(SDLK_1)) controlMode = 1;
-     else if(EnIsButtonPressed(SDLK_2)) controlMode = 2;
-     else if(EnIsButtonPressed(SDLK_3)) controlMode = 3;
+     else if(EnIsButtonPressed(SDLK_3)) controlMode = 2;
+     else if(EnIsButtonPressed(SDLK_4)) controlMode = 3;
+     else if(EnIsButtonPressed(SDLK_2)) controlMode = 4;
         
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
     if(keystate[SDLK_z]) blockCount++;
@@ -238,7 +247,7 @@ DRReturn generateSphere(DRReal radius)
     float percent = 1.0f;
     const int iterator = 100;
     
-    int totalSegments = 1000;
+    int totalSegments = 400;
     int currentSegments = (int)((float)totalSegments*percent);
         
     int vertexCount = currentSegments*currentSegments;
@@ -250,9 +259,9 @@ DRReturn generateSphere(DRReal radius)
     //DRGeometrieIcoSphere geo2;        
    DRGeometrieIcoSphere geo;        
    // DRGeometrieSphere geo;    
-    geo.initIcoSphere(7);
-	geo.changeGeometrieTo(4, true);
-    //geo.initSphere(totalSegments);
+    //geo.initIcoSphere(7);
+	//geo.changeGeometrieTo(4, true);
+    geo.initSphere(totalSegments);
     //geo.makeSphericalLandscape(iterator, 7157);
     //geo.copyDataToVertexBuffer();
     
@@ -371,10 +380,15 @@ DRReturn generateSphere(DRReal radius)
 DRReturn render(float fTime)
 {
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3f(1.0f, 1.0f, 1.0f);
+    glColor3f(1.0f, 1.0f, 1.0f);    
     
+    //glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    if(g_terrain)
+        g_terrain->bind();
     if(g_Player.getSektor()->render(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
+    glDisable(GL_LIGHTING);
     
     glClear (GL_DEPTH_BUFFER_BIT);
     
@@ -392,15 +406,15 @@ DRReturn render(float fTime)
     
     //light
     //Add ambient light
-    GLfloat ambientColor[] = {0.2f, 0.2f, 0.2f, 1.0f}; //Color(0.2, 0.2, 0.2)
+    GLfloat ambientColor[] = {0.4f, 0.4f, 0.4f, 1.0f}; //Color(0.2, 0.2, 0.2)
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
     
-      //Add positioned light
-    GLfloat lightColor0[] = {0.5f, 0.5f, 0.5f, 1.0f}; //Color (0.5, 0.5, 0.5)
+    //Add positioned light
+    GLfloat lightColor0[] = {1.0f, 1.0f, 1.0f, 1.0f}; //Color (0.5, 0.5, 0.5)
     GLfloat lightPos0[] = {4.0f, 0.0f, 8.0f, 1.0f}; //Positioned at (4, 0, 8)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor0);
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
-    glEnable(GL_LIGHT0);
+    glDisable(GL_LIGHT0);
     
     //Add directed light
     GLfloat lightColor1[] = {0.5f, 0.5f, 0.5f, 1.0f}; //Color (0.5, 0.2, 0.2)
@@ -535,8 +549,9 @@ DRReturn render(float fTime)
     {
         case 0: text.setText("Steuerung: (NONE)"); break;
         case 1: text.setText("Steuerung: 1 - 20 m/s"); break;
-        case 2: text.setText("Steuerung: 2 - 20.000 km/s"); break;
-        case 3: text.setText("Steuerung: 3 - 0.005 AE/s"); break;
+        case 2: text.setText("Steuerung: 3 - 20.000 km/s"); break;
+        case 3: text.setText("Steuerung: 4 - 0.005 AE/s"); break;
+        case 4: text.setText("Steuerung: 2 - 100 km/s"); break;
         default: text.setText("Steuerung: (default)");
     }
     text.setPosition(DRVector2(0.0f, 0.08f));

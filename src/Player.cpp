@@ -28,11 +28,15 @@ DRReturn Player::init()
     if(loadFromFile())
     {
         mServerID = Server::createNewServer();
+        Sektor* root = Server::getServer(mServerID)->getRootSektor();
+        root->seed();
+        root->addSektor(new Sektor(root, SOLAR_SYSTEM, 0, rand(), mServerID));
         newPlayer = true;
     }
+    Server::getServer(mServerID);
     
     srand(mSeed);
-    mCurrentSektor = new Sektor(0, mSeed);
+    mCurrentSektor = new Sektor(NULL, STELLAR_BODY, 0, mSeed);
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
     Vector3Unit position(DRRandom::rVector3(1.0f), AE);
     position = position.normalize();
@@ -43,7 +47,7 @@ DRReturn Player::init()
     
     int seed = rand();
     Unit radius(DRRandom::rDouble(72000, 1000), KM);
-    mCurrentSektor->addStellarBody(new Planet(radius, position, seed, mCurrentSektor));
+    mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
     //mCamera.setAbsPosition(Unit(0.0, KM));
     mCameraFOV = 45.0f;
     return DR_OK;

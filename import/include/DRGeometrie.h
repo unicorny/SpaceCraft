@@ -24,7 +24,7 @@ public:
      * \param color bei false wird kein Speicher für das color-array reserviert
      * \return DR_OK wenn alles okay ist, oder DR_ERROR bei Fehler 
      * */
-    DRReturn init(u32 vertexCount, u32 indexCount = 0, u32 textureCount = 0, bool color = false);
+    DRReturn init(u32 vertexCount, u32 indexCount = 0, u32 textureCount = 0, bool color = false, bool normals = false);
     DRReturn initVertexBuffer();
     
     //! \param clearData if set to true, after copying data to vertexbuffer, local copy will be deleted
@@ -46,16 +46,17 @@ public:
 protected:
 
     DRVector3*  mVertices;
+    DRVector3*  mNormals;
     GLuint*     mIndices;
     DRColor*    mColors;
     DRVector2** mTextureCoords;
     u32         mVertexCount;
     u32         mIndexCount;
-	u32         mMaxVertexCount;
-	u32         mMaxIndexCount;
+    u32         mMaxVertexCount;
+    u32         mMaxIndexCount;
     u32         mNumTextureCoords;
     
-    GLuint      mVertexBufferObjects[4];
+    GLuint      mVertexBufferObjects[5];
     bool        mRenderVertexBuffer;
     
     GLenum      mRenderMode;

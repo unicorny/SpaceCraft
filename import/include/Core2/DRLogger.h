@@ -64,8 +64,8 @@ public:
 	DRReturn writeToLogDirect(const char* pcText, ...);
 
 	DRReturn writeVector2ToLog(const DRVector2& v, const char* name = NULL);			// 2D-Vektor ins Logbuch schreiben
-        DRReturn writeVector3ToLog(const DRVector3& v, const char* pcName = NULL);			// 3D-Vektor ins Logbuch schreiben
-        DRReturn writeMatrixToLog(const DRMatrix& m, const char* name = NULL);			// Matrix ins Logbuch schreiben
+    DRReturn writeVector3ToLog(const DRVector3& v, const char* pcName = NULL);			// 3D-Vektor ins Logbuch schreiben
+    DRReturn writeMatrixToLog(const DRMatrix& m, const char* name = NULL);			// Matrix ins Logbuch schreiben
 	//DRReturn WritePlaneToLog(DRPlane& p);				// Ebene ins Logbuch schreiben
 	DRReturn writeColorToLog(const DRColor& c);				// Farbe ins Logbuch schreiben
 

@@ -13,22 +13,29 @@ public:
     static Server* getServer(u64 ServerID);
     static void freeServer(Server* server) {DR_SAVE_DELETE(server);};
     static void freeServer(u64 ServerID) {LOG_WARNING("not implemented");}
+    static void freeAllServer();
     
     static u64 createNewServer();
+        
+    // later, DRFile will be overloaded to enable write and read on a far server
+    DRFile* getFileDescriptor() {return new DRFile();}
+    void freeFileDescriptor(DRFile* fileDescriptor) {fileDescriptor->close(); DR_SAVE_DELETE(fileDescriptor);}
     
-    // home ist ein sonnensystem sektor
-    Sektor* getHome();    
-    DRReturn saveHome(Sektor* home);
+    DRReturn saveToFile();
+    DRReturn loadFromFile();
+    
+    Sektor* getRootSektor() {return mRootSektor;}
     
 private:
     Server(u64 serverID);
     Server(const Server& orig);
+    static std::map<u64, Server*> mServerList;
+    typedef std::pair<u64, Server*> SERVER_ENTRY;
     
     virtual ~Server();
     
     u64 mServerID;
-    std::map<u64, Sektor*> mSektoren;
-    typedef std::pair<u64, Sektor*> SEKTOR_ENTRY;
+    Sektor* mRootSektor;
 };
 
 #endif	/* SERVER_H */

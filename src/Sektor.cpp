@@ -7,28 +7,52 @@
 
 #include "main.h"
 
-Sektor::Sektor(SektorID id /*= 0*/, int seed /* = 0*/): mID(id), mSeed(seed)
+Sektor::Sektor(Sektor* parent, SektorType type, SektorID id /*= 0*/, int seed /* = 0*/, u64 serverID/* = 0*/): 
+mStellarBody(NULL), mID(id), mType(type), mSeed(seed), mParent(parent), mServerID(serverID)
 {
 }
 
 Sektor::Sektor(const Sektor& orig)
-: mID(orig.mID)
+: mStellarBody(NULL), mID(orig.mID), mType(orig.mType), mSeed(orig.mSeed), mParent(orig.mParent),
+  mSektorSize(orig.mSektorSize), mSektorPosition(orig.mSektorPosition), mServerID(orig.mServerID)
 {
 }
 
 Sektor::~Sektor() 
 {
-    for(std::list<StellarBody*>::iterator it = mStellarBodys.begin(); it != mStellarBodys.end(); it++)
+    DR_SAVE_DELETE(mStellarBody);
+    
+    for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
     {
-        DR_SAVE_DELETE(*it);
+        Sektor* temp = it->second;
+        DR_SAVE_DELETE(temp);
     }
-    mStellarBodys.clear();
+    mChilds.clear();
 }
 
-void Sektor::addStellarBody(StellarBody* newBody)
+void Sektor::setStellarBody(StellarBody* newBody)
 {
     if(!newBody) LOG_ERROR_VOID("Zero Pointer");
-    mStellarBodys.push_back(newBody);
+    DR_SAVE_DELETE(mStellarBody);
+    mStellarBody = newBody;
+}
+
+DRReturn Sektor::addSektor(Sektor* newSektor)
+{
+    SektorID s = newSektor->getID();
+    s.count = 0;
+    std::map<u64, Sektor*>::iterator it;
+    do
+    {
+        s.count++;
+        it = mChilds.find(s);
+    } while(it != mChilds.end());
+    if(s.count > 0) DRLog.writeToLog("[Sektor::addSektor] count value is: %d", s.count);
+    newSektor->setID(s);
+    
+    mChilds.insert(SEKTOR_ENTRY(s, newSektor));
+    
+    return DR_OK;
 }
 
 DRReturn Sektor::save(DRFile* openFile)
@@ -38,10 +62,6 @@ DRReturn Sektor::save(DRFile* openFile)
     char identifier[] = "sekt";
     openFile->write(identifier, sizeof(char), 4);
     
-    for(std::list<StellarBody*>::iterator it = mStellarBodys.begin(); it != mStellarBodys.end(); it++)
-    {
-     
-    }
     return DR_OK;
 }
 
@@ -58,16 +78,13 @@ DRReturn Sektor::render(float fTime, Camera* camera)
     camera->setKameraMatrixRotation();
     
     //glDisable(GL_DEPTH_TEST);             // Enables depth test
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
+    if(!mStellarBody) return DR_OK;
     
     //glScalef(10.0f, 10.0f, 10.0f);
     //glTranslatef(0.0f, 0.0f, -200.0f);
-    
-    for(std::list<StellarBody*>::iterator it = mStellarBodys.begin(); it != mStellarBodys.end(); it++)
-    {
-        (*it)->render(fTime, camera->getAbsPosition());
-    }    
+    mStellarBody->render(fTime, camera->getAbsPosition());
     
     
     return DR_OK;
@@ -81,12 +98,37 @@ DRReturn Sektor::move(float fTime, Camera* camera)
     if(diff.lengthSq())
     {
         //diff.print();
-        for(std::list<StellarBody*>::iterator it = mStellarBodys.begin(); it != mStellarBodys.end(); it++)
-        {
-            
-        }        
+              
     }   
     
     mLastPosition = camera->getAbsPosition();
     return DR_OK;
+}
+
+std::list<u64>* Sektor::getSektorPath(std::list<u64>* buffer)
+{
+    if(!buffer) return NULL;
+    if(mType == ROOT) return buffer;
+    if(mParent)
+        mParent->getSektorPath(buffer);
+    buffer->push_back(mID.id);
+    return buffer;
+}
+
+const char* Sektor::getSektorTypeName(SektorType type)
+{
+    switch(type)
+    {
+        case ROOT: return "root";
+        case SUPER_GALAXIE_CLUSTER: return "super_galaxie_cluster";
+        case SUPER_GALAXIE: return "super_galaxie";
+        case GALAXIE_CLUSTER: return "galaxie_cluster";
+        case GALAXIE: return "galaxie";
+        case STAR_CLUSTER: return "star_cluster";
+        case SOLAR_SYSTEM: return "solar_system";
+        case STELLAR_BODY: return "stellar_body";
+        case SEKTOR_NONE: return "none";
+        default: return "- default -";
+    }
+    return "- return -";
 }
