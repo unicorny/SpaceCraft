@@ -118,6 +118,10 @@ enum /*CORE_API*/ DRReturn
  enum CORE2_API DRReturn;
 #endif
 
+//ä = \303\244
+//ü = \303\274
+//ö = \303\266
+//ß = \303\237
 
 // core includes (ohne log)
 #include "DRVector2.h"

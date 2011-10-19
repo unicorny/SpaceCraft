@@ -129,6 +129,8 @@ DRReturn load()
     glClearColor(0.1, 0.2, 0.0, 0);
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
+
+	DRLog.writeToLog("CPU-Count: %d", g_CPU_Count);
     
   //  glShadeModel(GL_SMOOTH);
   //  glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
@@ -201,8 +203,21 @@ DRReturn move(float fTime)
 {
     float fRotSpeed = 2.0f;
     float fSpeed = 20.0f;
+	int numKeys = 0;
     //Kamera
-    Uint8 *keystate = SDL_GetKeyState(NULL);
+#if SDL_VERSION_ATLEAST(1,3,0)
+	Uint8 *keystate = SDL_GetKeyboardState(&numKeys);
+#else
+	Uint8 *keystate = SDL_GetKeyState(NULL);
+#endif
+	
+	/*for(uint i = 0; i < numKeys; i++)
+	{
+		if(keystate[i]) DRLog.writeToLog("%d button pressed: %d", i, (int)keystate[i]);
+	}
+	//*/
+//	return DR_OK;
+    
     int mouseMove_x = 0, mouseMove_y = 0;
     // holen der Maus bewegung seit letztem frame und der bitmaks welche Tasten gedrückt sind
     Uint8 mousePressed = SDL_GetRelativeMouseState(&mouseMove_x, &mouseMove_y);
@@ -210,7 +225,7 @@ DRReturn move(float fTime)
     if(controlMode != 0 )
     {
          // die Kamera wird rotiert, gesteuert durch die Tasten w, s (x Achse, hoch/runter), <-, -> (y Achse links/rechts), e und q (z Achse seitlich)
-        g_cam->rotateRel(DRVector3(keystate[SDLK_w]-keystate[SDLK_s], keystate[SDLK_LEFT]-keystate[SDLK_RIGHT], keystate[SDLK_e]-keystate[SDLK_q])*fTime);
+        g_cam->rotateRel(DRVector3(keystate[SDLK_s]-keystate[SDLK_w], keystate[SDLK_RIGHT]-keystate[SDLK_LEFT], keystate[SDLK_q]-keystate[SDLK_e])*fTime);
         // wenn die rechte maustaste gedrückt ist
         if((mousePressed & 4) == 4)
             // wird die Kamera auch abhängig von der Mausposition gedreht
@@ -396,7 +411,8 @@ DRReturn render(float fTime)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    gluPerspective(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
+    //gluPerspective(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
+	glMultMatrixf(DRMatrix::view_frustum(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
     glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
 
     glLoadIdentity();                    // Reset (init) the modelview matrix

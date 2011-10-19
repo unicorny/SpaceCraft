@@ -22,12 +22,12 @@ Camera::~Camera()
 
 void Camera::setKameraMatrix()
 {
-    glMultMatrixf(mMatrix.transpose());
+    glMultMatrixf(mMatrix);
 }
 
 void Camera::setKameraMatrixRotation()
 {
-    glMultMatrixf(DRMatrix::axis(mXAxis, mYAxis, mZAxis).transpose());
+    glMultMatrixf(DRMatrix::axis(mXAxis, mYAxis, mZAxis));
 }
 
 void Camera::translateRel_AbsPosition(const DRVector3& translate, const UnitTypes& type)

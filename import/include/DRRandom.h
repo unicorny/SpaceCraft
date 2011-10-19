@@ -31,6 +31,13 @@ public:
             ret.z = rReal(maxLengthSq - ret.x - ret.y, -(maxLengthSq -ret.x - ret.y));
             return ret;
     }
+    static DRVector2 rVector2(DRReal maxLengthSq)
+    {
+            DRVector2 ret;
+            ret.x = rReal(maxLengthSq/2.0f, -maxLengthSq/2.0f);
+            ret.y = rReal(maxLengthSq - ret.x, -(maxLengthSq -ret.x));
+            return ret;
+    }    
     static void seed(GLuint seed) {srand(seed);}
 private:
 };

@@ -33,7 +33,7 @@ private:
         IcoSphereFace(int seed = 0);
         ~IcoSphereFace() {reset();}
         void reset(DRGeometrieIcoSphere* sphere = NULL);
-        bool   hasChilds();
+        bool hasChilds();
         IcoSphereFace* getChildAtBorder(GLuint borderIndices[2], IcoSphereFace* caller = NULL);
         
         IcoSphereFace* mNeighbors[3];
@@ -55,8 +55,7 @@ private:
     DRReturn grabIndicesFromFaces(IcoSphereFace* current = NULL);
     void reset(bool full = true);
     
-    DRReturn calculateNormals(uint oldVertexCount);
-    
+    DRReturn calculateNormals(uint oldVertexCount);    
     
     std::list<IcoSphereFace*>           mFreeIcoFaceMemory;
     IcoSphereFace                       mRootSphereFaces[20];
