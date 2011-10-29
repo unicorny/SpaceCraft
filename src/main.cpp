@@ -503,12 +503,9 @@ DRReturn render(float fTime)
     translate.y += 2.0f;
     
 
-	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f)+translate, DRVector3(0.5f)+translate, DRMatrix::identity());// DRMatrix::translation(translate));
-	//DRFrustumPosition res = cull.isSphereInFrustum(translate, 0.5f);
-	//DRFrustumPosition res = cull.isPointInFrustum(translate);
-    if(res != OUTSIDE)
-    //if(cull.isPointInFrustum(DRVector3(0.0f)+translate) != OUTSIDE)
-        g_RenderBlockLoader.getRenderBlock("benc")->render();
+	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate));
+        if(res != OUTSIDE)    
+                g_RenderBlockLoader.getRenderBlock("benc")->render();
 
 	switch(res)
 	{
@@ -586,7 +583,8 @@ DRReturn render(float fTime)
             glTranslatef(1.0f*dir[0], 0.0f, 0.0f);
             translate.x += 1.0f*dir[0];
         }
-        rb->render();
+        if(cull.isPointInFrustum(DRVector3(0.0f)+translate) != OUTSIDE)
+                rb->render();
     }
     u32 end = SDL_GetTicks();
     //printf("\r clipCount:%d", clipCount);
