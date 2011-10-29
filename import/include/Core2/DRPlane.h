@@ -105,6 +105,8 @@ public:
 
     static inline DRPlane	fromPointNormal(const DRVector3& p, const DRVector3& n)	{return DRPlane(n, -n.x * p.x - n.y * p.y - n.z * p.z);}
     static inline DRPlane	fromPoints(const DRVector3& v1, const DRVector3& v2, const DRVector3& v3)	{return fromPointNormal(v1, DRVector3(v3 - v2).cross(v1 - v2));}
+    
+    DRPlane transform(const DRMatrix& m) const;
 
     // ******************************************************************
 

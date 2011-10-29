@@ -35,7 +35,7 @@ void Camera::translateRel_AbsPosition(const DRVector3& translate, const UnitType
     DRMatrix m1 = DRMatrix::axis(mXAxis, mYAxis, mZAxis);
     DRMatrix m2 = DRMatrix::translation(mAbsPosition.getVector3());
     DRMatrix m = DRMatrix(m1) * DRMatrix(m2);
-    mAbsPosition -= Vector3Unit(translate.transformNormal(m), type);
+    mAbsPosition += Vector3Unit(translate.transformNormal(m), type);
     //mAbsPosition.print();
  /*   printf("\r x-axis: %f %f %f, y-axis: %f %f %f, z-axis: %f %f %f, abs: %s %s %s", mXAxis.x, mXAxis.y, mXAxis.z,
                                                     mYAxis.x, mYAxis.y, mYAxis.z,
@@ -56,46 +56,12 @@ void Camera::translateRel(const DRVector3& translate)
         printf("update sektor\n");
     }
 }
-/*
-void Camera::rotateAbs(const DRVector3& rotation)
+
+void Camera::update()
 {
-    // Rotation um die x-Achse
-        DRMatrix mRotation(DRMatrix::rotationX(rotation.x));
-	mYAxis = mYAxis.transformNormal(mRotation);
-	mZAxis = mXAxis.cross(mYAxis);
-
-	// Rotation um die y-Achse
-        mRotation = DRMatrix::rotationY(rotation.y);
-	mXAxis = mXAxis.transformNormal(mRotation);
-	mZAxis = mXAxis.cross(mYAxis);
-
-	// Rotation um die z-Achse
-        mRotation = DRMatrix::rotationZ(rotation.z);
-	mXAxis = mXAxis.transformNormal(mRotation);
-	mYAxis = mYAxis.transformNormal(mRotation);
-
-	// Matrizen aktualisieren
-	update();
+    DRMatrix m1 = DRMatrix::axis(mXAxis, mYAxis, mZAxis);
+    DRMatrix m2 = DRMatrix::translation(-mPosition);
+    //mMatrix = DRMatrix(m1) * DRMatrix(m2);
+    mMatrix = DRMatrix(m2) * DRMatrix(m1);
+   // mMatrix.print();
 }
-
-void Camera::rotateRel(const DRVector3& rotation)
-{
-    // Rotation um die x-Achse des Objekts
-        DRMatrix mRot = DRMatrix::rotationAxis(mXAxis, rotation.x);
-	mYAxis = mYAxis.transformNormal(mRot);
-	mZAxis = mXAxis.cross(mYAxis);
-                
-	// Rotation um die y-Achse des Objekts
-        mRot = DRMatrix::rotationAxis(mYAxis, rotation.y);
-	mXAxis = mXAxis.transformNormal(mRot);
-	mZAxis = mXAxis.cross(mYAxis);
-
-	// Rotation um die z-Achse des Objekts
-        mRot = DRMatrix::rotationAxis(mZAxis, rotation.z);
-	mXAxis = mXAxis.transformNormal(mRot);
-	mYAxis = mYAxis.transformNormal(mRot);
-
-	// Matrizen aktualisieren
-	update();
-}
- * //*/

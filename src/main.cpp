@@ -7,8 +7,10 @@ Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 DRTextur* g_terrain = NULL;
-int blockCount = 100;
-int controlMode = 1;
+int blockCount = 10000;
+#define MAX_CONTROL_MODES 4
+ControlMode gControlModes[MAX_CONTROL_MODES];
+int gCurrentControlMode = 0;
 //DRGeometrieIcoSphere g_geo;
 
 GLint sphereList = 0;
@@ -117,10 +119,16 @@ DRReturn load()
     if(EnInit_Simple())
         return DR_ERROR;
     DRFileManager::Instance().addOrdner("data/blockView");
-    //test();
+    test();
         
     DRRandom r;
     srand(77111);
+    
+    //Steuerung
+    gControlModes[0].mValue = Unit(20, M);
+    gControlModes[1].mValue = Unit(1000, KM);
+    gControlModes[2].mValue = Unit(20000, KM);
+    gControlModes[3].mValue = Unit(0.1, AE);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
@@ -130,7 +138,7 @@ DRReturn load()
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
 
-	DRLog.writeToLog("CPU-Count: %d", g_CPU_Count);
+    DRLog.writeToLog("CPU-Count: %d", g_CPU_Count);
     
   //  glShadeModel(GL_SMOOTH);
   //  glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
@@ -222,30 +230,36 @@ DRReturn move(float fTime)
     // holen der Maus bewegung seit letztem frame und der bitmaks welche Tasten gedrückt sind
     Uint8 mousePressed = SDL_GetRelativeMouseState(&mouseMove_x, &mouseMove_y);
 
-    if(controlMode != 0 )
-    {
+    //if(gCurrentControlMode != 0 )
+    //{
          // die Kamera wird rotiert, gesteuert durch die Tasten w, s (x Achse, hoch/runter), <-, -> (y Achse links/rechts), e und q (z Achse seitlich)
         g_cam->rotateRel(DRVector3(keystate[SDLK_s]-keystate[SDLK_w], keystate[SDLK_RIGHT]-keystate[SDLK_LEFT], keystate[SDLK_q]-keystate[SDLK_e])*fTime);
         // wenn die rechte maustaste gedrückt ist
         if((mousePressed & 4) == 4)
             // wird die Kamera auch abhängig von der Mausposition gedreht
         g_cam->rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fRotSpeed);
-    }
-    if(controlMode == 1)
+    //}
+
+    if(gControlModes[gCurrentControlMode].mValue.getType() == M)
+        g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
+    else
+        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
+    /*if(gCurrentControlMode == 1)
     // kamera bewegung abhängig von den Tasten a, d (links/rechts), bild up, bild down (hoch/runter), Pfeil hoch und Pfeil runter (vorwärts/rückwärts)
         g_cam->translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
-    else if(controlMode == 2)
+    else if(gCurrentControlMode == 2)
         g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*1000.0f, KM);
-    else if(controlMode == 3)
+    else if(gCurrentControlMode == 3)
         g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*0.005f, AE);
-    else if(controlMode == 4)
+    else if(gCurrentControlMode == 4)
         g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*50.0f, KM);
-    
+    */
     //set control mode
-     if(EnIsButtonPressed(SDLK_1)) controlMode = 1;
-     else if(EnIsButtonPressed(SDLK_3)) controlMode = 2;
-     else if(EnIsButtonPressed(SDLK_4)) controlMode = 3;
-     else if(EnIsButtonPressed(SDLK_2)) controlMode = 4;
+    if(EnIsButtonPressed(SDLK_1)) gCurrentControlMode = 0;
+    else if(EnIsButtonPressed(SDLK_2)) gCurrentControlMode = 1;
+    else if(EnIsButtonPressed(SDLK_3)) gCurrentControlMode = 2;
+    else if(EnIsButtonPressed(SDLK_4)) gCurrentControlMode = 3;
+     
         
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
     if(keystate[SDLK_z]) blockCount++;
@@ -399,6 +413,7 @@ DRReturn render(float fTime)
     
     //glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
+    glDisable(GL_CULL_FACE);
     if(g_terrain)
         g_terrain->bind();
     if(g_Player.getSektor()->render(fTime, g_Player.getCamera()))
@@ -412,11 +427,13 @@ DRReturn render(float fTime)
     glLoadIdentity();
 
     //gluPerspective(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
-	glMultMatrixf(DRMatrix::view_frustum(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
+    glMultMatrixf(DRMatrix::view_frustum(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
+    DRFrustumCulling cull(g_cam, g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 50.0f);
     glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
 
     glLoadIdentity();                    // Reset (init) the modelview matrix
-    
+    DRVector3 translate(0.0f);
+        
     g_cam->setKameraMatrix();
     glEnable(GL_DEPTH_TEST);             // Enables depth test
     
@@ -471,16 +488,36 @@ DRReturn render(float fTime)
   //  printf("bevore renderBlock\n");
     
     glTranslatef(0.0f, 10.0f, 0.0f);
+    translate.y += 10.0f;
     RenderBlock* rb =  g_RenderBlockLoader.getRenderBlock("dirt");
     rb->render();
     
     glTranslatef(0.0f, -5.0f, 0.0f);
+    translate.y -= 5.0f;
     rb = g_RenderBlockLoader.getRenderBlock("dirG");
     rb->render();
     glTranslatef(1.0f, 0.0f, 0.0f);
+    translate.x += 1.0f;
     rb->render();
     glTranslatef(0.0f, 2.0f, 0.0f);
-    g_RenderBlockLoader.getRenderBlock("benc")->render();
+    translate.y += 2.0f;
+    
+
+	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f)+translate, DRVector3(0.5f)+translate, DRMatrix::identity());// DRMatrix::translation(translate));
+	//DRFrustumPosition res = cull.isSphereInFrustum(translate, 0.5f);
+	//DRFrustumPosition res = cull.isPointInFrustum(translate);
+    if(res != OUTSIDE)
+    //if(cull.isPointInFrustum(DRVector3(0.0f)+translate) != OUTSIDE)
+        g_RenderBlockLoader.getRenderBlock("benc")->render();
+
+	switch(res)
+	{
+	case OUTSIDE:   printf("\r outside  "); break;
+	case INSIDE:    printf("\r inside   "); break;
+	case INTERSECT: printf("\r intersect"); break;
+	default: printf("\r unknown"); break;
+	}
+	//printf("\r outside");
     
     glDisable(GL_TEXTURE_2D);
     //glDisable(GL_LIGHTING);
@@ -507,26 +544,37 @@ DRReturn render(float fTime)
     float dir[] = {1.0f, 1.0f};
     int y = 0;
     const int length = 250;
+    int clipCount = 0;
+    
     for(int i = 0; i < blockCount; i++)
-    {   
-        
+    {           
         if(!(i % 10))
         {
             glTranslatef(0.0f, 1.0f, 0.0f);
-            rb->render();
+            translate.y += 1.0f;
+            
+            if(cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate)) != OUTSIDE)
+            //if(cull.isSphereInFrustum(DRVector3(0.0f)+translate, 0.5f) != OUTSIDE)
+            //if(cull.isPointInFrustum(DRVector3(0.0f)+translate) != OUTSIDE)
+                rb->render();
+            else clipCount++;
+            
             glTranslatef(0.0f, -1.0f, 0.0f);
+            translate.y -= 1.0f;
         }
         if(!(i % length))
         {
             if(!(y % length))
             {
                 glTranslatef(0.0f, 1.0f, 0.0f);
+                translate.y += 1.0f;
                 dir[1] *= -1.0f;
                 dir[0] *= -1.0f;
             }
             else
             {
                 glTranslatef(0.0f, 0.0f, 1.0f*dir[1]);
+                translate.z += 1.0f*dir[1];
                 dir[0] *= -1.0f;
              
             }
@@ -536,11 +584,12 @@ DRReturn render(float fTime)
         else
         {
             glTranslatef(1.0f*dir[0], 0.0f, 0.0f);
+            translate.x += 1.0f*dir[0];
         }
         rb->render();
     }
     u32 end = SDL_GetTicks();
-    
+    //printf("\r clipCount:%d", clipCount);
           
     //FPS
     g_Font->begin();
@@ -561,7 +610,8 @@ DRReturn render(float fTime)
     text.setPosition(DRVector2(0.1f, 0.0f));
     text.drawText();
     
-    switch(controlMode)
+    text.setText("Steuerung: %d - %s/s", gCurrentControlMode+1, gControlModes[gCurrentControlMode].mValue.print().data());
+    /*switch(controlMode)
     {
         case 0: text.setText("Steuerung: (NONE)"); break;
         case 1: text.setText("Steuerung: 1 - 20 m/s"); break;
@@ -570,6 +620,7 @@ DRReturn render(float fTime)
         case 4: text.setText("Steuerung: 2 - 100 km/s"); break;
         default: text.setText("Steuerung: (default)");
     }
+     */
     text.setPosition(DRVector2(0.0f, 0.08f));
     text.drawText();
     

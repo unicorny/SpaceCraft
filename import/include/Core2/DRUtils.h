@@ -21,26 +21,26 @@
 
 
 /*
-Hilfsfunktionen für die Arbeit mit strings
+Hilfsfunktionen fÃ¼r die Arbeit mit strings
 von Dario Rekowski
 */
 #ifndef __DR_UTILS__
 #define __DR_UTILS__
 
 //- - -- - - - - - - - - -- - - - - - - - - - - - -- -  - - - - - - - - - - - - - -
-//liefert die nächste 2er Potenz zurück
+//liefert die nÃ¤chste 2er Potenz zurÃ¼ck
 CORE2_API int DRGetNextPotenz(int iIn);
 
 // DRGetNumChar = strlen
 
-//Sagt ob ein Zeichen ein Großbuchstabe ist, doer nicht
+//Sagt ob ein Zeichen ein GroÃŸbuchstabe ist, doer nicht
 
 //CORE2_API bool DRisGrosB(char zeichen); = isUppercase();
 
 //Sagt ob ein Zeichen eine Zahl ist (oder , und hochzeichen)
 CORE2_API bool DRisMathChar(char czeichen);
 
-//Liefert den Term vor oder nach cTrenn zurück
+//Liefert den Term vor oder nach cTrenn zurÃ¼ck
 CORE2_API DRReturn DRGetTermVorChar(DRString* sInput, DRString* sOutput, char cTrenn);
 CORE2_API DRReturn DRGetTermNachChar(DRString* sInput, DRString* sOutput, char cTrenn);
 
@@ -48,10 +48,10 @@ CORE2_API DRReturn DRGetTermNachChar(DRString* sInput, DRString* sOutput, char c
 //CORE2_API double DRMakeNumberFromString(DRString* sInput);
 //atof oder atoi
 
-//Zähle Zeichen eines Types in einem String
+//ZÃ¤hle Zeichen eines Types in einem String
 CORE2_API int DRCountCharsOf(DRString* sInput, char cCountable);
 
-//Zähle Zahlen in einem String
+//ZÃ¤hle Zahlen in einem String
 CORE2_API int DRCountNumbers(DRString* sInput);
 
 //Sagt ob ein zeichen eine Zahl ist
@@ -63,11 +63,11 @@ CORE2_API DRReturn DRRemoveHTMLTags(char* pcIn, char* pcOut, u32 dwOutLength);
 //Entfernen einer Pfadangabe aus einem Dateinamen
 CORE2_API const char* DRRemoveDir(const char* pcFilename);
 
-//reserviert Speicher in String Größe, kopiert übergebenden String rein und gibt Zeiger auf neues char array zurück
+//reserviert Speicher in String GrÃ¶ÃŸe, kopiert Ã¼bergebenden String rein und gibt Zeiger auf neues char array zurÃ¼ck
 //CORE2_API char* DRCopyString(const char* pcString);
 //strcpy
 
-//überprüft, ob ein String nach dem letzten Punkt, exakt das gleiche hat, wie im String pcEndung
+//Ã¼berprÃ¼ft, ob ein String nach dem letzten Punkt, exakt das gleiche hat, wie im String pcEndung
 CORE2_API bool DRCheckEndung(const char* pcInput, const char* pcEndung);
 
 /*//Liefert den Pfad, also alles vor dem letzten / oder \\*/

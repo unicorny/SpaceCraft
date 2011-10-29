@@ -130,6 +130,7 @@ enum /*CORE_API*/ DRReturn
 #include "DRPlane.h"
 #include "DRMatrix.h"
 #include "DRObjekt.h"
+#include "DRFrustumCulling.h"
 #include "DRIni.h"
 #include "DRDampingSpring.h"
 //#include "DRGeometrieGenerator.h"

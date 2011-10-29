@@ -33,7 +33,6 @@ DRReturn StellarBody::render(float fTime, Vector3Unit absCameraPosition)
     Unit distance1 = Vector3Unit(mPosition - absCameraPosition).length();
     DRVector3 diff = Vector3Unit(mPosition - absCameraPosition).convertTo(KM).getVector3();
     
-    
     distance1 = distance1.convertTo(mRadius.getType());
     float distance2 = 200.0f;
     Unit radius1 = mRadius;

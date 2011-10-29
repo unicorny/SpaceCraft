@@ -40,6 +40,7 @@ DRReturn Player::init()
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
     Vector3Unit position(DRRandom::rVector3(1.0f), AE);
     position = position.normalize();
+    position = position * Unit(0.2f, AE);
    // position.print("Planeten position");
     
     if(newPlayer)

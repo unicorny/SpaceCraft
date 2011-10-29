@@ -94,7 +94,7 @@ public:
 
 protected:
     //! berechnet die Matrix neu
-    void update();
+    virtual void update();
 
     DRVector3 mPosition;
 

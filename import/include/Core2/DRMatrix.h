@@ -48,33 +48,33 @@ public:
     //! \brief Kopierkonstruktor
     //!     erwartet eine DRMatrix deren Werte &uuml;bernommen werden
     //! \param m andere DRMatrix von der die Werte genommen werden
-	DRMatrix(const DRMatrix& m) {memcpy(n, m.n, sizeof(float)*16);}
+    DRMatrix(const DRMatrix& m) {memcpy(n, m.n, sizeof(float)*16);}
 
-	// Spalte ist groﬂ bei opengl...
-	//! \brief Konstruktor, der jeden einzelnen DRMatrix Wert erwartet
-	//! \param _m00 = x Achse x Koordinate
-	//! \param _m01 = x Achse y Koordinate
-	//! \param _m02 = x Achse z Koordinate
-	//! \param _m03 = 0
-	//! \param _m04 = y Achse x Koordinate
-	//! \param _m05 = y Achse y Koordinate
-	//! \param _m06 = y Achse z Koordinate
-	//! \param _m07 = 0
-	//! \param _m08 = z Achse x Koordinate
-	//! \param _m09 = z Achse y Koordinate
-	//! \param _m10 = z Achse z Koordinate
-	//! \param _m11 = 0
-	//! \param _m12 x Translation
-	//! \param _m13 y Translation
-	//! \param _m14 z Translation
-	//! \param _m15 = 1
-	DRMatrix(float _m00, float _m04, float _m08, float _m12,
-           float _m01, float _m05, float _m09, float _m13,
-           float _m02, float _m06, float _m10, float _m14,
-           float _m03, float _m07, float _m11, float _m15) : m00(_m00), m04(_m01), m08(_m02), m12(_m03),
-			                                                 m01(_m04), m05(_m05), m09(_m06), m13(_m07),
-													         m02(_m08), m06(_m09), m10(_m10), m14(_m11),
-				   											 m03(_m12), m07(_m13), m11(_m14), m15(_m15) {}
+    // Spalte ist gro√ü bei opengl...
+    //! \brief Konstruktor, der jeden einzelnen DRMatrix Wert erwartet
+    //! \param _m00 = x Achse x Koordinate
+    //! \param _m01 = x Achse y Koordinate
+    //! \param _m02 = x Achse z Koordinate
+    //! \param _m03 = 0
+    //! \param _m04 = y Achse x Koordinate
+    //! \param _m05 = y Achse y Koordinate
+    //! \param _m06 = y Achse z Koordinate
+    //! \param _m07 = 0
+    //! \param _m08 = z Achse x Koordinate
+    //! \param _m09 = z Achse y Koordinate
+    //! \param _m10 = z Achse z Koordinate
+    //! \param _m11 = 0
+    //! \param _m12 x Translation
+    //! \param _m13 y Translation
+    //! \param _m14 z Translation
+    //! \param _m15 = 1
+    DRMatrix(float _m00, float _m04, float _m08, float _m12,
+       float _m01, float _m05, float _m09, float _m13,
+       float _m02, float _m06, float _m10, float _m14,
+       float _m03, float _m07, float _m11, float _m15) : m00(_m00), m04(_m01), m08(_m02), m12(_m03),
+                                                         m01(_m04), m05(_m05), m09(_m06), m13(_m07),
+                                                         m02(_m08), m06(_m09), m10(_m10), m14(_m11),
+                                                         m03(_m12), m07(_m13), m11(_m14), m15(_m15) {}
     //! \brief Kontruktor
     //!    erwartet einen Wert, setzt alle Felder auf diesen Wert
     //! \param f ein float Wert auf den alle Felder gesetzt werden
@@ -273,9 +273,9 @@ public:
     //!                    0   v.y 0   0 <br>
     //!                    0   0   v.z 0 <br>
     //!                    0   0   0   1 </p>
-	static DRMatrix	scaling(const DRVector3& v);		// Skalierungsmatrix berechnen
+    static DRMatrix	scaling(const DRVector3& v);		// Skalierungsmatrix berechnen
 
-	static DRMatrix view_frustum(const float angle_of_view, const float aspect_ratio, const float z_near, const float z_far);
+    static DRMatrix view_frustum(const float angle_of_view, const float aspect_ratio, const float z_near, const float z_far);
 
     //! \brief liefert eine transponierte DRMatrix zur&uuml;ck, const
     //! \return eine neue DRMatrix, diese transponiert

@@ -37,6 +37,10 @@ public:
     void translateRel_AbsPosition(const DRVector3& translate, const UnitTypes& type);
     
     void translateRel(const DRVector3& translate);
+    
+protected:
+    virtual void update();
+        
 private:
     //! absolute position of camera in the current sector in sector coordinates (example: AE)
     //! the position of camera is the distance from the abs position, abs position is local zero-point

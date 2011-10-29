@@ -152,9 +152,9 @@ ENGINE_API extern u16       g_CPU_Count;
 
 /**	Engine Funktionen
 	Verschieden Init-Funktionen und anderes
-	Init alleine f�r SDL
-	f�r SDL und OpenGL
-	f�r SDL und Ogre3D
+	Init alleine für SDL
+	für SDL und OpenGL
+	für SDL und Ogre3D
 */
 ENGINE_API DRReturn EnInit_Simple(DRReal fVersion = 1.0f, bool initSound = false);
 ENGINE_API DRReturn EnInit(DRReal fVersion = 1.0f, bool initSound = false);
