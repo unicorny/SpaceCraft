@@ -428,7 +428,7 @@ DRReturn render(float fTime)
 
     //gluPerspective(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
     glMultMatrixf(DRMatrix::view_frustum(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
-    DRFrustumCulling cull(g_cam, g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 50.0f);
+    DRFrustumCulling cull(g_cam, g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 1000.0f);
     glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
 
     glLoadIdentity();                    // Reset (init) the modelview matrix
@@ -542,6 +542,7 @@ DRReturn render(float fTime)
     int y = 0;
     const int length = 250;
     int clipCount = 0;
+    int renderCount = 0;
     
     for(int i = 0; i < blockCount; i++)
     {           
@@ -550,10 +551,11 @@ DRReturn render(float fTime)
             glTranslatef(0.0f, 1.0f, 0.0f);
             translate.y += 1.0f;
             
-            if(cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate)) != OUTSIDE)
-            //if(cull.isSphereInFrustum(DRVector3(0.0f)+translate, 0.5f) != OUTSIDE)
-            //if(cull.isPointInFrustum(DRVector3(0.0f)+translate) != OUTSIDE)
+            if(cull.isSphereInFrustum(translate, 0.6f) != OUTSIDE)
+            {
                 rb->render();
+                renderCount++;
+            }
             else clipCount++;
             
             glTranslatef(0.0f, -1.0f, 0.0f);
@@ -583,11 +585,15 @@ DRReturn render(float fTime)
             glTranslatef(1.0f*dir[0], 0.0f, 0.0f);
             translate.x += 1.0f*dir[0];
         }
-        if(cull.isPointInFrustum(DRVector3(0.0f)+translate) != OUTSIDE)
+        if(cull.isSphereInFrustum(translate, 0.6f) != OUTSIDE)
+        {
                 rb->render();
+                renderCount++;
+        }
+        else clipCount++;
     }
     u32 end = SDL_GetTicks();
-    //printf("\r clipCount:%d", clipCount);
+    printf("\r clipCount:%d, renderCount: %d", clipCount, renderCount);
           
     //FPS
     g_Font->begin();

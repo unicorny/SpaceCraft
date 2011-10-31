@@ -77,7 +77,6 @@ const float PI = 3.1415926535f;
 
 //einbinden von OpenGL
 //#include <GL/glu.h>   // Damit kann Glu32 genutzt werden.
-#define GLEW_STATIC
 #include "glew.h"
 #define NO_SDL_GLEXT
 #include <sdl/SDL_opengl.h>

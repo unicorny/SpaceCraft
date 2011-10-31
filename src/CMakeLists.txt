@@ -3,13 +3,13 @@ PROJECT(SpaceCraft CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(spaceCraftSrc main Player Sektor Server Camera RenderBlockLoader RenderBlock BlockLoader Block
-				  SektorChunk StellarBody Unit Planet GlobalRenderer)
+				  SektorChunk StellarBody Unit Planet GlobalRenderer ShaderProgram)
 #IF(WIN32)
 SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/Sektor.h ../include/Server.h
 								   ../include/Camera.h ../include/RenderBlockLoader.h ../include/RenderBlock.h
 								   ../include/BlockLoader.h ../include/Block.h ../include/SektorChunk.h
                                                                    ../include/StellarBody.h ../include/Unit.h ../include/Planet.h
-                                                                   ../include/Vector3Unit.h ../include/GlobalRenderer.h)
+                                                                   ../include/Vector3Unit.h ../include/GlobalRenderer.h ../include/ShaderProgram)
 #ENDIF(WIN32)
 
 SET(PA ../import/bin ../import/lib)
@@ -19,8 +19,12 @@ find_library(DR_CORE2_LIB Core2 PATHS ${PA} REQUIRED)
 if(WIN32)
 SET(SpaceCraftLibs ${SDL_LIB} ${DR_ENGINE2_LIB} ${DR_CORE2_LIB} glu32 opengl32)
 else()
-SET(SpaceCraftLibs ${SDL_LIB} Engine2 Core2 GLEW glut)
+SET(SpaceCraftLibs ${SDL_LIB} Engine2 Core2 glut)
 endif()
+
+if (MSVC)
+ADD_DEFINITIONS(-DNODEFAULTLIB:library)
+endif(MSVC)
 
 ADD_EXECUTABLE(SpaceCraft ${spaceCraftSrc})
 

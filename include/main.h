@@ -5,6 +5,7 @@
 
 
 // Tools
+#include "ShaderProgram.h"
 #include "Unit.h"
 #include "Vector3Unit.h"
 
