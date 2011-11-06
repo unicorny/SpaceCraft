@@ -7,7 +7,7 @@ Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 DRTextur* g_terrain = NULL;
-int blockCount = 10000;
+int blockCount = 100;
 #define MAX_CONTROL_MODES 4
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
@@ -269,8 +269,61 @@ DRReturn move(float fTime)
 
     return DR_OK;
 }
-const float tao = 1.61803399;
 
+#define TWOPI (PI*2.0f)
+#define PID2  (PI/2.0f)
+void CreateSphere(DRVector3 c,double r,int n)
+{
+	int i,j;
+	double theta1,theta2,theta3;
+	DRVector3 e,p;
+
+	if (r < 0)
+		r = -r;
+	if (n < 0)
+		n = -n;
+	if (n < 4 || r <= 0) {
+		glBegin(GL_POINTS);
+		glVertex3f(c.x,c.y,c.z);
+		glEnd();
+		return;
+	}
+
+	for (j=0;j<n/2;j++) {
+		theta1 = j * TWOPI / n - PID2;
+		theta2 = (j + 1) * TWOPI / n - PID2;
+
+		glBegin(GL_QUAD_STRIP);
+		for (i=0;i<=n;i++) {
+			theta3 = i * TWOPI / n;
+
+			e.x = cos(theta2) * cos(theta3);
+			e.y = sin(theta2);
+			e.z = cos(theta2) * sin(theta3);
+			p.x = c.x + r * e.x;
+			p.y = c.y + r * e.y;
+			p.z = c.z + r * e.z;
+
+			glNormal3f(e.x,e.y,e.z);
+			glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
+			glVertex3f(p.x,p.y,p.z);
+
+			e.x = cos(theta1) * cos(theta3);
+			e.y = sin(theta1);
+			e.z = cos(theta1) * sin(theta3);
+			p.x = c.x + r * e.x;
+			p.y = c.y + r * e.y;
+			p.z = c.z + r * e.z;
+
+			glNormal3f(e.x,e.y,e.z);
+			glTexCoord2f(i/(double)n,2*j/(double)n);
+			glVertex3f(p.x,p.y,p.z);
+		}
+		glEnd();
+	}
+}
+
+const float tao = 1.61803399;
 DRReturn generateSphere(DRReal radius)
 {
     float percent = 1.0f;
@@ -288,9 +341,9 @@ DRReturn generateSphere(DRReal radius)
     //DRGeometrieIcoSphere geo2;        
    DRGeometrieIcoSphere geo;        
    // DRGeometrieSphere geo;    
-    //geo.initIcoSphere(7);
-	//geo.changeGeometrieTo(4, true);
-    geo.initSphere(totalSegments);
+    geo.initIcoSphere(7);
+    geo.changeGeometrieTo(5, true);
+    //geo.initSphere(totalSegments);
     //geo.makeSphericalLandscape(iterator, 7157);
     //geo.copyDataToVertexBuffer();
     
@@ -527,8 +580,12 @@ DRReturn render(float fTime)
     glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    GlobalRenderer::Instance().getPlanetShaderPtr()->bind();
     if(sphereList)
         glCallList(sphereList);
+    glTranslatef(5.0f, 0.0f, 0.0f);
+    CreateSphere(DRVector3(), 1.0f, 20.0f);
+    GlobalRenderer::Instance().getPlanetShaderPtr()->unbind();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     //g_geo.render();
     

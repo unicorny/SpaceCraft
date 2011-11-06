@@ -67,8 +67,9 @@ DRReturn StellarBody::render(float fTime, Vector3Unit absCameraPosition)
     
     //if(mGeometrie.render())
       //  LOG_ERROR("Fehler beim rendern der geometrie", DR_ERROR);
+    GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
     gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
-    
+    GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
     glPopMatrix();
     if(DRGrafikError("[StellarBody::render]")) return DR_ERROR;
     

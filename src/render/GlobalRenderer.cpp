@@ -20,6 +20,10 @@ DRReturn GlobalRenderer::init()
     gluQuadricNormals(mQuadratic, GLU_SMOOTH); // erzeugt Normalen ( NEU ) 
     gluQuadricTexture(mQuadratic, GL_TRUE); // erzeugt Textur Koordinaten ( NEU )
     
+    if(mPlanetShader.init("data/shader/planet1.vert", "data/shader/planet1.frag"))
+        LOG_ERROR("Fehler beim laden des Shaders", DR_ERROR);
+    
+    
     m_bInitialized= true;
     return DR_OK;
 }

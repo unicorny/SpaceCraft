@@ -8,6 +8,7 @@
 #include "ShaderProgram.h"
 #include "Unit.h"
 #include "Vector3Unit.h"
+#include "GenerateNoisePlanet.h"
 
 // View
 #include "Block.h"
@@ -15,6 +16,8 @@
 #include "RenderBlock.h"
 #include "RenderBlockLoader.h"
 #include "SektorChunk.h"
+#include "RenderStellarBody.h"
+#include "RenderPlanet.h"
 
 // Modell
 #include "StellarBody.h"

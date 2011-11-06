@@ -45,6 +45,12 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     mVertexShader = glCreateShader(GL_VERTEX_SHADER);
 
     unsigned char* vertexShaderAssembly = readShaderFile( vertexShaderFile );
+    if(!vertexShaderAssembly)
+    {
+        DRLog.writeToLog("<font color='red'>Fehler:</font>couldn't open Vertex shader file: %s", vertexShaderFile);
+        LOG_ERROR("Fehler by opening vertex-shader", DR_ERROR);
+    }
+
     vertexShaderStrings[0] = (char*)vertexShaderAssembly;
     glShaderSource( mVertexShader, 1, vertexShaderStrings, NULL );
     glCompileShader( mVertexShader);
@@ -53,14 +59,21 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     glGetShaderiv( mVertexShader, GL_COMPILE_STATUS, &vertexCompiled );
     if(vertexCompiled  == GL_FALSE)
     {
-        glGetShaderInfoLog(mVertexShader, sizeof(str), NULL, str);
-        DRLog.writeToLog("<font color='red'>Fehler:</font>Vertex shader (%s) compile error: %s", vertexShaderFile, str);
+            glGetShaderInfoLog(mVertexShader, sizeof(str), NULL, str);
+            DRLog.writeToLog("<font color='red'>Fehler:</font>Vertex shader (%s) compile error: %s", vertexShaderFile, str);
     }
+    
 // -------------------------------------------------------------------------------------------------------------------------
     // Create the fragment shader.
     mFragmentShader = glCreateShader( GL_FRAGMENT_SHADER );
 
     unsigned char* fragmentShaderAssembly = readShaderFile( fragmentShaderFile );
+    if(!fragmentShaderAssembly)
+    {
+        DRLog.writeToLog("<font color='red'>Fehler:</font>couldn't open Fragment shader file: %s", vertexShaderFile);
+        LOG_ERROR("Fehler by opening fragment-shader", DR_ERROR);
+    }
+    
     fragmentShaderStrings[0] = (char*)fragmentShaderAssembly;
     glShaderSource( mFragmentShader, 1, fragmentShaderStrings, NULL );
     glCompileShader( mFragmentShader );
@@ -69,9 +82,10 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     glGetProgramiv( mFragmentShader, GL_COMPILE_STATUS, &fragmentCompiled );
     if(fragmentCompiled == GL_FALSE)
     {
-        glGetShaderInfoLog( mFragmentShader, sizeof(str), NULL, str );
-        DRLog.writeToLog("<font color='red'>Fehler:</font>Fragment shader (%s) compile error: %s", fragmentShaderFile, str);
+            glGetShaderInfoLog( mFragmentShader, sizeof(str), NULL, str );
+            DRLog.writeToLog("<font color='red'>Fehler:</font>Fragment shader (%s) compile error: %s", fragmentShaderFile, str);
     }
+    
 //----------------------------------------------------------------------------------------------------
     // Create a program object and attach the two compiled shaders.
     mProgram = glCreateProgram();
@@ -86,7 +100,7 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     {
         glGetProgramInfoLog( mProgram, sizeof(str), NULL, str );
         //printError("Program object linking error", str);
-        DRLog.writeToLog("<font color='red'>Fehler:</font>Program object linking error: %s", str);
+        DRLog.writeToLog("<font color='red'>Fehler:</font>Program object linking error:\n%s", str);
     }
     return DR_OK;
 }

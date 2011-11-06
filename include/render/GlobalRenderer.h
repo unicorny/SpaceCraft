@@ -23,6 +23,8 @@ public:
     DRReturn init();
     void exit();
     
+    inline ShaderProgram* getPlanetShaderPtr() {return &mPlanetShader;}
+    
     GLUquadricObj* getQuadric() {if(m_bInitialized) return mQuadratic; else return NULL;}
     
 private:
@@ -30,6 +32,7 @@ private:
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
+    ShaderProgram                       mPlanetShader;
 };
 
 
