@@ -111,7 +111,26 @@ void test()
     v *= 7.0f;
     DRLog.writeVector3ToLog(v, "multiplikator");
     
-        
+    // ----------------------------------  ReferenzHolder Test --------------------------------
+    
+    DRLog.writeToLog("DRIndexReferenzHolder test");
+    DRIndexReferenzHolder referenzHolder(10);
+    uint tests[10];
+    tests[0] = referenzHolder.getFree();
+    referenzHolder.add(tests[0]);
+    tests[1] = referenzHolder.getFree();
+    
+    DRLog.writeToLog("index1 (0): %d, index2 (1): %d", tests[0], tests[1]);
+    referenzHolder.remove(tests[0]);
+    tests[2] = referenzHolder.getFree();
+    referenzHolder.remove(tests[1]);
+    tests[3] = referenzHolder.getFree();
+    DRLog.writeToLog("index3 (2): %d, index4 (1): %d", tests[2], tests[3]);
+    for(int i = 0; i < 5; i++)
+        tests[4+i] = referenzHolder.getFree();
+    referenzHolder.remove(tests[7]);
+    tests[9] = referenzHolder.getFree();
+    DRLog.writeToLog("index10: (6): %d", tests[9]);
 }
 DRReturn generateSphere(DRReal radius);
 DRReturn load()
@@ -176,12 +195,12 @@ DRReturn load()
     //glEnable(GL_LIGHTING);
     glDisable(GL_FOG);
     
+	if(GlobalRenderer::getSingleton().init())
+		LOG_ERROR("error by init GlobalRenderer", DR_ERROR);
+
     if(g_Player.init())
         LOG_ERROR("Fehler bei Player::init", DR_ERROR);
     g_cam = g_Player.getCamera();
-    
-    if(GlobalRenderer::getSingleton().init())
-        LOG_ERROR("error by init GlobalRenderer", DR_ERROR);
        
     if(g_RenderBlockLoader.init())
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
@@ -341,7 +360,7 @@ DRReturn generateSphere(DRReal radius)
     //DRGeometrieIcoSphere geo2;        
    DRGeometrieIcoSphere geo;        
    // DRGeometrieSphere geo;    
-    geo.initIcoSphere(7);
+    geo.initIcoSphere(5);
     geo.changeGeometrieTo(5, true);
     //geo.initSphere(totalSegments);
     //geo.makeSphericalLandscape(iterator, 7157);
@@ -379,10 +398,14 @@ DRReturn generateSphere(DRReal radius)
     }
     else
     {
-        geo.makeSphericalLandscape(iterator, 9312);
+        //geo.makeSphericalLandscape(iterator, 9312);
+        GenerateNoisePlanet* g = GlobalRenderer::Instance().getGenerateNoisePlanet();
+        g->setupGenerator(182172);
+        
         float max = 0.0f, min = 1.0f;
         for(int i = 0; i < vertexCount; i++)
         {
+            points[i] *= 1.0f+g->getValue(points[i])*0.01f;
             float l = vektorLenght - points[i].length();
             if(l == vektorLenght) continue;
            // printf("%d: length: %f\n",i, points[i].length());
@@ -395,7 +418,11 @@ DRReturn generateSphere(DRReal radius)
         {
         //    DRLog.writeToLog("\n---------- j:%d -------------", j);
             float d = vektorLenght - points[j].length();
+            //d = g->getValue(points[j]);
             heighMap[j] = DRColor((DRReal)(fabs((d+min))/(max+fabs(min))));
+			color[j] = heighMap[j];
+			continue;
+
     //        if(j < 10)
       //          DRLog.writeToLog("heighMapValue: %f, d: %f", fabs((d+min))/(max+fabs(min)), d);
             d *= -1.0f;
@@ -419,7 +446,6 @@ DRReturn generateSphere(DRReal radius)
             }
             //DRLog.writeVector3ToLog(points[j]);
             //DRLog.writeColorToLog(color[j]);
-           // points[j] = points[j].normalize();
         }
         //DRLog.writeToLog("\n-------- ende -------------");
         printf("%d Pixel in ein %d großes Bild\n", vertexCount, currentSegments * (currentSegments+2));
@@ -431,11 +457,12 @@ DRReturn generateSphere(DRReal radius)
         
         image->setPixel(heighMap);
         image->saveIntoFile("data/heighmap.png");
+		
     } 
     
     g_tex = new DRTextur(image);
    // */
-    geo.copyDataToVertexBuffer();
+	geo.copyDataToVertexBuffer();
     sphereList = glGenLists(1);
     glNewList(sphereList, GL_COMPILE);     
     
@@ -465,13 +492,14 @@ DRReturn render(float fTime)
     glColor3f(1.0f, 1.0f, 1.0f);    
     
     //glEnable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_2D);
-    glDisable(GL_CULL_FACE);
-    if(g_terrain)
-        g_terrain->bind();
+    glDisable(GL_TEXTURE_2D);
+    //glDisable(GL_CULL_FACE);
+    //if(g_terrain)
+      //  g_terrain->bind();
     if(g_Player.getSektor()->render(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
     glDisable(GL_LIGHTING);
+    glEnable(GL_CULL_FACE);
     
     glClear (GL_DEPTH_BUFFER_BIT);
     
@@ -559,15 +587,6 @@ DRReturn render(float fTime)
 	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate));
         if(res != OUTSIDE)    
                 g_RenderBlockLoader.getRenderBlock("benc")->render();
-
-	switch(res)
-	{
-	case OUTSIDE:   printf("\r outside  "); break;
-	case INSIDE:    printf("\r inside   "); break;
-	case INTERSECT: printf("\r intersect"); break;
-	default: printf("\r unknown"); break;
-	}
-	//printf("\r outside");
     
     glDisable(GL_TEXTURE_2D);
     //glDisable(GL_LIGHTING);
@@ -580,7 +599,7 @@ DRReturn render(float fTime)
     glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    GlobalRenderer::Instance().getPlanetShaderPtr()->bind();
+	GlobalRenderer::Instance().getPlanetShaderPtr()->bind();
     if(sphereList)
         glCallList(sphereList);
     glTranslatef(5.0f, 0.0f, 0.0f);
@@ -635,7 +654,6 @@ DRReturn render(float fTime)
              
             }
             y++;
-            
         }
         else
         {
@@ -650,7 +668,6 @@ DRReturn render(float fTime)
         else clipCount++;
     }
     u32 end = SDL_GetTicks();
-    printf("\r clipCount:%d, renderCount: %d", clipCount, renderCount);
           
     //FPS
     g_Font->begin();

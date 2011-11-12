@@ -24,6 +24,7 @@ public:
     void exit();
     
     inline ShaderProgram* getPlanetShaderPtr() {return &mPlanetShader;}
+    inline GenerateNoisePlanet* getGenerateNoisePlanet() {return mPlanetGen;}
     
     GLUquadricObj* getQuadric() {if(m_bInitialized) return mQuadratic; else return NULL;}
     
@@ -32,6 +33,7 @@ private:
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
+    GenerateNoisePlanet*                mPlanetGen;
     ShaderProgram                       mPlanetShader;
 };
 

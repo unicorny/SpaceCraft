@@ -78,7 +78,7 @@ DRReturn Sektor::render(float fTime, Camera* camera)
     camera->setKameraMatrixRotation();
     
     //glDisable(GL_DEPTH_TEST);             // Enables depth test
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
     if(!mStellarBody) return DR_OK;
     
@@ -86,6 +86,7 @@ DRReturn Sektor::render(float fTime, Camera* camera)
     //glTranslatef(0.0f, 0.0f, -200.0f);
     mStellarBody->render(fTime, camera->getAbsPosition());
     
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
     return DR_OK;
 }

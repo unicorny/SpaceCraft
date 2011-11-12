@@ -2,7 +2,7 @@
 
 
 GlobalRenderer::GlobalRenderer()
-: m_bInitialized(false), mQuadratic(NULL)
+: m_bInitialized(false), mQuadratic(NULL), mPlanetGen(NULL)
 {
     
 }
@@ -23,6 +23,8 @@ DRReturn GlobalRenderer::init()
     if(mPlanetShader.init("data/shader/planet1.vert", "data/shader/planet1.frag"))
         LOG_ERROR("Fehler beim laden des Shaders", DR_ERROR);
     
+    mPlanetGen = new GenerateNoisePlanet;
+    DRLog.writeToLog("GenerateNoisePlanet size in kBytes: %f", (float)sizeof(GenerateNoisePlanet)/1024.0f);
     
     m_bInitialized= true;
     return DR_OK;
@@ -31,5 +33,6 @@ DRReturn GlobalRenderer::init()
 void GlobalRenderer::exit()
 {
     gluDeleteQuadric(mQuadratic); 
-    m_bInitialized = false;
+    DR_SAVE_DELETE(mPlanetGen);
+    m_bInitialized = false;    
 }

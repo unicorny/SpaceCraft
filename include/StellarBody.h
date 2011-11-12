@@ -27,6 +27,7 @@ protected:
     
     //not to save
     DRGeometrieIcoSphere mGeometrie;
+    PlanetHeightValues mHeightValues;
 };
 
 

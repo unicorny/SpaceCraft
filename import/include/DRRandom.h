@@ -23,6 +23,10 @@ public:
     {
             return fMin + (fMax - fMin) * ((DRReal)(rand() % 10001) / 10000.0f);
     }
+    static int rInt(int max, int min)
+    {
+        return min + (rand() % (max-min+1));
+    }
     static DRVector3 rVector3(DRReal maxLengthSq)
     {
             DRVector3 ret;

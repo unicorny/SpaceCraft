@@ -8,6 +8,12 @@
 #ifndef __DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
 #define	__DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
 
+class ENGINE_API DRHeightValueStorage
+{
+public:
+    virtual float getHeightValue(DRVector3& position) = 0;
+    virtual DRColor getColorValue(const float height) = 0;
+};
 
 class ENGINE_API DRGeometrieIcoSphere : public DRGeometrieSphere
 {
@@ -21,12 +27,15 @@ public:
      * 
      */
     DRReturn initIcoSphere(u8 maxEbene = 0, int seed = 0);
-    DRReturn changeGeometrieTo(u8 ebene = 0, bool waitToComplete = false);
+    /*! \param relCameraPos camera position relative zu IcoSphere */
+    DRReturn changeGeometrieTo(u8 ebene = 0, bool waitToComplete = false, DRVector3 relCameraPos = DRVector3(0.0f));
     DRReturn update();
+    
+    __inline__ void setHeightValueStorage(DRHeightValueStorage* heightValueStorage) {mHeightValues = heightValueStorage;}
     
 private:
     DRGeometrieIcoSphere(const DRGeometrieIcoSphere& orig) {LOG_WARNING("Not exist");}
-	static int updateGeometrieThread(void* data);
+        static int updateGeometrieThread(void* data);
     
     struct IcoSphereFace
     {
@@ -48,8 +57,11 @@ private:
     void deleteFace(IcoSphereFace* face);
     
     //achtung! rekursive funktion!
-    void subdivide(IcoSphereFace* current = NULL);
-    int removeLeafs(IcoSphereFace* current = NULL);
+    void subdivide(IcoSphereFace* current = NULL, u8 currentEbene = 0);
+    void removeLeafs(IcoSphereFace* current = NULL, u8 currentEbene = 0);
+    
+    //! \return true if face is visible (Horizont Culling)
+    bool isFaceVisible(IcoSphereFace* face);
     
     //achtung! rekursive funktion!  
     DRReturn grabIndicesFromFaces(IcoSphereFace* current = NULL);
@@ -59,17 +71,23 @@ private:
     
     std::list<IcoSphereFace*>           mFreeIcoFaceMemory;
     IcoSphereFace                       mRootSphereFaces[20];
+    DRIndexReferenzHolder*              mIndexReferenzen;
     u8                                  mMaxEbene;
-    u8									mCurrentEbene;
-    u8									mNewEbene;
+    u8					mCurrentEbene;
+    u8					mNewEbene;
     GLuint                              mMaxFaceBuffer;
-    SDL_Thread*							mUpdateThread;
-    SDL_sem *							mUpdateThreadSemaphore;
+    SDL_Thread*				mUpdateThread;
+    SDL_sem *				mUpdateThreadSemaphore;
+    SDL_mutex*                          mUpdateGeometrieMutex;
     
     static float                        mVektorLength;          
     unsigned int                        mVertexCursor;      
     unsigned int                        mEbeneNeighborCount;
     uint                                mFacesSphereCount;
+    DRHeightValueStorage*               mHeightValues;
+    DRVector3                           mRelCameraPos;
+    float                               mHorizontAngle;
+    bool                                mUpdateChanged;
 
 };
 //*/

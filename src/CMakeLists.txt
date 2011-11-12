@@ -4,14 +4,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(spaceCraftSrc main Player Sektor Server Camera render/RenderBlockLoader render/RenderBlock BlockLoader Block
 				  SektorChunk StellarBody Unit Planet render/GlobalRenderer ShaderProgram
-                                  render/RenderStellarBody render/RenderPlanet GenerateNoisePlanet)
+                                  render/RenderStellarBody render/RenderPlanet GenerateNoisePlanet noiseutils)
 #IF(WIN32)
 SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/Sektor.h ../include/Server.h
 								   ../include/Camera.h ../include/render/RenderBlockLoader.h ../include/render/RenderBlock.h
 								   ../include/BlockLoader.h ../include/Block.h ../include/SektorChunk.h
                                                                    ../include/StellarBody.h ../include/Unit.h ../include/Planet.h
                                                                    ../include/Vector3Unit.h ../include/render/GlobalRenderer.h ../include/ShaderProgram
-                                                                   ../include/render/RenderStellarBody.h ../include/render/RenderPlanet.h ../include/GenerateNoisePlanet.h)
+                                                                   ../include/render/RenderStellarBody.h ../include/render/RenderPlanet.h ../include/GenerateNoisePlanet.h
+																   ../include/noiseutils.h)
 #ENDIF(WIN32)
 
 SET(PA ../import/bin ../import/lib)

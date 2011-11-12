@@ -154,6 +154,7 @@ CORE2_API extern DRLogger DRLog;
 // core includes (mit log)
 #include "DRFileManager.h"
 #include "DRMemoryList.h"
+#include "DRIndexReferenzHolder.h"
 
 CORE2_API DRReturn Core2_init(const char* logFileName = "Logger.html");
 CORE2_API void      Core2_exit();
