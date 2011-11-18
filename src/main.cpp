@@ -283,7 +283,8 @@ DRReturn move(float fTime)
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
     if(keystate[SDLK_z]) blockCount++;
     
-    if(g_Player.getSektor()->move(fTime, g_cam))
+    if(fTime == 0.0f) fTime = 0.00166f;
+    if(g_Player.getSektor()->moveAll(fTime, g_cam))
         LOG_ERROR("Fehler bei move sektor", DR_ERROR);
 
     return DR_OK;
@@ -496,7 +497,7 @@ DRReturn render(float fTime)
     //glDisable(GL_CULL_FACE);
     //if(g_terrain)
       //  g_terrain->bind();
-    if(g_Player.getSektor()->render(fTime, g_Player.getCamera()))
+    if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
     glDisable(GL_LIGHTING);
     glEnable(GL_CULL_FACE);

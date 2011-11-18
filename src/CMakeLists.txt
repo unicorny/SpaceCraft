@@ -2,17 +2,19 @@ PROJECT(SpaceCraft CXX)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-SET(spaceCraftSrc main Player Sektor Server Camera render/RenderBlockLoader render/RenderBlock BlockLoader Block
+SET(spaceCraftSrc main Player sektor/Sektor Server Camera render/RenderBlockLoader render/RenderBlock BlockLoader Block
 				  SektorChunk StellarBody Unit Planet render/GlobalRenderer ShaderProgram
-                                  render/RenderStellarBody render/RenderPlanet GenerateNoisePlanet noiseutils)
+				  render/RenderStellarBody render/RenderPlanet GenerateNoisePlanet noiseutils
+				  sektor/SolarSystemSektor sektor/RootSektor sektor/PlanetSektor render/RenderSektor render/RenderSolarSystem)
 #IF(WIN32)
-SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/Sektor.h ../include/Server.h
+SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/sektor/Sektor.h ../include/Server.h
 								   ../include/Camera.h ../include/render/RenderBlockLoader.h ../include/render/RenderBlock.h
 								   ../include/BlockLoader.h ../include/Block.h ../include/SektorChunk.h
                                                                    ../include/StellarBody.h ../include/Unit.h ../include/Planet.h
                                                                    ../include/Vector3Unit.h ../include/render/GlobalRenderer.h ../include/ShaderProgram
                                                                    ../include/render/RenderStellarBody.h ../include/render/RenderPlanet.h ../include/GenerateNoisePlanet.h
-																   ../include/noiseutils.h)
+																   ../include/noiseutils.h ../include/sektor/SolarSystemSektor.h ../include/sektor/RootSektor.h
+																   ../include/sektor/PlanetSektor.h ../include/render/RenderSektor.h ../include/render/RenderSolarSystem.h)
 #ENDIF(WIN32)
 
 SET(PA ../import/bin ../import/lib)

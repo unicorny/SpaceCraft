@@ -96,3 +96,12 @@ RenderPlanet::~RenderPlanet()
 {
 
 }
+
+DRReturn RenderPlanet::render(float fTime, Camera* cam)
+{
+    //glTranslatef(0.0f, 0.0f, -4.0f);
+    gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, 32, 32);
+    
+    if(DRGrafikError("[RenderPlanet::render]")) return DR_ERROR;
+    return DR_OK;
+}

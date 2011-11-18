@@ -39,11 +39,13 @@ private:
     
 };
 
-class RenderPlanet : public RenderStellarBody
+class RenderPlanet : public RenderSektor
 {
 public:
-    RenderPlanet() : RenderStellarBody() {};
+    RenderPlanet() : RenderSektor() {};
     virtual ~RenderPlanet();
+    
+    virtual DRReturn render(float fTime, Camera* cam);
 protected:
     
 private:    

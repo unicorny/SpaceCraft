@@ -9,6 +9,7 @@
 #include "Unit.h"
 #include "Vector3Unit.h"
 #include "GenerateNoisePlanet.h"
+#include "Camera.h"
 
 // View
 #include "Block.h"
@@ -16,6 +17,8 @@
 #include "RenderBlock.h"
 #include "RenderBlockLoader.h"
 #include "SektorChunk.h"
+#include "RenderSektor.h"
+#include "RenderSolarSystem.h"
 #include "RenderStellarBody.h"
 #include "RenderPlanet.h"
 
@@ -25,8 +28,10 @@
 
 #include "GlobalRenderer.h"
 
-#include "Camera.h"
 #include "Sektor.h"
+#include "PlanetSektor.h"
+#include "SolarSystemSektor.h"
+#include "RootSektor.h"
 #include "Server.h"
 #include "Player.h"
 

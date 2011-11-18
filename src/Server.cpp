@@ -66,7 +66,7 @@ u64 Server::createNewServer()
     
     Server* serv = getServer(newID);
     DRRandom::seed((int)newID);
-    serv->mRootSektor = new Sektor(NULL, ROOT, 0, rand(), newID);
+    serv->mRootSektor = new RootSektor();
     
     return newID;
 }
@@ -118,7 +118,7 @@ DRReturn Server::loadFromFile()
     }
     freeFileDescriptor(f);
     DRRandom::seed((int)mServerID);
-    mRootSektor = new Sektor(NULL, ROOT, 0, rand(), mServerID);
+    mRootSektor = new RootSektor();
     
     if(mRootSektor)
     {
