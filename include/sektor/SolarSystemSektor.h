@@ -21,7 +21,6 @@ public:
     virtual DRReturn move(float fTime, Camera* cam);
     
 protected:
-    virtual bool isPlayerInIt(Camera* cam) {return false;};
     
 private:
 };

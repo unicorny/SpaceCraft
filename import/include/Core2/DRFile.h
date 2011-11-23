@@ -47,7 +47,7 @@ enum DRFileErrorCodes
 };
 
 //***********************************************************************************************+
-
+// TODO: File Buffer einbauen 
 class CORE2_API DRFile
 {
 public:
@@ -92,7 +92,7 @@ public:
 
 	//File Pointer setzen
 	//SEEK_CUR = Current Position, SEEK_SET = Begin, SEEK_END = Ende
-	DRFileErrorCodes setFilePointer(unsigned long ulDistance, unsigned long ulStartPoint = SEEK_CUR);
+	DRFileErrorCodes setFilePointer(s32 ulDistance, unsigned long ulStartPoint = SEEK_CUR);
 
 	inline FILE* getFile() {return mFile;};
 

@@ -23,7 +23,7 @@ DRReturn GlobalRenderer::init()
     if(mPlanetShader.init("data/shader/planet1.vert", "data/shader/planet1.frag"))
         LOG_ERROR("Fehler beim laden des Shaders", DR_ERROR);
     
-    mPlanetGen = new GenerateNoisePlanet;
+   // mPlanetGen = new GenerateNoisePlanet;
     DRLog.writeToLog("GenerateNoisePlanet size in kBytes: %f", (float)sizeof(GenerateNoisePlanet)/1024.0f);
     
     m_bInitialized= true;

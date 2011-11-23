@@ -109,6 +109,37 @@ Unit Unit::operator / (const Unit& b) const
     }
 }
 
+bool Unit::operator < (const Unit& b) const
+{
+    if(this->mUnitType == b.mUnitType)
+    {
+        return mValue < b.mValue; 
+    }
+    else
+    {
+        if((int)this->mUnitType < (int)b.mUnitType)
+            return mValue < b.convertTo(this->mUnitType).mValue;
+        else
+            return convertTo(b.mUnitType).mValue < b.mValue;
+       //convertTo() 
+    }
+}
+bool Unit::operator <= (const Unit& b) const
+{
+    if(this->mUnitType == b.mUnitType)
+    {
+        return mValue <= b.mValue; 
+    }
+    else
+    {
+        if((int)this->mUnitType < (int)b.mUnitType)
+            return mValue <= b.convertTo(this->mUnitType).mValue;
+        else
+            return convertTo(b.mUnitType).mValue <= b.mValue;
+       //convertTo() 
+    }
+}
+
 double Unit::getConversionFaktor(UnitTypes a, UnitTypes b)
 {
     if(a == b) return 1.0;

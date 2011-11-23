@@ -20,7 +20,14 @@ public:
      */
     virtual DRReturn move(float fTime, Camera* cam);
     
-    protected:
+    __inline__ GenerateNoisePlanet* getNoiseGenerator() {return mNoiseGenerator;}
+    
+    virtual bool isObjectInSektor(Vector3Unit positionInParentSektor);
+protected:
+    GenerateNoisePlanet*        mNoiseGenerator;
+        
+       
+        
 private:
     
 };

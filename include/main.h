@@ -1,7 +1,11 @@
 #include "Engine2Main.h"
+//includes whcih will be later go into Engine
+#include "DRGeometrieHeightfield.h"
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+#include <limits.h>
 
 
 // Tools
@@ -21,6 +25,7 @@
 #include "RenderSolarSystem.h"
 #include "RenderStellarBody.h"
 #include "RenderPlanet.h"
+#include "RenderSubPlanet.h"
 
 // Modell
 #include "StellarBody.h"
@@ -29,6 +34,7 @@
 #include "GlobalRenderer.h"
 
 #include "Sektor.h"
+#include "SubPlanetSektor.h"
 #include "PlanetSektor.h"
 #include "SolarSystemSektor.h"
 #include "RootSektor.h"

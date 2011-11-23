@@ -19,7 +19,7 @@
  *                                                                       *
  *************************************************************************/
 /*
-Klasse f�r vereinfachten Datei zugriff
+Klasse für vereinfachten Datei zugriff
 Autor: Dario Rekowski
 Datum: 16.12.06
 
@@ -49,36 +49,36 @@ Datum: 16.12.06
 
 struct CORE2_API DRSHauptHeader
 {
-	char  			acIdentifierCheck[8];
-	u32         	ulDateiGesLegth;
-	DRReal			fFileVersion;
-	u32         	ulNumBloecke;
+    char        acIdentifierCheck[8];
+    u32         ulDateiGesLegth;
+    DRReal	fFileVersion;
+    u32         ulNumBloecke;
 };
 //Header am Anfang eines Blockes
 struct CORE2_API DRSBlockHeaderF
 {
-    u16            u16HeaderLength;
-	u32            u32BlockLength;
-	DHASH		   ID;
-	int			   iStrLength;
-	char* 		   pcDateiname;
+    u16         u16HeaderLength;
+    u32         u32BlockLength;
+    DHASH	ID;
+    int		iStrLength;
+    char* 	pcDateiname;
 };
 
-//Header f�r einen Block (ein System)
+//Header für einen Block (ein System)
 struct CORE2_API DRSBlockHeader
 {
-	int		  iBlockSize;
-	char      acID[14];		//BlockType
+    int         iBlockSize;
+    char        acID[14];		//BlockType
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 //Hauptheader
 struct CORE2_API DRSMasterHeader
 {
-	char  	acID[14];	//Identifer (Jetzt f�r alle eigenen Datenformate nehmen)
-	DRReal	fVersion;	//Datei Version
-	int		iHeaderSize;//Gr��e des Headers
-	int		iNumBlocks;	//Anzahl Bl�cke
+    char  	acID[14];	//Identifer (Jetzt für alle eigenen Datenformate nehmen)
+    DRReal	fVersion;	//Datei Version
+    int		iHeaderSize;//Größe des Headers
+    int		iNumBlocks;	//Anzahl Blöcke
 };
 
 
@@ -96,21 +96,21 @@ public:
 	inline static DRFileManager* getSingletonPtr() {return &Instance();};
 	static bool	isInitialized()	{return Instance().m_bInitialized;};
 
-	//Init, erstellen der IndexList (alle vorhandene Dateien pr�fen)
-	DRReturn init();	//"Fremd" Daten bekommen f�r Typ den HASH von "NULL"
+	//Init, erstellen der IndexList (alle vorhandene Dateien prüfen)
+	DRReturn init();	//"Fremd" Daten bekommen für Typ den HASH von "NULL"
 
-	//Zeiger auf ge�ffnetem File liefern, schlie�en und freigeben muss der User.
-	DRFile* getFileByHASH(DHASH ID);									//Nach beenden CloseFile aufrufen nicht vergessen
+	//Zeiger auf geöffnetem File liefern, schließen und freigeben muss der User.
+	DRFile* getFileByHASH(DHASH ID) const;									//Nach beenden CloseFile aufrufen nicht vergessen
 //	inline DRFile* GetFileByName(DRString* pstrTyp, DRString* pstrFilename);	//Nach beenden CloseFile aufrufen nicht vergessen
-	inline DRFile* getFileByName(char*    pcTyp,   char*    pcFilename);	//Nach beenden File.close() und File delete aufrufen nicht vergessen
+	DRFile* getFileByName(const char* pcTyp,   const char*  pcFilename) const;	//Nach beenden File.close() und File delete aufrufen nicht vergessen
 	void closeFile(DRFile* pFile);
 	void exit();												//Freigeben der IndexList
 
 	//Neue Datei aufnehmen
-	DRReturn addFile(char* pcFilename);
+	DRReturn addFile(const char* pcFilename);
 
 	//Laden, Speichern und kombinieren
-	DRFile* startWriting(char* pcPfadName, char* pcFilename, char* pcTyp, unsigned long ulBlockLength);
+	DRFile* startWriting(const char* pcPfadName, const char* pcFilename, const char* pcTyp, unsigned long ulBlockLength);
 	DRReturn endWriting(DRFile* pOpenFile);
 
 	//Andere Dinge
@@ -139,8 +139,8 @@ private:
 
 	//Unterfunktionen
 //	DRReturn FillIndexFromOrdner(DRString* pstrOrdner);
-	DRReturn checkFile(char* pcFile);
-	DRReturn newFile(char* pcFilename);
+	DRReturn checkFile(const char* pcFile) const;
+	DRReturn newFile(const char* pcFilename);
 	bool isFileOK(DRFile* pOpenFile, bool bPointerOnEnd = true);
 
 };

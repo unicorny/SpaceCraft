@@ -11,7 +11,7 @@ public:
 
     DRReturn load(const char* filename, bool keepImage = false, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
     DRReturn loadFromMemory(DRColor* colors, DRVector2 size, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
-    void unload();
+    void unload(bool full = true);
     
     bool isLoaded() {return mSucessfullLoaded;}
 

@@ -1,7 +1,8 @@
 #include "main.h"
 
 Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent) 
-: mID(0), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL)
+: mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
+    mIdleSeconds(0.0)
 {
     
 }
@@ -11,6 +12,7 @@ Sektor::~Sektor()
     for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
     {
         Sektor* temp = it->second;
+        temp->setParent(NULL);
         DR_SAVE_DELETE(temp);
     }
     mChilds.clear();
@@ -51,13 +53,23 @@ DRReturn Sektor::renderAll(float fTime, Camera* cam, bool rootRendered/* = false
     else if(!mParent || rootRendered) 
     {
         DRReturn ret = DR_OK;
+        if(!mParent) ret = render(fTime, cam);
+        if(ret) LOG_ERROR("Fehler bei render this", DR_ERROR);
         for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
         {
             Sektor* temp = it->second;     
+			glPushMatrix();
             ret = temp->render(fTime, cam);
+            if(ret == DR_NOT_ERROR) 
+            {
+                glPopMatrix();
+				ret = DR_OK;
+                continue;
+            }
             if(ret) LOG_ERROR("Fehler bei render", DR_ERROR);
             ret = temp->renderAll(fTime, cam, true);
             if(ret) LOG_ERROR("Fehler bei render all", DR_ERROR);
+			glPopMatrix();
         }
         return ret;
     }
@@ -70,6 +82,7 @@ DRReturn Sektor::moveAll(float fTime, Camera* cam, bool rootMoved/* = false*/)
     else if(!mParent || rootMoved) 
     {
         DRReturn ret = DR_OK;
+		if(!mParent) ret = move(fTime, cam);
         for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
         {
             Sektor* temp = it->second;     
@@ -102,4 +115,33 @@ const char* Sektor::getSektorTypeName(SektorType type)
         default:            return "- default -";
     }
     return "- return -";
+}
+
+bool Sektor::isObjectInSektor(Vector3Unit positionInParentSektor)
+{
+    return Vector3Unit(positionInParentSektor - mSektorPosition).lengthSq() <= mRadius*mRadius;
+}
+
+void Sektor::removeInactiveChilds(double idleThreshold/* = 1.0*/)
+{
+    for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+    {
+        Sektor* temp = it->second;
+        if(temp->mIdleSeconds < idleThreshold) continue;
+        temp->setParent(NULL);
+        DR_SAVE_DELETE(temp);
+        mChilds.erase(it);        
+	}
+}
+
+DRReturn Sektor::callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data)
+{
+    DRReturn ret = DR_OK;
+    for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+    {
+        Sektor* temp = it->second;
+        ret = callbackFunction(temp, data);  
+        if(ret) LOG_ERROR("Fehler bei callbackFunction", DR_ERROR);
+	}
+    return ret;
 }

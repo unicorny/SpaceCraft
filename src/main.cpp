@@ -262,7 +262,7 @@ DRReturn move(float fTime)
     if(gControlModes[gCurrentControlMode].mValue.getType() == M)
         g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
     else
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
+        g_cam->translateRel_SektorPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
     /*if(gCurrentControlMode == 1)
     // kamera bewegung abhängig von den Tasten a, d (links/rechts), bild up, bild down (hoch/runter), Pfeil hoch und Pfeil runter (vorwärts/rückwärts)
         g_cam->translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
@@ -400,7 +400,7 @@ DRReturn generateSphere(DRReal radius)
     else
     {
         //geo.makeSphericalLandscape(iterator, 9312);
-        GenerateNoisePlanet* g = GlobalRenderer::Instance().getGenerateNoisePlanet();
+        GenerateNoisePlanet* g = new GenerateNoisePlanet(); //GlobalRenderer::Instance().getGenerateNoisePlanet();
         g->setupGenerator(182172);
         
         float max = 0.0f, min = 1.0f;
@@ -458,6 +458,8 @@ DRReturn generateSphere(DRReal radius)
         
         image->setPixel(heighMap);
         image->saveIntoFile("data/heighmap.png");
+
+		DR_SAVE_DELETE(g);
 		
     } 
     
@@ -492,7 +494,7 @@ DRReturn render(float fTime)
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);    
     
-    //glEnable(GL_LIGHTING);
+    glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     //glDisable(GL_CULL_FACE);
     //if(g_terrain)
@@ -503,6 +505,7 @@ DRReturn render(float fTime)
     glEnable(GL_CULL_FACE);
     
     glClear (GL_DEPTH_BUFFER_BIT);
+     
     
     //Reseten der Matrixen
     glMatrixMode(GL_PROJECTION);
@@ -515,10 +518,9 @@ DRReturn render(float fTime)
 
     glLoadIdentity();                    // Reset (init) the modelview matrix
     DRVector3 translate(0.0f);
-        
     g_cam->setKameraMatrix();
     glEnable(GL_DEPTH_TEST);             // Enables depth test
-    
+        
     //light
     //Add ambient light
     GLfloat ambientColor[] = {0.4f, 0.4f, 0.4f, 1.0f}; //Color(0.2, 0.2, 0.2)
@@ -584,7 +586,6 @@ DRReturn render(float fTime)
     glTranslatef(0.0f, 2.0f, 0.0f);
     translate.y += 2.0f;
     
-
 	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate));
         if(res != OUTSIDE)    
                 g_RenderBlockLoader.getRenderBlock("benc")->render();
@@ -705,8 +706,7 @@ DRReturn render(float fTime)
     
     g_Font->end();
     
-    start = SDL_GetTicks();
-    
+    start = SDL_GetTicks();    
 
     return DR_OK;
 }

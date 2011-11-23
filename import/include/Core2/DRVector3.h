@@ -112,6 +112,7 @@ public:
     //! \param f Skalar durch den geteilt wird
     //! \return einen neuen Vektor
     DRVector3 operator / (const float f)       const {return DRVector3(x/f, y/f, z/f);}
+    DRVector3 operator /= (const float f)            {*this = *this / f; return *this;}
     //!  multiplieziert diesen Vektor mit einem Skalar, const
     //! \brief * operator
     //! \param f Skalar mit dem multipliziert wird

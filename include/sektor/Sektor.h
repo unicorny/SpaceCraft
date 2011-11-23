@@ -101,9 +101,18 @@ public:
     __inline__ RenderSektor* getRenderer() {return mRenderer;}
     __inline__ Vector3Unit getPosition() {return mSektorPosition;}
     __inline__ Unit getRadius() {return mRadius;}
+    __inline__ void setParent(Sektor* parent) {mParent = parent;}
+    
+    __inline__ SektorType getType() const {return mType;} 
+    
+    virtual bool isObjectInSektor(Vector3Unit positionInParentSektor);
     
 protected:
-    virtual bool isPlayerInIt(Camera* cam) {return false;}
+    
+    
+    virtual void removeInactiveChilds(double idleThreshold = 1.0);
+    
+    DRReturn callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data);
     
     //! id des sektors, gleichzeitig der seed
     SektorID            mID;
@@ -118,15 +127,14 @@ protected:
     //! renderer for this sektor
     RenderSektor*       mRenderer;
     
+    //! seconds since last use (visible for camera)
+    double              mIdleSeconds;
+    
     std::map<u64, Sektor*> mChilds;
     typedef std::pair<u64, Sektor*> SEKTOR_ENTRY;
     
 private:
     
-    DRReturn renderChilds();
-    DRReturn renderParents();
-    DRReturn moveChilds();
-    DRReturn moveParents();
 };
 
 #endif //__SC_SEKTOR_

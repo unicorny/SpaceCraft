@@ -39,14 +39,20 @@ public:
     __inline__ Unit operator -() const {return Unit(-this->mValue, this->mUnitType);}
     __inline__ Unit operator -= (const Unit& b) {*this = *this - b; return *this;}
     
-    Unit operator *(const Unit& b) const;
+    Unit operator * (const Unit& b) const;
     __inline__ Unit operator *= (const Unit& b) {*this = *this * b; return *this;}
+    
+    __inline__ Unit operator *  (const double b) const {return Unit(this->mValue*b, this->mUnitType);}
+    __inline__ Unit operator *= (const double b) {*this = Unit(this->mValue*b, this->mUnitType); return *this;}
     
     Unit operator /(const Unit& b) const;
     __inline__ Unit operator /= (const Unit& b) {*this = *this / b; return *this;}
     
     __inline__ bool operator == (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return true; return false;}
     __inline__ bool operator != (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return false; return true;}
+    
+    bool operator < (const Unit& b) const;
+    bool operator <= (const Unit& b) const;
     
     //__inline__ operator double() const {return this->mValue;}
     

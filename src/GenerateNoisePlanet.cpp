@@ -3,7 +3,8 @@
 double GenerateNoisePlanet::getValue(DRVector3 point)
 {
     //return finalPlanet.GetValue(point.x, point.y, point.z);
-    return unscaledFinalPlanet.GetValue(point.x, point.y, point.z);
+    //return unscaledFinalPlanet.GetValue(point.x, point.y, point.z);
+    return finalPlanet.GetValue(point.x, point.y, point.z);
 }
 
 using namespace noise;
@@ -21,8 +22,10 @@ void GenerateNoisePlanet::setupGenerator(int seed)
 	//
 
     srand(seed);
+    
 	// Planet seed.  Change this to generate a different planet.
 	const int CUR_SEED = rand();
+    DRLog.writeToLog("PlanetSeed: %d, parameter: %d", CUR_SEED, seed);
 
 	// Minimum elevation on the planet, in meters.  This value is approximate.
 	const double MIN_ELEV = -1.0f;// -8192.0;
@@ -1527,7 +1530,7 @@ void GenerateNoisePlanet::setupGenerator(int seed)
 
 	// 1: [Unscaled-final-planet subgroup]: Caches the output value from the
 	//    continent-with-rivers subgroup.
-	unscaledFinalPlanet.SetSourceModule (0, continentsWithRivers);
+	//unscaledFinalPlanet.SetSourceModule (0, continentsWithRivers);
 
 
 	////////////////////////////////////////////////////////////////////////////
@@ -1540,11 +1543,13 @@ void GenerateNoisePlanet::setupGenerator(int seed)
 	// 1: [Final-planet-in-meters module]: This scale/bias module scales the
 	//    output value from the unscaled-final-planet subgroup so that its
 	//    output value is measured in meters.
-	finalPlanet_sb.SetSourceModule (0, unscaledFinalPlanet);
-	finalPlanet_sb.SetScale ((MAX_ELEV - MIN_ELEV) / 2.0);
-	finalPlanet_sb.SetBias (MIN_ELEV + ((MAX_ELEV - MIN_ELEV) / 2.0));
+	//finalPlanet_sb.SetSourceModule (0, unscaledFinalPlanet);
+	//finalPlanet_sb.SetScale ((MAX_ELEV - MIN_ELEV) / 2.0);
+	//finalPlanet_sb.SetBias (MIN_ELEV + ((MAX_ELEV - MIN_ELEV) / 2.0));
 
 	// 2: [Final-planet group]: Caches the output value from the final-planet-
 	//    in-meters module.  Stick a fork in it, we're done!
-	finalPlanet.SetSourceModule (0, finalPlanet_sb);  
+	//finalPlanet.SetSourceModule (0, finalPlanet_sb);  
+    
+    finalPlanet.SetSourceModule(0, continentsWithRivers);
 }

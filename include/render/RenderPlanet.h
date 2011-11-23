@@ -23,32 +23,35 @@ public:
    __inline__ void ClearGradientPoints() {mColor.Clear();}
    
 private:
-	//! \return true if value could be found, else false
-    bool findValue(const DRVector3& position, float& value);
-	void addValue(const DRVector3& position, float value);
-    
+    //! \return true if value could be found, else false
     noise::utils::GradientColor mColor;
-    GenerateNoisePlanet* mNoisePlanet;
-    
-    typedef std::pair<float, float> ZMAP_PAIR;
-	typedef std::map<float, float> ZMAP;
-    typedef std::pair<float, ZMAP*> YMAP_PAIR;
-	typedef std::map<float, ZMAP*> YMAP;
-    typedef std::pair<float, YMAP*> XMAP_PAIR;
-    std::map<float, YMAP*> mXMap;
+    GenerateNoisePlanet* mNoisePlanet;    
     
 };
 
 class RenderPlanet : public RenderSektor
 {
 public:
-    RenderPlanet() : RenderSektor() {};
+    RenderPlanet(GenerateNoisePlanet* noiseGenerator);
     virtual ~RenderPlanet();
     
     virtual DRReturn render(float fTime, Camera* cam);
+    
+    static int TextureGenerateThread(void* data);
+    virtual DRReturn updateTexture(DRVector2 newSize, int (*function)(void*), bool waitToComplete = false);
+    
 protected:
+    PlanetHeightValues*         mHeights;
+    GenerateNoisePlanet*        mNoiseGenerator;
+    DRTextur*                   mPlanetTexture;
     
 private:    
+    SDL_Thread*				mUpdateTextureThread;
+    SDL_sem *				mUpdateTextureThreadSemaphore;
+    SDL_mutex*                          mUpdateTextureMutex;
+    
+    DRColor*                            mTextureTempPoints;
+    DRVector2                           mTextureSize;
 };
 
 

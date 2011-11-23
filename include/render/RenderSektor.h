@@ -4,11 +4,14 @@
 class RenderSektor
 {
 public:
-    RenderSektor() {};
+    RenderSektor();
     virtual ~RenderSektor() {};
     
     virtual DRReturn render(float fTime, Camera* cam) = 0;
-protected:
+    __inline__ void setCurrentDetail(int detail) {mDetailLevel = detail;}
+protected:    
+    int                         mDetailLevel;
+    
 private:
 };
 

@@ -11,7 +11,6 @@ public:
     virtual DRReturn render(float fTime, Camera* cam) {return DR_ERROR;}
         
 protected:
-    virtual bool isPlayerInIt(Camera* cam) {return true;};
 };
 
 #endif //__SC_ROOT_SEKTOR__

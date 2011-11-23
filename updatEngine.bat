@@ -13,6 +13,8 @@ xcopy /Y Y:\Engine2\dependencies\bin\Debug\Image.dll .
 xcopy /Y Y:\Engine2\bin\Debug\Engine2.dll Debug\
 xcopy /Y Y:\Engine2\dependencies\bin\Debug\Core2.dll Debug\
 xcopy /Y Y:\Engine2\dependencies\bin\Debug\Image.dll Debug\
+xcopy /Y Y:\Engine2\dependencies\bin\Release\Core2.dll Release\
+xcopy /Y Y:\Engine2\dependencies\bin\Release\Image.dll Release\
 
 xcopy /Y /s Y:\Engine2\include\* import\include\
 xcopy /Y /s Y:\Engine2\include\* Y:\Engine2\import\include\

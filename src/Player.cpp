@@ -31,11 +31,15 @@ DRReturn Player::init()
         //root->seed();
         //root->addSektor(new Sektor(root, SOLAR_SYSTEM, 0, rand(), mServerID));
         newPlayer = true;
+        srand(mSeed);
+        mSeed = rand();
     }
     //Server::getServer(mServerID);
     //mCurrentSektor = Server::getServer(mServerID)->getRootSektor();
     
     srand(mSeed);
+    
+    DRLog.writeToLog("Player Seed: %d", mSeed);
     // position, radius, id, parent
     mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, NULL);
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
@@ -45,13 +49,17 @@ DRReturn Player::init()
    // position.print("Planeten position");
     
     if(newPlayer)
-        mCurrentSektor->move(0.0f, &mCamera);
+    {
+        mCurrentSektor->moveAll(0.0f, &mCamera);
+        mCameraFOV = 45.0f;
+    }
+    mCamera.setCurrentSektor(mCurrentSektor);
     
     int seed = rand();
     Unit radius(DRRandom::rDouble(72000, 1000), KM);
     //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
     //mCamera.setAbsPosition(Unit(0.0, KM));
-    mCameraFOV = 45.0f;
+   
     return DR_OK;
 }
 
@@ -86,7 +94,7 @@ DRReturn Player::loadFromFile(const char* file)
     f.read(&mPosition, sizeof(Vector3Unit), 1);
     Vector3Unit t;
     f.read(&t, sizeof(Vector3Unit), 1);
-    mCamera.setAbsPosition(t);
+    mCamera.setSektorPosition(t);
     
     f.close();
     LOG_INFO("Player sucessfull loaded");
@@ -111,7 +119,7 @@ DRReturn Player::saveIntoFile(const char* file)
     f.write(mCamera.getYAxis().c, sizeof(float), 3);
     f.write(mCamera.getZAxis().c, sizeof(float), 3);
     f.write(&mPosition, sizeof(Vector3Unit), 1);
-    Vector3Unit temp = mCamera.getAbsPosition();
+    Vector3Unit temp = mCamera.getSektorPosition();
     f.write(&temp, sizeof(Vector3Unit), 1);
     
     f.close();
