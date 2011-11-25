@@ -44,6 +44,7 @@ protected:
     PlanetHeightValues*         mHeights;
     GenerateNoisePlanet*        mNoiseGenerator;
     DRTextur*                   mPlanetTexture;
+    DRGeometrieIcoSphere*       mGeometrie;
     
 private:    
     SDL_Thread*				mUpdateTextureThread;

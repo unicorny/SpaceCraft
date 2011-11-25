@@ -4,7 +4,7 @@
 class SubPlanetSektor : public Sektor
 {
 public:
-    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent);
+    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, int subLevel = 6);
     virtual ~SubPlanetSektor() {}
     
     /*! \brief move sektor
@@ -25,6 +25,7 @@ public:
     static double Wurzel_3;
     
 protected:
+    int         mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     
     
 };

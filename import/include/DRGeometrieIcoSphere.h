@@ -8,12 +8,6 @@
 #ifndef __DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
 #define	__DR_ENGINE_GEOMETRIE_ICO_SPHERE_H
 
-class ENGINE_API DRHeightValueStorage
-{
-public:
-    virtual float getHeightValue(DRVector3& position) = 0;
-    virtual DRColor getColorValue(const float height) = 0;
-};
 
 class ENGINE_API DRGeometrieIcoSphere : public DRGeometrieSphere
 {

@@ -24,7 +24,7 @@ DRColor PlanetHeightValues::getColorValue(const float height)
 
 // *******************************************************************************
 RenderPlanet::RenderPlanet(GenerateNoisePlanet* noiseGenerator)
-: RenderSektor(), mHeights(NULL), mNoiseGenerator(noiseGenerator), mPlanetTexture(NULL),
+: RenderSektor(), mHeights(NULL), mNoiseGenerator(noiseGenerator), mPlanetTexture(NULL), mGeometrie(NULL),
   mUpdateTextureThread(NULL), mUpdateTextureThreadSemaphore(NULL), mUpdateTextureMutex(NULL),
   mTextureTempPoints(NULL), mTextureSize(DRVector2(2.0f))
 {
@@ -52,10 +52,15 @@ RenderPlanet::RenderPlanet(GenerateNoisePlanet* noiseGenerator)
     mUpdateTextureMutex = SDL_CreateMutex();
     
     updateTexture(DRVector2(2048.0f, 2048.0f), TextureGenerateThread, true);
+    
+    mGeometrie = new DRGeometrieIcoSphere();
+    mGeometrie->setHeightValueStorage(mHeights);
+    mGeometrie->initIcoSphere(4);    
 }
 
 RenderPlanet::~RenderPlanet()
 {
+    DR_SAVE_DELETE(mGeometrie);
     if(mUpdateTextureThread)
     {
         int returnValue = 0;
@@ -79,7 +84,7 @@ RenderPlanet::~RenderPlanet()
 
 DRReturn RenderPlanet::render(float fTime, Camera* cam)
 {
-    if(SDL_SemTryWait(mUpdateTextureThreadSemaphore) == 0)
+   /* if(SDL_SemTryWait(mUpdateTextureThreadSemaphore) == 0)
 	{
         SDL_mutexP(mUpdateTextureMutex);
         if(mTextureTempPoints)
@@ -96,6 +101,7 @@ DRReturn RenderPlanet::render(float fTime, Camera* cam)
         }
         mUpdateTextureThread = NULL;
     }
+    * */
     
     uint quadricDetails = 32;
     if(mDetailLevel > 9) quadricDetails = 256; // 10
@@ -104,10 +110,16 @@ DRReturn RenderPlanet::render(float fTime, Camera* cam)
     else if(mDetailLevel > 0.0f)  quadricDetails = 32; // 1
     else quadricDetails = 8;
     
-    updateTexture(DRVector2(128.0f, 256.0f), TextureGenerateThread);
+    mGeometrie->changeGeometrieTo(mDetailLevel, false);
+    mGeometrie->update();
+    
+    //printf("\rquadricDetail: %d", quadricDetails);
+    
+    //updateTexture(DRVector2(128.0f, 256.0f), TextureGenerateThread);
     //glTranslatef(0.0f, 0.0f, -4.0f);
-    mPlanetTexture->bind();
-    gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
+    //mPlanetTexture->bind();
+    //gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
+    mGeometrie->render();
     
     if(DRGrafikError("[RenderPlanet::render]")) return DR_ERROR;
     return DR_OK;
@@ -158,7 +170,7 @@ int RenderPlanet::TextureGenerateThread(void* data)
     imageRenderer.SetLightAzimuth (135.0);
     imageRenderer.Render ();
     
-	DR_SAVE_DELETE_ARRAY(t->mTextureTempPoints);
+    DR_SAVE_DELETE_ARRAY(t->mTextureTempPoints);
     t->mTextureTempPoints = new DRColor[size];
     
     for(int i = 0; i < size; i++)
@@ -176,8 +188,8 @@ int RenderPlanet::TextureGenerateThread(void* data)
 DRReturn RenderPlanet::updateTexture(DRVector2 newSize, int (*function)(void*), bool waitToComplete/* = false*/)
 {
     int returnValue = 0;
-	if(mUpdateTextureThread && waitToComplete)
-	{
+    if(mUpdateTextureThread && waitToComplete)
+    {
         SDL_WaitThread(mUpdateTextureThread, &returnValue);
         if(returnValue)
         {
@@ -185,13 +197,13 @@ DRReturn RenderPlanet::updateTexture(DRVector2 newSize, int (*function)(void*), 
             DRLog.writeToLog("Thread return with error: %d", returnValue);            
         }
         mUpdateTextureThread = NULL;
-	}
-	else if(mUpdateTextureThread) return DR_OK;
+    }
+    else if(mUpdateTextureThread) return DR_OK;
     
     double fractpart, intpart;
     fractpart = modf (newSize.x, &intpart);
     int ipart = (int)intpart;
-    // positive x is a power of two \scriptstyle\Leftrightarrow (x & (x − 1)) equals zero. 
+    // positive x is a power of two => (x & (x − 1)) equals zero. 
     // Quelle: http://en.wikipedia.org/wiki/Power_of_two#Fast_algorithm_to_check_if_a_positive_number_is_a_power_of_two
     if(fractpart > 0.0f || (ipart & (ipart - 1)) != 0) 
         LOG_ERROR("newSize isn't a power of 2", DR_ERROR);
@@ -209,8 +221,8 @@ DRReturn RenderPlanet::updateTexture(DRVector2 newSize, int (*function)(void*), 
 	mUpdateTextureThread = SDL_CreateThread(function, this);
 #endif
 
-	if(waitToComplete)
-	{
+    if(waitToComplete)
+    {
         SDL_WaitThread(mUpdateTextureThread, &returnValue);
         if(returnValue)
         {
@@ -222,7 +234,7 @@ DRReturn RenderPlanet::updateTexture(DRVector2 newSize, int (*function)(void*), 
         // things to do after ending
         if(mPlanetTexture->loadFromMemory(mTextureTempPoints, mTextureSize))
             LOG_ERROR("Fehler bei load texture from memory", DR_ERROR);
-	}
+    }
 		
-	return DR_OK;
+    return DR_OK;
 }

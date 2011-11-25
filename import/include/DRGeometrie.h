@@ -8,6 +8,15 @@
 #ifndef _DR_ENGINE_GEOMETRIE_h
 #define	_DR_ENGINE_GEOMETRIE_h
 
+
+class ENGINE_API DRHeightValueStorage
+{
+public:
+    virtual float getHeightValue(DRVector3& position) = 0;
+    virtual DRColor getColorValue(const float height) = 0;
+};
+
+
 class ENGINE_API DRGeometrie
 {
 public:

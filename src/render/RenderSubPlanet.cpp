@@ -11,9 +11,8 @@ RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGrid
 : RenderPlanet(noiseGenerator), mGeometrieGrid(NULL)
 {
     mGeometrieGrid = new DRGeometrieHeightfield(true);
-    DRVector3 edges[4];
-    getBoxSideEdges(boxSide, edges);
-    mGeometrieGrid->initHeightfield(edges, 33, mHeights);
+    getBoxSideEdges(boxSide, mSides);
+    mGeometrieGrid->initHeightfield(mSides, 33, mHeights);
 }
 
 RenderSubPlanet::~RenderSubPlanet()
@@ -38,7 +37,17 @@ int RenderSubPlanet::TextureGenerateThread(void* data)
 
 DRReturn RenderSubPlanet::getBoxSideEdges(RenderGridBoxSide boxSide, DRVector3 edges[4])
 {
-    int index = (int)boxSide;
+    int index = 0;
+    switch(boxSide)
+    {
+        case BOX_FRONT: index = 0; break;
+        case BOX_RIGHT: index = 1; break;
+        case BOX_BACK:  index = 2; break;
+        case BOX_LEFT:  index = 3; break;
+        case BOX_TOP:   index = 4; break;
+        case BOX_BOTTOM:index = 5; break;
+        default: index = -1;
+    }
     for(int i = 0; i < 3; i++)
     {
         for(int edge = 0; edge < 4; edge++)
@@ -52,4 +61,10 @@ DRReturn RenderSubPlanet::getBoxSideEdges(RenderGridBoxSide boxSide, DRVector3 e
 		*/
     }
     return DR_OK;
+}
+
+DRReturn RenderSubPlanet::getCurrentSideEdges(DRVector3* out)
+{
+    if(!out) return DR_ZERO_POINTER;
+    memcpy(out, mSides, sizeof(DRVector3)*4);
 }
