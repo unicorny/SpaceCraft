@@ -24,6 +24,7 @@ public:
      */
     DRReturn initHeightfield(DRVector3 edgePoints[4], u32 gridSize, DRHeightValueStorage* heightValues, bool normals = true, bool color = true, u8 textureCount = 0);
     
+    
 protected:
     DRHeightValueStorage*       mHeightValues;
     bool                        mSpherical;

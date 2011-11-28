@@ -90,7 +90,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
 	{
-//      GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
+      GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
         //glPushMatrix();
         
 		DRReturn ret = mRenderer->render(fTime, cam);

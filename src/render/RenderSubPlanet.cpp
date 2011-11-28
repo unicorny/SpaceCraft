@@ -8,11 +8,33 @@ s8 RenderSubPlanet::BoxValues[][3] = {{-1, 1,-1}, { 1, 1,-1}, {-1,-1,-1}, { 1,-1
                                       {-1,-1,-1}, { 1,-1,-1}, {-1,-1, 1}, { 1,-1, 1}};// bottom
 
 RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGridBoxSide boxSide)
-: RenderPlanet(noiseGenerator), mGeometrieGrid(NULL)
+: RenderSektor(), mHeights(NULL), mNoiseGenerator(noiseGenerator), mGeometrieGrid(NULL),
+  mUpdateThread(NULL), mUpdateThreadSemaphore(NULL), mUpdateMutex(NULL)
 {
+    if(!mNoiseGenerator) return;
+    mHeights = new PlanetHeightValues(mNoiseGenerator);
+    
+    double seaLevelInMeters = mNoiseGenerator->getSeaLevelInMetres();
+    
+    mHeights->ClearGradientPoints ();
+    mHeights->AddGradientPoint (-2.0 + seaLevelInMeters, noise::utils::Color (  0,   0,   0, 255));
+    mHeights->AddGradientPoint (    -0.03125 + seaLevelInMeters, noise::utils::Color (  6,  58, 127, 255));
+    mHeights->AddGradientPoint (    -0.0001220703 + seaLevelInMeters, noise::utils::Color ( 14, 112, 192, 255));
+    mHeights->AddGradientPoint (     0.0 + seaLevelInMeters, noise::utils::Color ( 70, 120,  60, 255));
+    mHeights->AddGradientPoint (  0.125 + seaLevelInMeters, noise::utils::Color (110, 140,  75, 255));
+    mHeights->AddGradientPoint (  0.25 + seaLevelInMeters, noise::utils::Color (160, 140, 111, 255));
+    mHeights->AddGradientPoint (  0.375 + seaLevelInMeters, noise::utils::Color (184, 163, 141, 255));
+    mHeights->AddGradientPoint (  0.5 + seaLevelInMeters, noise::utils::Color (255, 255, 255, 255));
+    mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
+    mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
+    
     mGeometrieGrid = new DRGeometrieHeightfield(true);
     getBoxSideEdges(boxSide, mSides);
-    mGeometrieGrid->initHeightfield(mSides, 33, mHeights);
+    //if(boxSide == BOX_FRONT)
+        //mGeometrieGrid->initHeightfield(mSides, 600, mHeights);
+    //else
+        mGeometrieGrid->initHeightfield(mSides, 33, NULL);
+        
 }
 
 RenderSubPlanet::~RenderSubPlanet()

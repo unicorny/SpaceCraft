@@ -55,7 +55,7 @@ RenderPlanet::RenderPlanet(GenerateNoisePlanet* noiseGenerator)
     
     mGeometrie = new DRGeometrieIcoSphere();
     mGeometrie->setHeightValueStorage(mHeights);
-    mGeometrie->initIcoSphere(4);    
+    mGeometrie->initIcoSphere(4);       
 }
 
 RenderPlanet::~RenderPlanet()
@@ -110,7 +110,7 @@ DRReturn RenderPlanet::render(float fTime, Camera* cam)
     else if(mDetailLevel > 0.0f)  quadricDetails = 32; // 1
     else quadricDetails = 8;
     
-    mGeometrie->changeGeometrieTo(mDetailLevel, false);
+    mGeometrie->changeGeometrieTo(4, false);
     mGeometrie->update();
     
     //printf("\rquadricDetail: %d", quadricDetails);

@@ -39,6 +39,8 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     double faktor = 1.0/Wurzel_3;
     //glScalef(faktor, faktor, faktor);
     //glTranslatef(mID.x, mID.y, mID.z);
+    GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
     mRenderer->render(fTime, cam);
+    GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
     return DR_OK;
 }

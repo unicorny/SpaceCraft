@@ -132,6 +132,19 @@ void test()
     tests[9] = referenzHolder.getFree();
     DRLog.writeToLog("index10: (6): %d", tests[9]);
 }
+
+void sizeOfClasses()
+{
+    DRLog.writeToLog("--------  Klassen-objelt größen: -----------");
+    DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
+    DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
+    DRLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
+    DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
+    DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
+    DRLog.writeToLog("GenerateNoisePlanet: %d", sizeof(GenerateNoisePlanet));
+    DRLog.writeToLog("------- Klassen-objelt größen Ende ----------");
+}
+
 DRReturn generateSphere(DRReal radius);
 DRReturn load()
 {
@@ -139,6 +152,7 @@ DRReturn load()
         return DR_ERROR;
     DRFileManager::Instance().addOrdner("data/blockView");
     test();
+    sizeOfClasses();
         
     DRRandom r;
     srand(77111);
@@ -207,7 +221,7 @@ DRReturn load()
     
     Uint32 start = SDL_GetTicks();
     generateSphere(2.0f);
-    g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
+    //g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
     DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
 
     return DR_OK;
@@ -362,7 +376,8 @@ DRReturn generateSphere(DRReal radius)
    DRGeometrieIcoSphere geo;        
    // DRGeometrieSphere geo;    
     geo.initIcoSphere(5);
-    geo.changeGeometrieTo(5, true);
+    for(int i = 0; i < 4; i++)
+        geo.changeGeometrieTo(3, true);
     //geo.initSphere(totalSegments);
     //geo.makeSphericalLandscape(iterator, 7157);
     //geo.copyDataToVertexBuffer();
@@ -466,6 +481,7 @@ DRReturn generateSphere(DRReal radius)
     g_tex = new DRTextur(image);
    // */
 	geo.copyDataToVertexBuffer();
+	geo.update();
     sphereList = glGenLists(1);
     glNewList(sphereList, GL_COMPILE);     
     

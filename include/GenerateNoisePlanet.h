@@ -72,51 +72,9 @@ private:
     noise::module::Cache baseContinentDef;
 
 
-    // --------------- Module subgroup: continent definition (5 noise modules) --------------
-
-    // 1: [Coarse-turbulence module]: This turbulence module warps the output
-    //    value from the base-continent-definition subgroup, adding some coarse
-    //    detail to it.
-    noise::module::Turbulence continentDef_tu0;
-
-    // 2: [Intermediate-turbulence module]: This turbulence module warps the
-    //    output value from the coarse-turbulence module.  This turbulence has
-    //    a higher frequency, but lower power, than the coarse-turbulence
-    //    module, adding some intermediate detail to it.
-    noise::module::Turbulence continentDef_tu1;
-
-    // 3: [Warped-base-continent-definition module]: This turbulence module
-    //    warps the output value from the intermediate-turbulence module.  This
-    //    turbulence has a higher frequency, but lower power, than the
-    //    intermediate-turbulence module, adding some fine detail to it.
-    noise::module::Turbulence continentDef_tu2;
-
-    // 4: [Select-turbulence module]: At this stage, the turbulence is applied
-    //    to the entire base-continent-definition subgroup, producing some very
-    //    rugged, unrealistic coastlines.  This selector module selects the
-    //    output values from the (unwarped) base-continent-definition subgroup
-    //    and the warped-base-continent-definition module, based on the output
-    //    value from the (unwarped) base-continent-definition subgroup.  The
-    //    selection boundary is near sea level and has a relatively smooth
-    //    transition.  In effect, only the higher areas of the base-continent-
-    //    definition subgroup become warped; the underwater and coastal areas
-    //    remain unaffected.
-    noise::module::Select continentDef_se;
-
-    // 7: [Continent-definition group]: Caches the output value from the
-    //    clamped-continent module.  This is the output value for the entire
-    //    continent-definition group.
-    noise::module::Cache continentDef;
-
     // ----------------Module subgroup: terrain type definition (3 noise modules) -------------
 
-    // 1: [Warped-continent module]: This turbulence module slightly warps the
-    //    output value from the continent-definition group.  This prevents the
-    //    rougher terrain from appearing exclusively at higher elevations.
-    //    Rough areas may now appear in the the ocean, creating rocky islands
-    //    and fjords.
-    noise::module::Turbulence terrainTypeDef_tu;
-
+    
     // 2: [Roughness-probability-shift module]: This terracing module sharpens
     //    the edges of the warped-continent module near sea level and lowers
     //    the slope towards the higher-elevation areas.  This shrinks the areas
@@ -170,17 +128,7 @@ private:
     //    higher areas.
     noise::module::Blend mountainBaseDef_bl;
 
-    // 7: [Coarse-turbulence module]: This turbulence module warps the output
-    //    value from the mountain-and-valleys module, adding some coarse detail
-    //    to it.
-    noise::module::Turbulence mountainBaseDef_tu0;
-
-    // 8: [Warped-mountains-and-valleys module]: This turbulence module warps
-    //    the output value from the coarse-turbulence module.  This turbulence
-    //    has a higher frequency, but lower power, than the coarse-turbulence
-    //    module, adding some fine detail to it.
-    noise::module::Turbulence mountainBaseDef_tu1;
-
+    
     // 9: [Mountain-base-definition subgroup]: Caches the output value from the
     //    warped-mountains-and-valleys module.
     noise::module::Cache mountainBaseDef;
@@ -204,9 +152,6 @@ private:
     //    this subgroup.
     noise::module::Max mountainousHigh_ma;
 
-    // 4: [Warped-high-mountains module]: This turbulence module warps the
-    //    output value from the high-mountains module, adding some detail to it.
-    noise::module::Turbulence mountainousHigh_tu;
 
     // 5: [High-mountainous-terrain subgroup]: Caches the output value from the
     //    warped-high-mountains module.
@@ -342,17 +287,6 @@ private:
     //    range from -1.0 to 1.0.
     noise::module::Exponent hillyTerrain_ex;
 
-    // 9: [Coarse-turbulence module]: This turbulence module warps the output
-    //    value from the increased-slope-hilly-terrain module, adding some
-    //    coarse detail to it.
-    noise::module::Turbulence hillyTerrain_tu0;
-
-    // 10: [Warped-hilly-terrain module]: This turbulence module warps the
-    //     output value from the coarse-turbulence module.  This turbulence has
-    //     a higher frequency, but lower power, than the coarse-turbulence
-    //     module, adding some fine detail to it.
-    noise::module::Turbulence hillyTerrain_tu1;
-
     // 11: [Hilly-terrain group]: Caches the output value from the warped-hilly-
     //     terrain module.  This is the output value for the entire hilly-
     //     terrain group.
@@ -447,17 +381,7 @@ private:
     //    the sharp cliff transition.
     noise::module::Terrace badlandsCliffs_te;
 
-    // 5: [Coarse-turbulence module]: This turbulence module warps the output
-    //    value from the terraced-cliffs module, adding some coarse detail to
-    //    it.
-    noise::module::Turbulence badlandsCliffs_tu0;
-
-    // 6: [Warped-cliffs module]: This turbulence module warps the output value
-    //    from the coarse-turbulence module.  This turbulence has a higher
-    //    frequency, but lower power, than the coarse-turbulence module, adding
-    //    some fine detail to it.
-    noise::module::Turbulence badlandsCliffs_tu1;
-
+    
     // 7: [Badlands-cliffs subgroup]: Caches the output value from the warped-
     //    cliffs module.
     noise::module::Cache badlandsCliffs;
@@ -509,10 +433,6 @@ private:
     //    river-curve module.
     noise::module::Min riverPositions_mi;
 
-    // 6: [Warped-rivers module]: This turbulence module warps the output value
-    //    from the combined-rivers module, which twists the rivers.  The high
-    //    roughness produces less-smooth rivers.
-    noise::module::Turbulence riverPositions_tu;
 
     // 7: [River-positions group]: Caches the output value from the warped-
     //    rivers module.  This is the output value for the entire river-

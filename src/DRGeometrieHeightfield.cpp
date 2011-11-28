@@ -66,9 +66,11 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     {
         if(mSpherical)
             mVertices[i] = mVertices[i].normalize();
-        mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(mVertices[i]));        
+        if(mHeightValues)
+            mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(mVertices[i]));        
     }
     setRenderMode(GL_TRIANGLE_STRIP);   
+    copyDataToVertexBuffer(GL_STATIC_DRAW_ARB, true);
     
     return DR_OK;
 }
