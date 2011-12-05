@@ -5,9 +5,10 @@ s8 RenderSubPlanet::BoxValues[][3] = {{-1, 1,-1}, { 1, 1,-1}, {-1,-1,-1}, { 1,-1
                                       { 1, 1, 1}, {-1, 1, 1}, { 1,-1, 1}, {-1,-1, 1}, // back
                                       {-1, 1, 1}, {-1, 1,-1}, {-1,-1, 1}, {-1,-1,-1}, // left
                                       {-1, 1, 1}, { 1, 1, 1}, {-1, 1,-1}, { 1, 1,-1}, // top
-                                      {-1,-1,-1}, { 1,-1,-1}, {-1,-1, 1}, { 1,-1, 1}};// bottom
+                                      {-1,-1,-1}, { 1,-1,-1}, {-1,-1, 1}, { 1,-1, 1}, // bottom
+                                      {-1, 1, 0}, { 1, 1, 0}, {-1,-1, 0}, { 1,-1, 0}}; // center
 
-RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGridBoxSide boxSide)
+RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGridBoxSide boxSide, float radius)
 : RenderSektor(), mHeights(NULL), mNoiseGenerator(noiseGenerator), mGeometrieGrid(NULL),
   mUpdateThread(NULL), mUpdateThreadSemaphore(NULL), mUpdateMutex(NULL)
 {
@@ -28,12 +29,20 @@ RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGrid
     mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
     mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
     
-    mGeometrieGrid = new DRGeometrieHeightfield(true);
-    getBoxSideEdges(boxSide, mSides);
+    mGeometrieGrid = new DRGeometrieHeightfield(radius);
+    //getBoxSideEdges(boxSide, mSides);
+    getBoxSideEdges(BOX_CENTER, mSides);
+ /*   float f = 1.1f;
+    mSides[0] += (mSides[1] - mSides[0])*f;
+    mSides[2] += (mSides[3] - mSides[2])*f;
+    
+    mSides[1] += (mSides[3] - mSides[1])*f;
+    mSides[0] += (mSides[2] - mSides[0])*f;
+   //*/ 
     //if(boxSide == BOX_FRONT)
         //mGeometrieGrid->initHeightfield(mSides, 600, mHeights);
     //else
-        mGeometrieGrid->initHeightfield(mSides, 33, NULL);
+        mGeometrieGrid->initHeightfield(mSides, 50, mHeights);
         
 }
 
@@ -68,7 +77,8 @@ DRReturn RenderSubPlanet::getBoxSideEdges(RenderGridBoxSide boxSide, DRVector3 e
         case BOX_LEFT:  index = 3; break;
         case BOX_TOP:   index = 4; break;
         case BOX_BOTTOM:index = 5; break;
-        default: index = -1;
+        case BOX_CENTER:index = 6; break;
+        default: index = 0;
     }
     for(int i = 0; i < 3; i++)
     {

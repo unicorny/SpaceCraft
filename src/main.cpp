@@ -8,7 +8,7 @@ DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 DRTextur* g_terrain = NULL;
 int blockCount = 100;
-#define MAX_CONTROL_MODES 4
+#define MAX_CONTROL_MODES 7
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
 //DRGeometrieIcoSphere g_geo;
@@ -136,12 +136,14 @@ void test()
 void sizeOfClasses()
 {
     DRLog.writeToLog("--------  Klassen-objelt größen: -----------");
-    DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
-    DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
-    DRLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
     DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
     DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
     DRLog.writeToLog("GenerateNoisePlanet: %d", sizeof(GenerateNoisePlanet));
+    DRLog.writeToLog("PlanetHeightValues: %d", sizeof(PlanetHeightValues));
+    DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
+    DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
+    DRLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
+    DRLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
     DRLog.writeToLog("------- Klassen-objelt größen Ende ----------");
 }
 
@@ -159,9 +161,12 @@ DRReturn load()
     
     //Steuerung
     gControlModes[0].mValue = Unit(20, M);
-    gControlModes[1].mValue = Unit(1000, KM);
-    gControlModes[2].mValue = Unit(20000, KM);
-    gControlModes[3].mValue = Unit(0.1, AE);
+    gControlModes[1].mValue = Unit(10, KM);
+    gControlModes[2].mValue = Unit(1000, KM);
+    gControlModes[3].mValue = Unit(20000, KM);
+    gControlModes[4].mValue = Unit(400000, KM);
+    gControlModes[5].mValue = Unit(0.1, AE);
+    gControlModes[6].mValue = Unit(10, AE);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
@@ -292,6 +297,9 @@ DRReturn move(float fTime)
     else if(EnIsButtonPressed(SDLK_2)) gCurrentControlMode = 1;
     else if(EnIsButtonPressed(SDLK_3)) gCurrentControlMode = 2;
     else if(EnIsButtonPressed(SDLK_4)) gCurrentControlMode = 3;
+    else if(EnIsButtonPressed(SDLK_5)) gCurrentControlMode = 4;
+    else if(EnIsButtonPressed(SDLK_6)) gCurrentControlMode = 5;
+    else if(EnIsButtonPressed(SDLK_7)) gCurrentControlMode = 6;
      
         
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;

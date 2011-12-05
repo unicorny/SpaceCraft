@@ -21,6 +21,7 @@
 #include "RenderBlock.h"
 #include "RenderBlockLoader.h"
 #include "SektorChunk.h"
+#include "RenderToTexture.h"
 #include "RenderSektor.h"
 #include "RenderSolarSystem.h"
 #include "RenderStellarBody.h"
@@ -30,9 +31,7 @@
 // Modell
 #include "StellarBody.h"
 #include "Planet.h"
-
 #include "GlobalRenderer.h"
-
 #include "Sektor.h"
 #include "SubPlanetSektor.h"
 #include "PlanetSektor.h"

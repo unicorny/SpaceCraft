@@ -32,16 +32,17 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
         // Wurzel(3)       1
         //  ------    =  -----   => Wurzel(3) = 1/faktor => faktor = 1/Wurzel(3)
         //     1         faktor
-        double faktor = 1.0/SubPlanetSektor::Wurzel_3;// sqrtf(3.0);
-        for(int i = 0; i < 6; i++)
+        double faktor = 1.0/SubPlanetSektor::Wurzel_3;// sqrtf(3.0) = ca. 1.73205, faktor = ca. 0.577
+        for(int i = 0; i < 2; i++)
         {
             if(mChilds.find(subPlanets[i]) == mChilds.end())
             {
                 printf("not ");
                 // Position des Quadratmittelpunktes
-                Vector3Unit position = Vector3Unit(subPlanets[i].x, subPlanets[i].y, subPlanets[i].z, KM)*(mRadius*faktor);
-                // Entfernung von Quadratmittelpunkt halbkreis punkt
-                Unit radius = mRadius * (1.0 - faktor);
+                Vector3Unit position = Vector3Unit(subPlanets[i].x, subPlanets[i].y, subPlanets[i].z, KM)*1.5;//(mRadius*faktor);
+                
+                // Entfernung von Quadratmittelpunkt zu Eckpunkt (Kreis-Radius)
+                Unit radius = Unit(sqrt(1+faktor*faktor), M);// R
                 SubPlanetSektor* temp = new SubPlanetSektor(position, radius, subPlanets[i], this);
                 mChilds.insert(SEKTOR_ENTRY(subPlanets[i], temp));
             }
@@ -86,7 +87,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 
 
 	glTranslatef(pos.x, pos.y, pos.z);
-    glScalef(radius2, radius2, radius2);
+    glScaled(radius2, radius2, radius2);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
 	{

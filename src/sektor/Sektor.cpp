@@ -130,7 +130,8 @@ void Sektor::removeInactiveChilds(double idleThreshold/* = 1.0*/)
         if(temp->mIdleSeconds < idleThreshold) continue;
         temp->setParent(NULL);
         DR_SAVE_DELETE(temp);
-        mChilds.erase(it);        
+        mChilds.erase(it);
+		break;
 	}
 }
 

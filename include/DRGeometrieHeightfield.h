@@ -4,7 +4,7 @@
 class DRGeometrieHeightfield : public DRGeometrie
 {
 public:
-    DRGeometrieHeightfield(bool spherical = false);
+    DRGeometrieHeightfield(double spherical = 0.0);
     virtual ~DRGeometrieHeightfield();
     
     /*! \brief init GeometrieData for a Heightfield
@@ -27,7 +27,7 @@ public:
     
 protected:
     DRHeightValueStorage*       mHeightValues;
-    bool                        mSpherical;
+    double                       mSphericalRadius;
 };
 
 #endif //__DR_GEOMETRIE_HEIGHTFIELD__

@@ -92,6 +92,11 @@ public:
     //! \param v der Vektor mit dem addiert wird
     //! \return einen neuen Vektor
     DRVector3 operator +  (const DRVector3& v) const {return DRVector3(x+v.x, y+v.y, z+v.z);}
+    //!  subtrahiert vom aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors
+    //! \brief subtraktions operator
+    //! \param v der Vektor der subtrahiert wird
+    //! \return referenz auf diesen Vektor
+    DRVector3 operator -= (const DRVector3& v) {x -= v.x; y -= v.y; z -= v.z; return *this;}
     //! subtrahiert den Vektor vom &uuml;bergebenden und liefert den neuen Vektor zur&uuml;ck
     //! \brief subtraktions operator
     //! \param v der Vektor der subtrahiert wird
@@ -128,7 +133,7 @@ public:
     //! \return einen neuen normalisierten Vektor
     DRVector3 normalize()                      const  {return *this / length();}
     
-    DRVector3 normalzeEx()                     const  {return *this / (length()+0.00001f);}
+    DRVector3 normalzeEx()                     const  {return *this / (length()+0.000000001f);}
     
     //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
     //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll

@@ -57,6 +57,8 @@ enum SektorType
  * a super-galaxie-heap, a super-galaxie 
  */
 
+//! TODO: Matrix-Stack ersetzen durch manuelle implementation, OpenGL Matrix Stack kann mindestens 32 matritzen halten
+
 class Sektor
 {
 public:
