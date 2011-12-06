@@ -8,7 +8,7 @@ s8 RenderSubPlanet::BoxValues[][3] = {{-1, 1,-1}, { 1, 1,-1}, {-1,-1,-1}, { 1,-1
                                       {-1,-1,-1}, { 1,-1,-1}, {-1,-1, 1}, { 1,-1, 1}, // bottom
                                       {-1, 1, 0}, { 1, 1, 0}, {-1,-1, 0}, { 1,-1, 0}}; // center
 
-RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGridBoxSide boxSide, float radius)
+RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator,RenderGridBoxSide boxSide, DRVector3 sphericalCenter)
 : RenderSektor(), mHeights(NULL), mNoiseGenerator(noiseGenerator), mGeometrieGrid(NULL),
   mUpdateThread(NULL), mUpdateThreadSemaphore(NULL), mUpdateMutex(NULL)
 {
@@ -29,9 +29,9 @@ RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGrid
     mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
     mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
     
-    mGeometrieGrid = new DRGeometrieHeightfield(radius);
-    //getBoxSideEdges(boxSide, mSides);
-    getBoxSideEdges(BOX_CENTER, mSides);
+    mGeometrieGrid = new DRGeometrieHeightfield(sphericalCenter);
+    getBoxSideEdges(boxSide, mSides);
+    //getBoxSideEdges(BOX_CENTER, mSides);
  /*   float f = 1.1f;
     mSides[0] += (mSides[1] - mSides[0])*f;
     mSides[2] += (mSides[3] - mSides[2])*f;
@@ -42,7 +42,7 @@ RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGrid
     //if(boxSide == BOX_FRONT)
         //mGeometrieGrid->initHeightfield(mSides, 600, mHeights);
     //else
-        mGeometrieGrid->initHeightfield(mSides, 50, mHeights);
+        mGeometrieGrid->initHeightfield(mSides, 33, mHeights);
         
 }
 

@@ -16,7 +16,7 @@ class RenderSubPlanet : public RenderSektor
 {
 public:
     //! \param boxSide 
-    RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGridBoxSide boxSide, float radius);
+    RenderSubPlanet(GenerateNoisePlanet* noiseGenerator,RenderGridBoxSide boxSide, DRVector3 sphericalCenter);
     virtual ~RenderSubPlanet();
     
     virtual DRReturn render(float fTime, Camera* cam);

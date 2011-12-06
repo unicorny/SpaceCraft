@@ -1,8 +1,8 @@
 #include "main.h"
 
 
-DRGeometrieHeightfield::DRGeometrieHeightfield(double spherical/* = 0.0f*/)
-: mHeightValues(NULL), mSphericalRadius(spherical)
+DRGeometrieHeightfield::DRGeometrieHeightfield(DRVector3 sphericalCenter/* = DRVector3(0.0f)*/)
+: mHeightValues(NULL), mSphericalCenter(sphericalCenter)
 {
     
 }
@@ -62,26 +62,7 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     //*/
     
     DRLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
-    double* radien = NULL;
-    double* relRadien = NULL;
-    u32     radienCount = 0;
-    //mSphericalRadius /= 2.0;
-    if(mSphericalRadius)
-    {
-     
-        radienCount = (u32)ceil((float)gridSize/2.0f);
-        radien = new double[radienCount];
-        relRadien = new double[radienCount];
-        printf("radienCount: %d\n", radienCount);
-        double radiusPart = mSphericalRadius/radienCount;
-        double relRadiusPart = edgePoints[0].length()/radienCount;
-        for(u32 i = 0; i < radienCount; i++)
-        {
-            radien[i] = radiusPart*(double)(i+1);
-            relRadien[i] = relRadiusPart*(double)(i+1);
-            printf("radien(%d): %f, relRadien: %f\n", i, radien[i], relRadien[i]);
-        }        
-    }
+    
     for(u32 i = 0; i < mVertexCount; i++)
     {
         if(mHeightValues)
@@ -90,29 +71,13 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
             mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(norm));        
         }
         
-        if(mSphericalRadius)
+        if(mSphericalCenter != DRVector3(0.0f))
         {
-            float length = mVertices[i].length();
-            u32 radienIndex = 0;
-            for(; radienIndex < radienCount-1; radienIndex++)
-                if(relRadien[radienIndex] > length) break;
-            printf("lenght: %f, radius(%d): %f, relRadien: %f\n", length, radienIndex, radien[radienIndex], relRadien[radienIndex]);
-            if(radienIndex)
-            {
-                mVertices[i] = (mVertices[i] / length)*relRadien[radienIndex];// * radien[radienIndex];
-                mVertices[i].z += mSphericalRadius - sqrt(mSphericalRadius - radien[radienIndex]*radien[radienIndex]);
-            }
-            else
-                mVertices[i].z += mSphericalRadius - sqrt(mSphericalRadius - length*length);
-                
-          //  mVertices[i] = mVertices[i].normalize();
-         //   printf("size(%d): %f\n", i, mVertices[i].length());
+            mVertices[i] = DRVector3(mVertices[i]-mSphericalCenter).normalize();
         }
+            
     }
-    DR_SAVE_DELETE_ARRAY(radien);
-    DR_SAVE_DELETE_ARRAY(relRadien);
-    radienCount = 0;
-    
+        
     setRenderMode(GL_TRIANGLE_STRIP);   
     copyDataToVertexBuffer(GL_STATIC_DRAW_ARB, true);
     
