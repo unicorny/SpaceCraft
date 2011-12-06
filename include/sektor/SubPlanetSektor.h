@@ -1,6 +1,12 @@
 #ifndef __SC_SUB_PLANET_SEKTOR__
 #define __SC_SUB_PLANET_SEKTOR__
 
+#define NEIGHBOR_LEFT 0
+#define NEIGHBOR_UP 1
+#define NEIGHBOR_RIGHT 2
+#define NEIGHBOR_DOWN 3
+
+
 class SubPlanetSektor : public Sektor
 {
 public:
@@ -24,8 +30,11 @@ public:
     
     static double Wurzel_3;
     
+    __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
+    
 protected:
-    int         mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
+    int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
+    SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
     
     
 };

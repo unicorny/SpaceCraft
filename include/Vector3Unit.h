@@ -84,12 +84,19 @@ public:
     //! \param f Skalar durch den geteilt wird
     //! \return einen neuen Vektor
     Vector3Unit operator / (const Unit f)       const {return Vector3Unit(x/f, y/f, z/f);}
-    //!  multiplieziert diesen Vektor mit einem Skalar, const
+    //!  multiplieziert diesen Vektor mit einem Unit Skalar, const
     //! \brief * operator
     //! \param f Skalar mit dem multipliziert wird
     //! \return einen neuen Vektor
     Vector3Unit operator *  (const Unit f)       const {return Vector3Unit(x*f, y*f, z*f);}
     Vector3Unit operator *= (const Unit f)             {return *this * f;}
+    
+    //!  multiplieziert diesen Vektor mit einem Skalar, const
+    //! \brief * operator
+    //! \param f Skalar mit dem multipliziert wird
+    //! \return einen neuen Vektor
+    Vector3Unit operator *  (const double f)       const {return Vector3Unit(x*f, y*f, z*f);}
+    Vector3Unit operator *= (const double f)             {return *this * f;}
  
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor

@@ -6,7 +6,7 @@ SET(spaceCraftSrc main Player sektor/Sektor Server Camera render/RenderBlockLoad
 				  SektorChunk StellarBody Unit Planet render/GlobalRenderer ShaderProgram
 				  render/RenderStellarBody render/RenderPlanet GenerateNoisePlanet noiseutils
 				  sektor/SolarSystemSektor sektor/RootSektor sektor/PlanetSektor render/RenderSektor render/RenderSolarSystem
-				  sektor/SubPlanetSektor render/RenderSubPlanet noisecache DRGeometrieHeightfield)
+				  sektor/SubPlanetSektor render/RenderSubPlanet noisecache DRGeometrieHeightfield render/renderToTexture)
 #IF(WIN32)
 SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/sektor/Sektor.h ../include/Server.h
 								   ../include/Camera.h ../include/render/RenderBlockLoader.h ../include/render/RenderBlock.h
@@ -17,7 +17,7 @@ SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../incl
 																   ../include/noiseutils.h ../include/sektor/SolarSystemSektor.h ../include/sektor/RootSektor.h
 																   ../include/sektor/PlanetSektor.h ../include/render/RenderSektor.h ../include/render/RenderSolarSystem.h
 																   ../include/sektor/SubPlanetSektor.h ../include/render/RenderSubPlanet.h ../include/noisecache.h
-																   ../include/DRGeometrieHeightfield.h)
+																   ../include/DRGeometrieHeightfield.h ../include/render/renderToTexture.h)
 #ENDIF(WIN32)
 
 SET(PA ../import/bin ../import/lib)

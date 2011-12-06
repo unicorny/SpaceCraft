@@ -4,7 +4,7 @@
 class DRGeometrieHeightfield : public DRGeometrie
 {
 public:
-    DRGeometrieHeightfield(bool spherical = false);
+    DRGeometrieHeightfield(DRVector3 sphericalCenter = DRVector3(0.0f));
     virtual ~DRGeometrieHeightfield();
     
     /*! \brief init GeometrieData for a Heightfield
@@ -24,9 +24,10 @@ public:
      */
     DRReturn initHeightfield(DRVector3 edgePoints[4], u32 gridSize, DRHeightValueStorage* heightValues, bool normals = true, bool color = true, u8 textureCount = 0);
     
+    
 protected:
     DRHeightValueStorage*       mHeightValues;
-    bool                        mSpherical;
+    DRVector3                   mSphericalCenter;
 };
 
 #endif //__DR_GEOMETRIE_HEIGHTFIELD__

@@ -8,14 +8,15 @@ enum RenderGridBoxSide
     BOX_BACK  = 2,
     BOX_LEFT  = 4,
     BOX_TOP   = 8,
-    BOX_BOTTOM= 16
+    BOX_BOTTOM= 16,
+    BOX_CENTER = 32
 };
 
 class RenderSubPlanet : public RenderSektor
 {
 public:
     //! \param boxSide 
-    RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, RenderGridBoxSide boxSide);
+    RenderSubPlanet(GenerateNoisePlanet* noiseGenerator,RenderGridBoxSide boxSide, DRVector3 sphericalCenter);
     virtual ~RenderSubPlanet();
     
     virtual DRReturn render(float fTime, Camera* cam);

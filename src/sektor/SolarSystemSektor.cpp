@@ -18,6 +18,7 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
 	idVector /= SHRT_MAX;
     int seed = (int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX);
     Unit planetRadius(DRRandom::rDouble(72000, 1000), KM);
+    
     //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
     Sektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, this);
     mChilds.insert(SEKTOR_ENTRY(seed, temp));

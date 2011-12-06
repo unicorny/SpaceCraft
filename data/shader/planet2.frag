@@ -1038,7 +1038,7 @@ void main( void )
 	terraceTemp[3] = -0.5000;
 	terraceTemp[4] =  0.0000;
 	terraceTemp[5] =  1.0000;
-	float badlandsCliffs_te = terrace(badlandsCliffs_cl, terraceTemp, 6)*0.005;
+	float badlandsCliffs_te = terrace(badlandsCliffs_cl, terraceTemp, 6);
 	//n = badlandsCliffs_te;
 	////////////////////////////////////////////////////////////////////////////
 	// Module subgroup: badlands terrain (3 noise modules)
@@ -1530,6 +1530,6 @@ void main( void )
     gradient[8] =  GradientColor( 0.75 		 	+ mSeaLevelInMetres, vec4(0.5,     1.0,     1.0,     1.0));
     gradient[9] =  GradientColor( 2.0 			+ mSeaLevelInMetres, vec4(0.0,     0.0,     1.0,     1.0));
 
-//   	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
-	gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), 1.0);
+   	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
+	//gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), 1.0);
 }

@@ -1,8 +1,8 @@
 #include "main.h"
 
 
-DRGeometrieHeightfield::DRGeometrieHeightfield(bool spherical/* = false*/)
-: mHeightValues(NULL), mSpherical(spherical)
+DRGeometrieHeightfield::DRGeometrieHeightfield(DRVector3 sphericalCenter/* = DRVector3(0.0f)*/)
+: mHeightValues(NULL), mSphericalCenter(sphericalCenter)
 {
     
 }
@@ -30,9 +30,9 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/gridSize;
     DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/gridSize;
     
-    for(int j = 1; j < gridSize+1; j++)
+    for(u32 j = 1; j < gridSize+1; j++)
     {
-        for(int i = 0; i < gridSize+1; i++)
+        for(u32 i = 0; i < gridSize+1; i++)
         {
             mIndices[mIndexCount++] = mVertexCount;
             mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*i + yVectorPart*j;
@@ -62,13 +62,24 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     //*/
     
     DRLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
-    for(int i = 0; i < mVertexCount; i++)
+    
+    for(u32 i = 0; i < mVertexCount; i++)
     {
-        if(mSpherical)
-            mVertices[i] = mVertices[i].normalize();
-        mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(mVertices[i]));        
+        if(mHeightValues)
+        {
+            DRVector3 norm = mVertices[i];
+            mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(norm));        
+        }
+        
+        if(mSphericalCenter != DRVector3(0.0f))
+        {
+            mVertices[i] = DRVector3(mVertices[i]-mSphericalCenter).normalize();
+        }
+            
     }
+        
     setRenderMode(GL_TRIANGLE_STRIP);   
+    copyDataToVertexBuffer(GL_STATIC_DRAW_ARB, true);
     
     return DR_OK;
 }
