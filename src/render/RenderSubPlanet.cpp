@@ -42,7 +42,7 @@ RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator,RenderGridB
     //if(boxSide == BOX_FRONT)
         //mGeometrieGrid->initHeightfield(mSides, 600, mHeights);
     //else
-        mGeometrieGrid->initHeightfield(mSides, 33, mHeights);
+        mGeometrieGrid->initHeightfield(mSides, 4, mHeights);
         
 }
 

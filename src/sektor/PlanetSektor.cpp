@@ -39,10 +39,14 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             {
                 printf("not ");
                 // Position des Quadratmittelpunktes
-                Vector3Unit position = Vector3Unit(subPlanets[i].x, subPlanets[i].y, subPlanets[i].z, KM)/(mRadius*faktor);
+                Vector3Unit position = Vector3Unit(subPlanets[i].x, subPlanets[i].y, subPlanets[i].z, M)*faktor;///(mRadius*faktor);
+                //position = Vector3Unit(1.0, 12.0, 19.0, LIGHTYEAR);
+                position.print("planet pos");
                 
                 // Entfernung von Quadratmittelpunkt zu Eckpunkt (Kreis-Radius)
-                Unit radius = Unit(sqrt(1+faktor*faktor), M);// R
+                //Unit radius = Unit(sqrt(1+faktor*faktor), M);// R
+                Unit radius = Unit(1.0-faktor, M);// R
+                
                 SubPlanetSektor* temp = new SubPlanetSektor(position, radius, subPlanets[i], this);
                 mChilds.insert(SEKTOR_ENTRY(subPlanets[i], temp));
                 
@@ -123,7 +127,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
 	{
-      GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
+      //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
         //glPushMatrix();
         
 		DRReturn ret = mRenderer->render(fTime, cam);
@@ -139,8 +143,9 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 
 bool PlanetSektor::isObjectInSektor(Vector3Unit positionInParentSektor)
 {
+    
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;
     radiusSquare *= radiusSquare;
-	Unit distance = Vector3Unit(positionInParentSektor - mSektorPosition).length();
+    //Unit distance = Vector3Unit(positionInParentSektor - mSektorPosition).length();
     return Vector3Unit(positionInParentSektor.convertTo(AE) - mSektorPosition).lengthSq() <= radiusSquare;
 }

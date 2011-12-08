@@ -133,7 +133,7 @@ public:
     //! \return einen neuen normalisierten Vektor
     DRVector3 normalize()                      const  {return *this / length();}
     
-    DRVector3 normalzeEx()                     const  {return *this / (length()+0.000000001f);}
+    DRVector3 normalzeEx()                     const  {return *this / (length()+0.00001f);}
     
     //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
     //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll

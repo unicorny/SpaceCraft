@@ -37,9 +37,20 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
 
 DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
 {
-    double faktor = 1.0f;//1.0/Wurzel_3;//mRadius;///2.0f;//1.0/Wurzel_3;
-    glScaled(faktor, faktor, faktor);
-    glTranslated(mSektorPosition.x, mSektorPosition.y, mSektorPosition.z);
+     double faktor = 0.5;//mRadius;//-1.0/Wurzel_3;//mRadius;///2.0f;//1.0/Wurzel_3;
+     glScaled(faktor, faktor, faktor);
+     glTranslated(mSektorPosition.x, mSektorPosition.y, mSektorPosition.z);
+ 
+     DRVector3 pos = mSektorPosition.getVector3().normalize();
+     
+     //DRLog.writeVector3ToLog(pos, "Position");
+     float angle = acos(pos.dot(DRVector3(0.0f, 0.0f, 1.0f)))*RADTOGRAD;
+     DRVector3 rotationAxis = pos.cross(DRVector3(0.0f, 0.0f, 1.0f)).normalzeEx();
+     if(rotationAxis.lengthSq() < 0.00000001f)
+         rotationAxis = DRVector3(0.0f, -1.0f, 0.0f);
+     //pos = achse.transformNormal(DRMatrix::rotationAxis(rotationAxis, angle*GRADTORAD));
+     
+     //glRotatef(angle, rotationAxis.x, rotationAxis.y, rotationAxis.z);
 
     //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
     
