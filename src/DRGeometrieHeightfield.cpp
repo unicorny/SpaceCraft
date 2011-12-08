@@ -27,11 +27,6 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     if(init(vertexCount, indexCount, 0, color, false))
         LOG_ERROR("no memory allocatet for geometrie!", DR_ERROR);
     
-    if(mSphericalCenter != DRVector3(0.0f))
-    {
-        for(int i = 0; i < 4; i++)
-                edgePoints[0] -= mSphericalCenter.normalize();
-    }
     DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/gridSize;
     DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/gridSize;
     
@@ -67,24 +62,29 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     //*/
     
     DRLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
-    DRLog.writeVector3ToLog(mSphericalCenter, "Spherical Center");
-    float centerH = mSphericalCenter.length();
-    printf("center h: %f\n", centerH);
-    
+    //DRLog.writeVector3ToLog(mSphericalCenter, "Spherical Center");    
     for(u32 i = 0; i < mVertexCount; i++)
     {
         if(mSphericalCenter != DRVector3(0.0f))
         {
             DRVector3 dir = DRVector3(mVertices[i]-mSphericalCenter);
             float length = dir.length();
-            printf("length: %f, newSize: %f, vertex: %d: %f, %f, %f\n", length, 1.0f-length, i, mVertices[i].x, mVertices[i].y, mVertices[i].z);
-            //mVertices[i] = mVertices[i]+ (dir / length);// * (length);
+            //printf("length: %f, newSize: %f, vertex: %d: %f, %f, %f\n", length, 1.0f-length, i, mVertices[i].x, mVertices[i].y, mVertices[i].z);
+            mVertices[i] += (dir / length) * (1.0-length);
+            //mVertices[i] = dir.normalize();
+            
+            if(mHeightValues)
+            {
+                mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(dir));        
+            }
+            
         }
-        
-        if(mHeightValues)
+        else   
         {
-            DRVector3 norm = mVertices[i];
-            mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(norm));        
+            if(mHeightValues)
+            {
+                mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(mVertices[i]));        
+            }
         }
             
     }

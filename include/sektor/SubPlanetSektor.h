@@ -28,9 +28,9 @@ public:
      */    
     DRReturn render(float fTime, Camera* cam);
     
-    static double Wurzel_3;
-    
     __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
+    
+    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
 protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet

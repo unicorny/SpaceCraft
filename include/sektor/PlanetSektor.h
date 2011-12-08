@@ -22,13 +22,15 @@ public:
     
     __inline__ GenerateNoisePlanet* getNoiseGenerator() {return mNoiseGenerator;}
     
-    virtual bool isObjectInSektor(Vector3Unit positionInParentSektor);
+    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual Sektor* getChild(SektorID childID);
 protected:
     GenerateNoisePlanet*        mNoiseGenerator;
         
        
         
 private:
+    static SektorID mSubPlanets[];
     
 };
 

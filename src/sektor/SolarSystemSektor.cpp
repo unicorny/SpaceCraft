@@ -7,9 +7,9 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     
     //neuen Planeten erstellen
     Vector3Unit planetPosition(DRRandom::rVector3(1.0f), AE);
-    planetPosition = planetPosition.normalize();
-    planetPosition = planetPosition * Unit(0.2f, AE);
-   // position.print("Planeten position");
+    //planetPosition = planetPosition.normalize();
+    //planetPosition = planetPosition * Unit(0.2f, AE);
+    planetPosition.print("Planeten position");
     
     noise::module::Perlin p;
     
@@ -18,6 +18,8 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
 	idVector /= SHRT_MAX;
     int seed = (int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX);
     Unit planetRadius(DRRandom::rDouble(72000, 1000), KM);
+    
+    DRLog.writeToLog("Planeten Radius: %s", planetRadius.print().data());
     
     //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
     Sektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, this);
@@ -31,6 +33,7 @@ SolarSystemSektor::~SolarSystemSektor()
 
 DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
 {
+    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     if(fTime == 0.0f)
     {
         Sektor* temp = mChilds.begin()->second;

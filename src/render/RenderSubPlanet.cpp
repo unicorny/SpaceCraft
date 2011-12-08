@@ -1,11 +1,11 @@
 #include "main.h"
 
-s8 RenderSubPlanet::BoxValues[][3] = {{-1, 1,-1}, { 1, 1,-1}, {-1,-1,-1}, { 1,-1,-1}, // front 
-                                      { 1, 1,-1}, { 1, 1, 1}, { 1,-1,-1}, { 1,-1, 1}, // right 
-                                      { 1, 1, 1}, {-1, 1, 1}, { 1,-1, 1}, {-1,-1, 1}, // back
-                                      {-1, 1, 1}, {-1, 1,-1}, {-1,-1, 1}, {-1,-1,-1}, // left
-                                      {-1, 1, 1}, { 1, 1, 1}, {-1, 1,-1}, { 1, 1,-1}, // top
-                                      {-1,-1,-1}, { 1,-1,-1}, {-1,-1, 1}, { 1,-1, 1}, // bottom
+s8 RenderSubPlanet::BoxValues[][3] = {{-1, 1, 0}, { 1, 1, 0}, {-1,-1, 0}, { 1,-1, 0}, // front 
+                                      { 0, 1,-1}, { 0, 1, 1}, { 0,-1,-1}, { 0,-1, 1}, // right 
+                                      { 1, 1, 0}, {-1, 1, 0}, { 1,-1, 0}, {-1,-1, 0}, // back
+                                      { 0, 1, 1}, { 0, 1,-1}, { 0,-1, 1}, { 0,-1,-1}, // left
+                                      {-1, 0, 1}, { 1, 0, 1}, {-1, 0,-1}, { 1, 0,-1}, // top
+                                      {-1, 0,-1}, { 1, 0,-1}, {-1, 0, 1}, { 1, 0, 1}, // bottom
                                       {-1, 1, 0}, { 1, 1, 0}, {-1,-1, 0}, { 1,-1, 0}}; // center
 
 RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator,RenderGridBoxSide boxSide, DRVector3 sphericalCenter)
@@ -42,7 +42,7 @@ RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator,RenderGridB
     //if(boxSide == BOX_FRONT)
         //mGeometrieGrid->initHeightfield(mSides, 600, mHeights);
     //else
-        mGeometrieGrid->initHeightfield(mSides, 4, mHeights);
+        mGeometrieGrid->initHeightfield(mSides, 10, mHeights);
         
 }
 

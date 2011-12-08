@@ -28,8 +28,6 @@ DRReturn Player::init()
     if(loadFromFile())
     {
         mServerID = Server::createNewServer();
-        //root->seed();
-        //root->addSektor(new Sektor(root, SOLAR_SYSTEM, 0, rand(), mServerID));
         newPlayer = true;
         srand(mSeed);
         mSeed = rand();
@@ -53,7 +51,12 @@ DRReturn Player::init()
         mCurrentSektor->moveAll(0.0f, &mCamera);
         mCameraFOV = 45.0f;
     }
-    mCamera.setCurrentSektor(mCurrentSektor);
+    Sektor* camSektor = mCurrentSektor->getSektorByPath(mCameraSektorPath);
+    if(camSektor)
+        mCamera.setCurrentSektor(camSektor);
+    else
+        mCamera.setCurrentSektor(mCurrentSektor);
+    mCamera.updateSektorPath();
     
     int seed = rand();
     Unit radius(DRRandom::rDouble(72000, 1000), KM);
@@ -96,6 +99,15 @@ DRReturn Player::loadFromFile(const char* file)
     f.read(&t, sizeof(Vector3Unit), 1);
     mCamera.setSektorPosition(t);
     
+    int size = 0;
+    f.read(&size, sizeof(int), 1);
+    for(int i = 0; i < size; i++)
+    {
+        SektorID tempID = 0;
+        f.read(&tempID, sizeof(SektorID), 1);
+        mCameraSektorPath.push_back(tempID);
+    }    
+    
     f.close();
     LOG_INFO("Player sucessfull loaded");
     
@@ -121,6 +133,13 @@ DRReturn Player::saveIntoFile(const char* file)
     f.write(&mPosition, sizeof(Vector3Unit), 1);
     Vector3Unit temp = mCamera.getSektorPosition();
     f.write(&temp, sizeof(Vector3Unit), 1);
+    
+    std::vector<SektorID> sektorPath;
+    mCamera.getCurrentSektor()->getSektorPath(sektorPath);
+    int size = sektorPath.size();
+    f.write(&size, sizeof(int), 1);
+    for(int i = 0; i < size; i++)
+        f.write(&sektorPath[i], sizeof(SektorID), 1);
     
     f.close();
     LOG_INFO("Player sucessfull saved");

@@ -19,6 +19,17 @@ enum UnitTypes
     KILOPARSEC = 6    
 };
 
+
+/*typedef u8 UnitTypes;
+#define NONE 0
+#define M 1
+#define KM 2
+#define AE 3
+#define LIGHTYEAR 4
+#define PARSEC 5
+#define KILOPARSEC 6
+*/
+
 class Unit
 {
 public:
@@ -67,6 +78,8 @@ private:
     double mValue;
     UnitTypes mUnitType;
 };
+
+__inline__ Unit sqrt(Unit& a) {return Unit(sqrt(a), a.getType());}
 
 #endif	/* __SPACE_CRAFT_UNIT_H */
 

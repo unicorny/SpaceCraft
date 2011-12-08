@@ -135,16 +135,22 @@ void test()
 
 void sizeOfClasses()
 {
-    DRLog.writeToLog("--------  Klassen-objelt größen: -----------");
+    DRLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
+    DRLog.writeToLog("Camera: %d", sizeof(Camera));
     DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
     DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
+    DRLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
     DRLog.writeToLog("GenerateNoisePlanet: %d", sizeof(GenerateNoisePlanet));
     DRLog.writeToLog("PlanetHeightValues: %d", sizeof(PlanetHeightValues));
+    DRLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
     DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
     DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
     DRLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
+    DRLog.writeToLog("Sektor: %d", sizeof(Sektor));
     DRLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
-    DRLog.writeToLog("------- Klassen-objelt größen Ende ----------");
+    DRLog.writeToLog("Unit: %d", sizeof(Unit));
+    DRLog.writeToLog("Vector3Unit: %d", sizeof(Vector3Unit));
+    DRLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
 }
 
 DRReturn generateSphere(DRReal radius);
@@ -306,7 +312,8 @@ DRReturn move(float fTime)
     if(keystate[SDLK_z]) blockCount++;
     
     if(fTime == 0.0f) fTime = 0.00166f;
-    if(g_Player.getSektor()->moveAll(fTime, g_cam))
+    //if(g_Player.getSektor()->moveAll(fTime, g_cam))
+    if(g_Player.getSektor()->moveAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei move sektor", DR_ERROR);
 
     return DR_OK;
@@ -523,6 +530,7 @@ DRReturn render(float fTime)
     //glDisable(GL_CULL_FACE);
     //if(g_terrain)
       //  g_terrain->bind();
+    //if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
     if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
     glDisable(GL_LIGHTING);

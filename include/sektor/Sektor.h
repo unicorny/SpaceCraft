@@ -6,7 +6,9 @@ struct SektorID
     SektorID(u64 id) : id(id) {}
     SektorID(s16 _x, s16 _y, s16 _z): x(_x), y(_y), z(_z), count(0) {}
     
-    bool operator() (const SektorID& x, const SektorID& y) const {return x.id<y.id;}
+    bool operator() (const SektorID& x, const SektorID& y) const {
+        return x.id<y.id;
+    }
     operator u64() {return id;}
     
     union
@@ -100,19 +102,30 @@ public:
     static const char* getSektorTypeName(SektorType type);
     
     //! inline getter and setter
-    __inline__ RenderSektor* getRenderer() {return mRenderer;}
-    __inline__ Vector3Unit getPosition() {return mSektorPosition;}
-    __inline__ Unit getRadius() {return mRadius;}
+    __inline__ RenderSektor* getRenderer() const {return mRenderer;}
+    __inline__ Vector3Unit getPosition() const {return mSektorPosition;}
+    __inline__ Unit getRadius() const {return mRadius;}
     __inline__ void setParent(Sektor* parent) {mParent = parent;}
+    __inline__ Sektor* getParent() const {return mParent;}
+    virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
     
     __inline__ SektorType getType() const {return mType;} 
     
-    virtual bool isObjectInSektor(Vector3Unit positionInParentSektor);
+    // is the position inside the current sektor
+    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    
+    Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);
+    
+    //! \brief fill a vector with all sektorID
+    //!
+    //! begin with root sektor (place zero)
+    void getSektorPath(std::vector<SektorID>& storage) const;
     
 protected:
     
     
     virtual void removeInactiveChilds(double idleThreshold = 1.0);
+    void updateCameraSektor(Camera* cam);
     
     DRReturn callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data);
     
@@ -121,6 +134,8 @@ protected:
     SektorType          mType;
     //! Position of sektor inside the parent
     Vector3Unit         mSektorPosition; 
+    //! last known camera position in sektor space
+    Vector3Unit         mLastRelativeCameraPosition;
     //! die größe des Sektors, oder der Sektor-Einschließenden Kugel
     Unit                mRadius;
     //! Pointer at the parent-sektor
@@ -134,6 +149,8 @@ protected:
     
     std::map<u64, Sektor*> mChilds;
     typedef std::pair<u64, Sektor*> SEKTOR_ENTRY;
+    
+    std::vector<SektorID> mSektorPath;
     
 private:
     

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <algorithm>
 #include <limits.h>
-
+#include <vector>
 
 // Tools
 #include "ShaderProgram.h"

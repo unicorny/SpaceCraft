@@ -9,6 +9,7 @@
 #define	CAMERA_H
 
 class Sektor;
+struct SektorID;
 
 class Camera : public DRObjekt
 {
@@ -29,6 +30,8 @@ public:
     void setKameraMatrixRotation();
     
     __inline__ Vector3Unit getSektorPosition() const {return mSektorPosition;}
+    //! \brief calculate camera sektor position relative to targetSektor
+    Vector3Unit getSektorPositionAtSektor(const Sektor* targetSektor);
     __inline__ void setSektorPosition(Vector3Unit absPosition) {mSektorPosition = absPosition;}
     
     //! in Verh&auml;ltniss zum Objekteigenem Koordinatensystem
@@ -40,6 +43,9 @@ public:
     
     __inline__ void setCurrentSektor(Sektor* current) {mCurrentSektor = current;}
     __inline__ const Sektor* getCurrentSektor() const {return mCurrentSektor;}
+    __inline__ int getSektorPathSize() const {return mSektorPath.size();}
+    
+    void updateSektorPath();
     
 protected:
     virtual void update();
@@ -49,7 +55,7 @@ private:
     //! the position of camera is the distance from the abs position, abs position is local zero-point
     Vector3Unit mSektorPosition;
     Sektor*     mCurrentSektor;
-
+    std::vector<SektorID> mSektorPath;
 };
 
 #endif	/* CAMERA_H */
