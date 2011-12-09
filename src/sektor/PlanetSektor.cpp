@@ -27,18 +27,29 @@ PlanetSektor::~PlanetSektor()
 DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    //if(isObjectInSektor(cam->getSektorPosition()))
+    double horizontAngle = acos(mRadius/mLastRelativeCameraPosition.length());
+    Unit distance = mLastRelativeCameraPosition.length()-mRadius;
+    distance = distance.convertTo(KM);
+    //printf("\rEntfernung zur Oberflaeche: %s", distance.print().data());
+    
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
         for(u32 i = 0; i < 6; i++)
         {
-            getChild(mSubPlanets[i]);            
+            //horizont culling
+            DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
+            double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))-PI/4.0;            
+            if(angle < horizontAngle)
+                getChild(mSubPlanets[i]);            
+            //else
+                //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
         }
     }
     else
     {
-        removeInactiveChilds(1.0f);
+        //removeInactiveChilds(1.0f);
     }
+    removeInactiveChilds(60.0f);
     return DR_OK;
 }
 
@@ -80,7 +91,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 
 	glTranslatef(pos.x, pos.y, pos.z);
     glScaled(radius2, radius2, radius2);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     if(mRenderer && !isObjectInSektor(mLastRelativeCameraPosition))
 	{
@@ -115,7 +126,7 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         //position.print("planet pos");
 
         Unit radius = mRadius * faktorH;
-        printf("radius: %s\n", radius.print().data());
+        //printf("radius: %s\n", radius.print().data());
         SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this);
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 
@@ -128,6 +139,7 @@ Sektor* PlanetSektor::getChild(SektorID childID)
                 if(mChilds.find(mSubPlanets[i-1]) != mChilds.end())
                 {
                     n = dynamic_cast<SubPlanetSektor*>(mChilds[mSubPlanets[i-1]]);
+                    if(temp == n) continue;
                     temp->setNeighbor(NEIGHBOR_LEFT, n);//left                    
                     n->setNeighbor(NEIGHBOR_RIGHT, temp);//right 
                 }
@@ -139,6 +151,7 @@ Sektor* PlanetSektor::getChild(SektorID childID)
                     if(mChilds.find(mSubPlanets[j]) != mChilds.end())
                     {
                         n = dynamic_cast<SubPlanetSektor*>(mChilds[mSubPlanets[j]]);
+                        if(temp == n) continue;
                         if(4 == i)
                         {
                             temp->setNeighbor(3-j, n);                    

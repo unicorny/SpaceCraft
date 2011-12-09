@@ -62,15 +62,17 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     //*/
     
     DRLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
-    //DRLog.writeVector3ToLog(mSphericalCenter, "Spherical Center");    
+    DRLog.writeVector3ToLog(mSphericalCenter, "Spherical Center");    
     for(u32 i = 0; i < mVertexCount; i++)
     {
         if(mSphericalCenter != DRVector3(0.0f))
         {
             DRVector3 dir = DRVector3(mVertices[i]-mSphericalCenter);
             float length = dir.length();
-            //printf("length: %f, newSize: %f, vertex: %d: %f, %f, %f\n", length, 1.0f-length, i, mVertices[i].x, mVertices[i].y, mVertices[i].z);
+            //printf("length: %f, newSize: %f, vertex: %d: %f, %f, %f", length, 1.0f-length, i, mVertices[i].x, mVertices[i].y, mVertices[i].z);
+            //printf(" dir: %f, %f, %f ", dir.x, dir.y, dir.z);
             mVertices[i] += (dir / length) * (1.0-length);
+            //printf(" newvertex: %f, %f, %f\n", mVertices[i].x, mVertices[i].y, mVertices[i].z);
             //mVertices[i] = dir.normalize();
             
             if(mHeightValues)
