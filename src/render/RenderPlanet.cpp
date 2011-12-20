@@ -22,29 +22,15 @@ DRColor PlanetHeightValues::getColorValue(const float height)
     return DRColor(c.red, c.green, c.blue, c.alpha);
 }
 
+// ********************************************************************************
 // *******************************************************************************
-RenderPlanet::RenderPlanet(GenerateNoisePlanet* noiseGenerator)
-: RenderSektor(), mHeights(NULL), mNoiseGenerator(noiseGenerator), mPlanetTexture(NULL), mGeometrie(NULL),
+RenderPlanet::RenderPlanet(GenerateNoisePlanet* noiseGenerator, PlanetHeightValues* heights)
+: RenderSektor(), mHeights(heights), mNoiseGenerator(noiseGenerator), mPlanetTexture(NULL), mGeometrie(NULL),
   mUpdateTextureThread(NULL), mUpdateTextureThreadSemaphore(NULL), mUpdateTextureMutex(NULL),
   mTextureTempPoints(NULL), mTextureSize(DRVector2(2.0f))
 {
     //mNoiseGenerator = new GenerateNoisePlanet();
-    if(!mNoiseGenerator) return;
-    mHeights = new PlanetHeightValues(mNoiseGenerator);
-    
-    double seaLevelInMeters = mNoiseGenerator->getSeaLevelInMetres();
-    
-    mHeights->ClearGradientPoints ();
-    mHeights->AddGradientPoint (-2.0 + seaLevelInMeters, noise::utils::Color (  0,   0,   0, 255));
-    mHeights->AddGradientPoint (    -0.03125 + seaLevelInMeters, noise::utils::Color (  6,  58, 127, 255));
-    mHeights->AddGradientPoint (    -0.0001220703 + seaLevelInMeters, noise::utils::Color ( 14, 112, 192, 255));
-    mHeights->AddGradientPoint (     0.0 + seaLevelInMeters, noise::utils::Color ( 70, 120,  60, 255));
-    mHeights->AddGradientPoint (  0.125 + seaLevelInMeters, noise::utils::Color (110, 140,  75, 255));
-    mHeights->AddGradientPoint (  0.25 + seaLevelInMeters, noise::utils::Color (160, 140, 111, 255));
-    mHeights->AddGradientPoint (  0.375 + seaLevelInMeters, noise::utils::Color (184, 163, 141, 255));
-    mHeights->AddGradientPoint (  0.5 + seaLevelInMeters, noise::utils::Color (255, 255, 255, 255));
-    mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
-    mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
+    if(!mNoiseGenerator || !mHeights) return;
     
     mPlanetTexture = new DRTextur;
     
@@ -76,14 +62,15 @@ RenderPlanet::~RenderPlanet()
         SDL_DestroyMutex(mUpdateTextureMutex);
     }
     
-    DR_SAVE_DELETE(mHeights);
     DR_SAVE_DELETE(mPlanetTexture);
     DR_SAVE_DELETE_ARRAY(mTextureTempPoints);
     mNoiseGenerator = NULL;
+    mHeights = NULL;
 }
 
 DRReturn RenderPlanet::render(float fTime, Camera* cam)
 {
+	if(!mGeometrie) return DR_ZERO_POINTER;
    /* if(SDL_SemTryWait(mUpdateTextureThreadSemaphore) == 0)
 	{
         SDL_mutexP(mUpdateTextureMutex);

@@ -16,23 +16,19 @@ class RenderSubPlanet : public RenderSektor
 {
 public:
     //! \param boxSide 
-    RenderSubPlanet(GenerateNoisePlanet* noiseGenerator,RenderGridBoxSide boxSide, DRVector3 sphericalCenter);
+    RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, PlanetHeightValues* heights, DRVector3 boxSideEdges[4], DRVector3 sphericalCenter);
+
     virtual ~RenderSubPlanet();
     
     virtual DRReturn render(float fTime, Camera* cam);
     
     static int TextureGenerateThread(void* data);        
     
-    static DRReturn getBoxSideEdges(RenderGridBoxSide boxSide, DRVector3 edges[4]);
-    //! \param out pointer on DRVector3-Array with at least the size 4
-    DRReturn getCurrentSideEdges(DRVector3* out);
     
 protected:
     PlanetHeightValues*         mHeights;
     GenerateNoisePlanet*        mNoiseGenerator;
     DRGeometrieHeightfield*     mGeometrieGrid;
-    DRVector3                   mSides[4];
-    static s8                   BoxValues[][3];
     
 private:    
     SDL_Thread*				mUpdateThread;

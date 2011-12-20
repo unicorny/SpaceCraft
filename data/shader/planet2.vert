@@ -43,7 +43,7 @@ void main( void )
 
 	c_color = gl_Color;
 
-	const int seed =99;
+	const int seed =182;
     v_texCoord3D = normalize(gl_Vertex).xyz + seed; 
 //	v_texCoord3D = vec3(gl_MultiTexCoord0.xy, seed);
 

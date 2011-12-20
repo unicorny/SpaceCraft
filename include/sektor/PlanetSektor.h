@@ -21,11 +21,14 @@ public:
     virtual DRReturn move(float fTime, Camera* cam);
     
     __inline__ GenerateNoisePlanet* getNoiseGenerator() {return mNoiseGenerator;}
+    __inline__ PlanetHeightValues*  getHeightValues() {return mHeights;}
     
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     virtual Sektor* getChild(SektorID childID);
+    
 protected:
     GenerateNoisePlanet*        mNoiseGenerator;
+    PlanetHeightValues*         mHeights;
         
        
         

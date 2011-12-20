@@ -10,7 +10,7 @@
 class SubPlanetSektor : public Sektor
 {
 public:
-    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, int subLevel = 6);
+    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet, DRVector3 edgePoints[4], int subLevel = 6);
     virtual ~SubPlanetSektor();
     
     /*! \brief move sektor
@@ -34,12 +34,22 @@ public:
     
     virtual Sektor* getChild(SektorID childID);
     
+    //! \param out pointer on DRVector3-Array with at least the size 4
+    DRReturn getCurrentSideEdges(DRVector3 out[4]);
+    
 protected:
+    
+    void fillEdgePoints();
+    void calculateNewEdgePoints(SektorID index, DRVector3 edgePoints[4]);
+    
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
+    PlanetSektor*       mPlanet;
+    DRVector3           mEdgePoints[4];
     
     // temporäre variablen      
     double              mHorizontCulling;
+private:
     
     
 };

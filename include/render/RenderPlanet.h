@@ -32,7 +32,7 @@ private:
 class RenderPlanet : public RenderSektor
 {
 public:
-    RenderPlanet(GenerateNoisePlanet* noiseGenerator);
+    RenderPlanet(GenerateNoisePlanet* noiseGenerator, PlanetHeightValues* heights);
     virtual ~RenderPlanet();
     
     virtual DRReturn render(float fTime, Camera* cam);

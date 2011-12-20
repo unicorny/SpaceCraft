@@ -25,7 +25,7 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     u32 indexCount = 2*(gridSize*gridSize)+2*gridSize;
     //if(init(vertexCount, indexCount, textureCount, color, normals))
     if(init(vertexCount, indexCount, 0, color, false))
-        LOG_ERROR("no memory allocatet for geometrie!", DR_ERROR);
+        LOG_ERROR("no memory allocated for geometrie!", DR_ERROR);
     
     DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/gridSize;
     DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/gridSize;
@@ -47,19 +47,7 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
                 mIndices[mIndexCount++] = (gridSize*2+2)+i+(j-3)*(gridSize+1);
         }
     }
-    /*mIndices[mIndexCount++] = mVertexCount;
-    mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*0 + yVectorPart*3;
-    mIndices[mIndexCount++] = 101-33;
-    
-    mIndices[mIndexCount++] = mVertexCount;
-    mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*1 + yVectorPart*3;
-    mIndices[mIndexCount++] = 102-33;
-     * */
-    
-    /*mVertices[mVertexCount++] = edgePoints[1];
-    mVertices[mVertexCount++] = edgePoints[2];
-    mVertices[mVertexCount++] = edgePoints[3];
-    //*/
+
     
     DRLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
     DRLog.writeVector3ToLog(mSphericalCenter, "Spherical Center");    
@@ -71,7 +59,7 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
             float length = dir.length();
             //printf("length: %f, newSize: %f, vertex: %d: %f, %f, %f", length, 1.0f-length, i, mVertices[i].x, mVertices[i].y, mVertices[i].z);
             //printf(" dir: %f, %f, %f ", dir.x, dir.y, dir.z);
-            mVertices[i] += (dir / length) * (1.0-length);
+            //mVertices[i] += (dir / length) * (1.0f-length);
             //printf(" newvertex: %f, %f, %f\n", mVertices[i].x, mVertices[i].y, mVertices[i].z);
             //mVertices[i] = dir.normalize();
             
@@ -79,7 +67,6 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
             {
                 mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(dir));        
             }
-            
         }
         else   
         {
@@ -88,7 +75,6 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
                 mColors[i] = mHeightValues->getColorValue(mHeightValues->getHeightValue(mVertices[i]));        
             }
         }
-            
     }
         
     setRenderMode(GL_TRIANGLE_STRIP);   

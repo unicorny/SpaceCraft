@@ -55,7 +55,7 @@ public:
     
     __inline__ Unit operator *  (const double b) const {return Unit(this->mValue*b, this->mUnitType);}
     __inline__ Unit operator *= (const double b) {*this = Unit(this->mValue*b, this->mUnitType); return *this;}
-    
+        
     Unit operator /(const Unit& b) const;
     __inline__ Unit operator /= (const Unit& b) {*this = *this / b; return *this;}
     
@@ -70,7 +70,7 @@ public:
     static const char* getUnitTypeName(UnitTypes unitType);
     __inline__ UnitTypes getType() const {return mUnitType;}
     
-    operator double() {return mValue;}
+    operator double() const {return mValue;}
 private:
     //!
     static double getConversionFaktor(UnitTypes a, UnitTypes b);

@@ -9,18 +9,35 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     mType = PLANET;
     
     mNoiseGenerator = new GenerateNoisePlanet();
+    mHeights = new PlanetHeightValues(mNoiseGenerator);
         
 	noise::module::Perlin p;
 	if(id.count) p.SetSeed(id.count);
 	DRVector3 idVector(id.x, id.y, id.z);
 	idVector /= SHRT_MAX;
     mNoiseGenerator->setupGenerator((int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX));
-    mRenderer = new RenderPlanet(mNoiseGenerator);
+    
+    double seaLevelInMeters = mNoiseGenerator->getSeaLevelInMetres();
+    
+    mHeights->ClearGradientPoints ();
+    mHeights->AddGradientPoint (-2.0 + seaLevelInMeters, noise::utils::Color (  0,   0,   0, 255));
+    mHeights->AddGradientPoint (    -0.03125 + seaLevelInMeters, noise::utils::Color (  6,  58, 127, 255));
+    mHeights->AddGradientPoint (    -0.0001220703 + seaLevelInMeters, noise::utils::Color ( 14, 112, 192, 255));
+    mHeights->AddGradientPoint (     0.0 + seaLevelInMeters, noise::utils::Color ( 70, 120,  60, 255));
+    mHeights->AddGradientPoint (  0.125 + seaLevelInMeters, noise::utils::Color (110, 140,  75, 255));
+    mHeights->AddGradientPoint (  0.25 + seaLevelInMeters, noise::utils::Color (160, 140, 111, 255));
+    mHeights->AddGradientPoint (  0.375 + seaLevelInMeters, noise::utils::Color (184, 163, 141, 255));
+    mHeights->AddGradientPoint (  0.5 + seaLevelInMeters, noise::utils::Color (255, 255, 255, 255));
+    mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
+    mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
+    
+    mRenderer = new RenderPlanet(mNoiseGenerator, mHeights);
 }
 
 PlanetSektor::~PlanetSektor()
 {
     DR_SAVE_DELETE(mRenderer);
+    DR_SAVE_DELETE(mHeights);
     DR_SAVE_DELETE(mNoiseGenerator);
 }
 
@@ -122,12 +139,13 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         double faktorH = sqrt(2.0/sqrt(3.0)-1.0/3.0);
 
         // Position des Quadratmittelpunktes
-        Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius*faktor;
+        //Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius*faktor;
+        Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius;//*faktor;
         //position.print("planet pos");
 
         Unit radius = mRadius * faktorH;
-        //printf("radius: %s\n", radius.print().data());
-        SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this);
+        printf("radius: %s\n", radius.print().data());
+        SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, NULL);
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 
         //Set neighbor pointer
