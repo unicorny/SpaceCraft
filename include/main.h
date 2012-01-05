@@ -1,5 +1,5 @@
 #include "Engine2Main.h"
-//includes whcih will be later go into Engine
+//includes which will be later go into Engine
 #include "DRGeometrieHeightfield.h"
 
 #include <iostream>

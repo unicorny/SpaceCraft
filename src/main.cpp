@@ -100,6 +100,9 @@ void test()
     u2.print("u2");
     u3.print("u3");
     
+    u1 *= Unit(20, KM);
+    u1.print("u1* 20 km");
+    
     Vector3Unit(u1 + u2).print("u1+u2");
     Vector3Unit(u2+u3).print("u2+u3");
     Vector3Unit(u1*Unit(1, LIGHTYEAR)).print("u1*1 Lichtjahr");
