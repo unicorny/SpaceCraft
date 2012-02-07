@@ -1,15 +1,19 @@
 #include "Engine2Main.h"
 //includes which will be later go into Engine
 #include "DRGeometrieHeightfield.h"
+#include "DRTextureManager.h"
+#include "DRGeometrieManager.h"
 
 #include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <limits.h>
 #include <vector>
+#include <queue>
 
 // Tools
 #include "ShaderProgram.h"
+#include "ShaderManager.h"
 #include "Unit.h"
 #include "Vector3Unit.h"
 #include "GenerateNoisePlanet.h"
@@ -22,6 +26,8 @@
 #include "RenderBlockLoader.h"
 #include "SektorChunk.h"
 #include "RenderToTexture.h"
+#include "RenderInStepsToTexture.h"
+#include "RenderNoisePlanetToTexture.h"
 #include "RenderSektor.h"
 #include "RenderSolarSystem.h"
 #include "RenderStellarBody.h"

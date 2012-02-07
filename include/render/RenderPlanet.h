@@ -32,27 +32,18 @@ private:
 class RenderPlanet : public RenderSektor
 {
 public:
-    RenderPlanet(GenerateNoisePlanet* noiseGenerator, PlanetHeightValues* heights);
+    RenderPlanet(SektorID seed);
     virtual ~RenderPlanet();
     
     virtual DRReturn render(float fTime, Camera* cam);
     
-    static int TextureGenerateThread(void* data);
-    virtual DRReturn updateTexture(DRVector2 newSize, int (*function)(void*), bool waitToComplete = false);
     
 protected:
-    PlanetHeightValues*         mHeights;
-    GenerateNoisePlanet*        mNoiseGenerator;
-    DRTextur*                   mPlanetTexture;
-    DRGeometrieIcoSphere*       mGeometrie;
+    RenderNoisePlanetToTexture* mTextureRenderer;
+    GLuint                      mTextureID;    
     
 private:    
-    SDL_Thread*				mUpdateTextureThread;
-    SDL_sem *				mUpdateTextureThreadSemaphore;
-    SDL_mutex*                          mUpdateTextureMutex;
     
-    DRColor*                            mTextureTempPoints;
-    DRVector2                           mTextureSize;
 };
 
 

@@ -8,9 +8,11 @@ DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 DRTextur* g_terrain = NULL;
 int blockCount = 100;
-#define MAX_CONTROL_MODES 7
+#define MAX_CONTROL_MODES 9
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
+// Debug
+bool            wireframe = false;
 //DRGeometrieIcoSphere g_geo;
 
 GLint sphereList = 0;
@@ -134,6 +136,8 @@ void test()
     referenzHolder.remove(tests[7]);
     tests[9] = referenzHolder.getFree();
     DRLog.writeToLog("index10: (6): %d", tests[9]);
+    
+    DRTextureManager::Instance().test();
 }
 
 void sizeOfClasses()
@@ -149,6 +153,8 @@ void sizeOfClasses()
     DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
     DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
     DRLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
+    DRLog.writeToLog("RenderInStepsToTexture: %d", sizeof(RenderInStepsToTexture));
+    DRLog.writeToLog("RenderNoisePlanetToTexture: %d", sizeof(RenderNoisePlanetToTexture));
     DRLog.writeToLog("Sektor: %d", sizeof(Sektor));
     DRLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
     DRLog.writeToLog("Unit: %d", sizeof(Unit));
@@ -162,6 +168,7 @@ DRReturn load()
     if(EnInit_Simple())
         return DR_ERROR;
     DRFileManager::Instance().addOrdner("data/blockView");
+    DRFileManager::Instance().addOrdner("data/shader");
     test();
     sizeOfClasses();
         
@@ -169,19 +176,22 @@ DRReturn load()
     srand(77111);
     
     //Steuerung
+  
     gControlModes[0].mValue = Unit(20, M);
-    gControlModes[1].mValue = Unit(10, KM);
-    gControlModes[2].mValue = Unit(1000, KM);
-    gControlModes[3].mValue = Unit(20000, KM);
-    gControlModes[4].mValue = Unit(400000, KM);
-    gControlModes[5].mValue = Unit(0.1, AE);
-    gControlModes[6].mValue = Unit(10, AE);
+    gControlModes[1].mValue = Unit(0.100, KM);
+    gControlModes[2].mValue = Unit(10, KM);
+    gControlModes[3].mValue = Unit(1000, KM);
+    gControlModes[4].mValue = Unit(20000, KM);
+    gControlModes[5].mValue = Unit(400000, KM);
+    gControlModes[6].mValue = Unit(0.1, AE);
+    gControlModes[7].mValue = Unit(10, AE);
+    gControlModes[8].mValue = Unit(500, AE);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
         LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
 
-    glClearColor(0.1, 0.2, 0.0, 0);
+    
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
 
@@ -223,8 +233,15 @@ DRReturn load()
     //glEnable(GL_LIGHTING);
     glDisable(GL_FOG);
     
-	if(GlobalRenderer::getSingleton().init())
+	if(GlobalRenderer::getSingleton().init("data/config.ini"))
 		LOG_ERROR("error by init GlobalRenderer", DR_ERROR);
+    
+    if(DRTextureManager::getSingleton().init())
+        LOG_ERROR("error by init DRTextureManager", DR_ERROR);
+    if(ShaderManager::getSingleton().init())
+        LOG_ERROR("error by init ShaderManager", DR_ERROR);
+    if(DRGeometrieManager::getSingleton().init())
+        LOG_ERROR("error by init DRGeometrieManager", DR_ERROR);
 
     if(g_Player.init())
         LOG_ERROR("Fehler bei Player::init", DR_ERROR);
@@ -249,6 +266,9 @@ void ende()
     DR_SAVE_DELETE(g_Font);
     DR_SAVE_DELETE(g_terrain);
     GlobalRenderer::getSingleton().exit();
+    DRTextureManager::getSingleton().exit();
+    ShaderManager::getSingleton().exit();
+    DRGeometrieManager::getSingleton().exit();
     g_RenderBlockLoader.exit();
     Server::freeAllServer();
     EnExit();
@@ -309,8 +329,12 @@ DRReturn move(float fTime)
     else if(EnIsButtonPressed(SDLK_5)) gCurrentControlMode = 4;
     else if(EnIsButtonPressed(SDLK_6)) gCurrentControlMode = 5;
     else if(EnIsButtonPressed(SDLK_7)) gCurrentControlMode = 6;
+    else if(EnIsButtonPressed(SDLK_8)) gCurrentControlMode = 7;
+    else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
      
-        
+    // R-Taste
+    if(EnIsButtonPressed(21)) wireframe = !wireframe;
+    
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
     if(keystate[SDLK_z]) blockCount++;
     
@@ -525,15 +549,23 @@ DRReturn generateSphere(DRReal radius)
 
 DRReturn render(float fTime)
 {
+    glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
+    
+    glClearColor(0.1, 0.2, 0.0, 0);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0f, 1.0f, 1.0f);    
     
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
-    //glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     //if(g_terrain)
       //  g_terrain->bind();
     //if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
+    if(wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
     if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
     glDisable(GL_LIGHTING);
@@ -543,6 +575,9 @@ DRReturn render(float fTime)
      
     
     //Reseten der Matrixen
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
@@ -740,8 +775,10 @@ DRReturn render(float fTime)
     text.drawText();
     
     g_Font->end();
-    
+   
     start = SDL_GetTicks();    
+    if(GlobalRenderer::Instance().renderTasks())
+        LOG_ERROR("Fehler bei calling GlobalRenderer::renderTasks", DR_ERROR);
 
     return DR_OK;
 }

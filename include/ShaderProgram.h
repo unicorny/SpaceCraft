@@ -18,6 +18,8 @@ public:
     void bind() const;
     static void unbind();
     
+    __inline__ GLuint getProgram() {return mProgram;}
+    
 protected:
     unsigned char* readShaderFile(const char *filename);
     

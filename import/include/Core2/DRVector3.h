@@ -81,6 +81,8 @@ public:
     //! \brief Casting operator
     //! \return einen Zeiger auf das Werte Array
     operator float* () {return c;}
+    
+    operator const float* () const {return c;}
 
     //!  addiert auf den aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors hinzu
     //! \brief additions operator
@@ -129,11 +131,13 @@ public:
     //! \param die &uuml;bergebende Mtrix m
     //! \return einen neuen, transformierten Vektor
     DRVector3 transformNormal(const DRMatrix& m) const;
+    
+    DRVector3 transformCoords(const DRMatrix& m, float* const pfOutW = NULL) const;
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
     DRVector3 normalize()                      const  {return *this / length();}
     
-    DRVector3 normalzeEx()                     const  {return *this / (length()+0.00001f);}
+    DRVector3 normalizeEx()                     const  {return *this / (length()+0.00001f);}
     
     //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
     //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll

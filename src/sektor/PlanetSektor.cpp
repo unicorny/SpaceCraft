@@ -31,7 +31,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
     mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
     
-    mRenderer = new RenderPlanet(mNoiseGenerator, mHeights);
+    mRenderer = new RenderPlanet(id);
 }
 
 PlanetSektor::~PlanetSektor()
@@ -108,7 +108,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 
 	glTranslatef(pos.x, pos.y, pos.z);
     glScaled(radius2, radius2, radius2);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     if(mRenderer && !isObjectInSektor(mLastRelativeCameraPosition))
 	{

@@ -89,6 +89,7 @@ const float PI = 3.1415926535f;
 #define SDLK_d 7 
 #define SDLK_e 8
 #define SDLK_q 20
+#define SDLK_r 21
 #define SDLK_s 22
 #define SDLK_w 26
 #define SDLK_1 30
@@ -159,7 +160,7 @@ ENGINE_API DRReturn EnInit_Simple(DRReal fVersion = 1.0f, bool initSound = false
 ENGINE_API DRReturn EnInit(DRReal fVersion = 1.0f, bool initSound = false);
 ENGINE_API DRReturn EnInit_INI(const char* iniFileName);
 ENGINE_API DRReturn EnInit_OpenGL(DRReal fVersion = 1.0f, DRVideoConfig video = DRVideoConfig(), const char* pcTitel = "OpenGL Render Fenster", const char* pcBMPIcon = NULL, bool bInitSound = true);
-ENGINE_API DRReturn	EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRReal), bool bExitByEsc = true);
+ENGINE_API DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRReal), bool bExitByEsc = true);
 ENGINE_API void     EnExit();
 
 ENGINE_API void		EnPostExitMessageToSDL();

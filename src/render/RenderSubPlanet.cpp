@@ -6,13 +6,14 @@ RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, PlanetHeig
 {
     if(!mNoiseGenerator || !mHeights) return;
     
-    mGeometrieGrid = new DRGeometrieHeightfield(sphericalCenter);
-    mGeometrieGrid->initHeightfield(boxSideEdges, 33, mHeights);
+    //mGeometrieGrid = new DRGeometrieHeightfield(sphericalCenter);
+    //mGeometrieGrid->initHeightfield(boxSideEdges, 33, mHeights);
+    mGeometrieGrid = DRGeometrieManager::Instance().getGrid(33, GEO_FULL);
 }
 
 RenderSubPlanet::~RenderSubPlanet()
 {
-    DR_SAVE_DELETE(mGeometrieGrid);
+    //DR_SAVE_DELETE(mGeometrieGrid);
 }
 
 DRReturn RenderSubPlanet::render(float fTime, Camera* cam)

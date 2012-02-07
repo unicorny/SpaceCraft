@@ -43,7 +43,7 @@ RenderBlock::RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg)
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
 
-    //glBindTexture(GL_TEXTURE_2D, mTerrainTexture);
+    //glBindTexture(GL_TEXTURE_2D, 2);
     mTexture->bind();
         
     glBegin(GL_QUADS);

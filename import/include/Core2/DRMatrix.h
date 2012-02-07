@@ -217,19 +217,19 @@ public:
     //! \brief liefert die Translationsmatrix zu einem Vektor, static
     //! \param v translations Vektor
     //! \return eine neue Translationsmatrix <br>
-    //! <p align="center"> 1 0 0 v.x <br>
-    //!                    0 1 0 v.y <br>
-    //!                    0 0 1 v.z <br>
-    //!                    0 0 0 1 </p>
+    //! <p align="center"> 1   0   0   0 <br>
+    //!                    0   1   0   0 <br>
+    //!                    0   0   1   0 <br>
+    //!                    v.x v.y v.z 1 </p>
     static DRMatrix	translation(const DRVector3& v); 	// Translationsmatrix (Verschiebungsmatrix) berechnen
     //! \brief liefert die Achsen DRMatrix aus drei Achsen, static
     //! \param x_axis x Achse
     //! \param y_axis y Achse
     //! \param z_axis z Achse
     //! \return eine neue DRMatrix <br>
-    //! <p align="center"> x_axis.x x_axis.y x_axis.z 0 <br>
-    //!                    y_axis.x y_axis.y y_axis.z 0 <br>
-    //!                    z_axis.x z_axis.y z_axis.z 0 <br>
+    //! <p align="center"> x_axis.x y_axis.x z_axis.x 0 <br>
+    //!                    x_axis.y y_axis.y z_axis.y 0 <br>
+    //!                    x_axis.z y_axis.z z_axis.z 0 <br>
     //!                    0        0        0        1 </p>
     static DRMatrix   axis(const DRVector3& x_axis, const DRVector3& y_axis, const DRVector3& z_axis);
     //! \brief liefert die Rotationsmatrix um die x Achse, static

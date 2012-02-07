@@ -51,9 +51,9 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     {
         //sub sektoren erstellen
         getChild(SektorID(-1, 1, 0));  // rechts unten
-        //getChild(SektorID( 1, 1, 0));  // links unten
-      //  getChild(SektorID( 1,-1, 0));
-      //  getChild(SektorID(-1,-1, 0));
+        getChild(SektorID( 1, 1, 0));  // links unten
+        getChild(SektorID( 1,-1, 0));
+        getChild(SektorID(-1,-1, 0));
     }
     else
     {
