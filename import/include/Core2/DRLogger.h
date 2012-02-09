@@ -61,6 +61,7 @@ public:
 
 	//in die Log-Datei schreiben
 	DRReturn writeToLog(const char* pcText, ...);
+        DRReturn writeToLog(DRString text);
 	DRReturn writeToLogDirect(const char* pcText, ...);
 
 	DRReturn writeVector2ToLog(const DRVector2& v, const char* name = NULL);			// 2D-Vektor ins Logbuch schreiben

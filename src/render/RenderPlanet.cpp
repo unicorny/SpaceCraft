@@ -29,7 +29,7 @@ RenderPlanet::RenderPlanet(SektorID seed)
 {
     GlobalRenderer& gb = GlobalRenderer::Instance();
     
-    ShaderProgram* shader = ShaderManager::Instance().getShader("noise.frag", "noise.vert");
+    ShaderProgram* shader = ShaderManager::Instance().getShader("noise.vert", "noise.frag");
     DRVector2 textureSize = gb.getTextureRenderMaxResolution();
     mTextureRenderer = new RenderNoisePlanetToTexture(shader, textureSize);
     mTextureID = DRTextureManager::Instance().getGLTextureMemory(static_cast<GLuint>(textureSize.x),
@@ -42,7 +42,7 @@ RenderPlanet::RenderPlanet(SektorID seed)
 
 RenderPlanet::~RenderPlanet()
 {
-    ShaderManager::Instance().releaseShader("noise.frag", "noise.vert");
+    ShaderManager::Instance().releaseShader("noise.vert", "noise.frag");
     DR_SAVE_DELETE(mTextureRenderer);
     if(mTextureID)
     {

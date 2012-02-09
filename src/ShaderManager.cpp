@@ -45,20 +45,21 @@ DHASH ShaderManager::makeShaderHash(const char* vertexShader, const char* fragme
 //! lädt oder return instance auf Textur
 ShaderProgram* ShaderManager::getShader(const char* vertexShader, const char* fragmentShader)
 {
-	if(!mInitalized) return 0;
+    if(!mInitalized) return NULL;
 
-    DHASH id = makeShaderHash(fragmentShader, vertexShader);
-	//Schauen ob schon vorhanden
-	ShaderEntry* entry = static_cast<ShaderEntry*>(mShaderEntrys.findByHash(id));
-	
-	if(entry && entry->shader != NULL)
-	{
-		entry->referenzCounter++;
-		return entry->shader;
-	}
+    DHASH id = makeShaderHash(vertexShader, fragmentShader);
+    
+    //Schauen ob schon vorhanden
+    ShaderEntry* entry = static_cast<ShaderEntry*>(mShaderEntrys.findByHash(id));
 
-	entry = new ShaderEntry;
-	entry->referenzCounter = 0;
+    if(entry && entry->shader != NULL)
+    {
+        entry->referenzCounter++;
+        return entry->shader;
+    }
+
+    entry = new ShaderEntry;
+    entry->referenzCounter = 0;
 	
     entry->shader = new ShaderProgram;
     const char* fragmentPath = DRFileManager::Instance().getWholePfad(fragmentShader);
@@ -70,23 +71,23 @@ ShaderProgram* ShaderManager::getShader(const char* vertexShader, const char* fr
     if(vertexPath)
         vertexShaderString = DRString(DRString(vertexPath)+"/"+DRString(vertexShader));
 
-    if(entry->shader->init(fragmentShaderString.data(), vertexShaderString.data()))
+    if(entry->shader->init(vertexShaderString.data(), fragmentShaderString.data()))
         LOG_ERROR("Fehler beim laden des Shaders", NULL);
-	if(!entry->shader)
-	{
-		DR_SAVE_DELETE(entry);
+    if(!entry->shader)
+    {
+        DR_SAVE_DELETE(entry);
         LOG_ERROR("No Memory for new Shader left", 0);
-	}
+    }
     
     if(!mShaderEntrys.addByHash(id, entry))
-	{
+    {
         DR_SAVE_DELETE(entry->shader);
-		DR_SAVE_DELETE(entry);
-		LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShader aufgetreten", 0);
-	}
-	entry->referenzCounter = 1;
+        DR_SAVE_DELETE(entry);
+        LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShader aufgetreten", 0);
+    }
+    entry->referenzCounter = 1;
 
-	return entry->shader;
+    return entry->shader;
 }
 //! reduziert reference, bei null wird Textur gelöscht und OpenGL Texture in liste eingetragen
 void ShaderManager::releaseShader(const char* vertexShader, const char* fragmentShader)
@@ -94,15 +95,15 @@ void ShaderManager::releaseShader(const char* vertexShader, const char* fragment
     if(!mInitalized) return;
     
     //suchen
-    DHASH id = makeShaderHash(fragmentShader, vertexShader);
-	ShaderEntry* entry = static_cast<ShaderEntry*>(mShaderEntrys.findByHash(id));
-	if(!entry) return;
+    DHASH id = makeShaderHash(vertexShader, fragmentShader);
+    ShaderEntry* entry = static_cast<ShaderEntry*>(mShaderEntrys.findByHash(id));
+    if(!entry) return;
 
-	entry->referenzCounter--;
-	if(entry->referenzCounter <= 0)
-	{
+    entry->referenzCounter--;
+    if(entry->referenzCounter <= 0)
+    {
         DR_SAVE_DELETE(entry->shader);
-		mShaderEntrys.removeByHash(id);
-		DR_SAVE_DELETE(entry);
-	}
+        mShaderEntrys.removeByHash(id);
+        DR_SAVE_DELETE(entry);
+    }
 }

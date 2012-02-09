@@ -29,8 +29,7 @@ public:
 protected:
     GenerateNoisePlanet*        mNoiseGenerator;
     PlanetHeightValues*         mHeights;
-        
-       
+    ShaderProgram*              mSphericalShaderForSubPlanet;
         
 private:
     static SektorID mSubPlanets[];

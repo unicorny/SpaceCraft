@@ -30,6 +30,12 @@ protected:
     GenerateNoisePlanet*        mNoiseGenerator;
     DRGeometrieHeightfield*     mGeometrieGrid;
     
+    //Sphere
+    float                       mSphereH;
+    float                       mTheta;
+    DRVector3                   mSphercialCenter;
+    
+    
 private:    
     SDL_Thread*				mUpdateThread;
     SDL_sem *				mUpdateThreadSemaphore;

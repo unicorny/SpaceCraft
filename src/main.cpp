@@ -568,6 +568,7 @@ DRReturn render(float fTime)
     
     if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
+    ShaderProgram::unbind();
     glDisable(GL_LIGHTING);
     glEnable(GL_CULL_FACE);
     
@@ -671,12 +672,12 @@ DRReturn render(float fTime)
     glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	GlobalRenderer::Instance().getPlanetShaderPtr()->bind();
+    //GlobalRenderer::Instance().getPlanetShaderPtr()->bind();
     if(sphereList)
         glCallList(sphereList);
     glTranslatef(5.0f, 0.0f, 0.0f);
     CreateSphere(DRVector3(), 1.0f, 20.0f);
-    GlobalRenderer::Instance().getPlanetShaderPtr()->unbind();
+    //GlobalRenderer::Instance().getPlanetShaderPtr()->unbind();
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     //g_geo.render();
     

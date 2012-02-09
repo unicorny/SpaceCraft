@@ -32,7 +32,6 @@ ShaderProgram::~ShaderProgram()
 
 DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentShaderFile)
 {
-    
     const char *vertexShaderStrings[1];
     const char *fragmentShaderStrings[1];
      
@@ -40,6 +39,7 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     GLint fragmentCompiled;
     GLint shadersLinked;
     char str[4096]; // For error messages from the GLSL compiler and linker
+    memset(str, 0, 4096);
 
     // Create the vertex shader.
     mVertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -86,7 +86,7 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
         glGetShaderInfoLog( mFragmentShader, sizeof(str), NULL, str );
         DRLog.writeToLog("<font color='red'>Fehler:</font>Fragment shader (%s) compile error: %s", fragmentShaderFile, str);
     }
-    if(DRGrafikError("ShaderProgram::init create fragment shader")) LOG_WARNING("Fehler bei shader init");
+    if(DRGrafikError("ShaderProgram::init create fragment shader")) LOG_WARNING("Fehler bei shader init");    
 //----------------------------------------------------------------------------------------------------
     // Create a program object and attach the two compiled shaders.
     mProgram = glCreateProgram();
@@ -96,12 +96,15 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     // Link the program object and print out the info log.
     glLinkProgram( mProgram );
     glGetProgramiv( mProgram, GL_LINK_STATUS, &shadersLinked );
-
     if( shadersLinked == GL_FALSE )
     {
-        glGetProgramInfoLog( mProgram, sizeof(str), NULL, str );
+        int length = 0;
+        glGetProgramInfoLog( mProgram, sizeof(str), &length, str );
         //printError("Program object linking error", str);
-        DRLog.writeToLog("<font color='red'>Fehler:</font>Program object linking error:\n%s", str);
+        if(length > 1023)
+            DRLog.writeToLog(DRString(str));
+        else
+            DRLog.writeToLog("<font color='red'>Fehler:</font>Program object linking error:\n%s", str);
     }
     
     if(DRGrafikError("ShaderProgram::init create programm")) LOG_WARNING("Fehler bei shader init");

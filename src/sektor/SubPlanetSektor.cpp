@@ -34,7 +34,7 @@ SubPlanetSektor::~SubPlanetSektor()
 
 DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
 {
-	mHorizontCulling = 75.0;
+    mHorizontCulling = 75.0;
     if(mSubLevel != 6) return DR_OK;
     //teilen bei Camera Distance von 1.5 radius
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
@@ -68,13 +68,13 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     if(mIdleSeconds > 0.0f) return DR_OK;
     DRVector3 pos = mSektorPosition.getVector3().normalize();
     if(mSubLevel == 6)
-        glTranslated(pos.x, pos.y, pos.z);
+       // glTranslated(pos.x, pos.y, pos.z);
 
     //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
     if(mHorizontCulling > 70.0)
     {
         mRenderer->render(fTime, cam);
-        GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
+        //GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
         // childs didn't need to render
         return DR_NOT_ERROR;
     }
