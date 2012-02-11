@@ -1,14 +1,13 @@
 #include "main.h"
+#include "DRGeometrieManager.h"
 
-RenderSubPlanet::RenderSubPlanet(GenerateNoisePlanet* noiseGenerator, PlanetHeightValues* heights, DRVector3 boxSideEdges[4], DRVector3 sphericalCenter)
-: RenderSektor(), mHeights(heights), mNoiseGenerator(noiseGenerator), mGeometrieGrid(NULL),
-  mUpdateThread(NULL), mUpdateThreadSemaphore(NULL), mUpdateMutex(NULL)
+RenderSubPlanet::RenderSubPlanet(SektorID seed, float theta, float cameraDistance, const DRMatrix& rotation, DRString texturePath)
+: RenderPlanet(seed, theta, cameraDistance, rotation, texturePath), mGeometrieGrid(NULL)
 {
-    if(!mNoiseGenerator || !mHeights) return;
-    
+        
     //mGeometrieGrid = new DRGeometrieHeightfield(sphericalCenter);
     //mGeometrieGrid->initHeightfield(boxSideEdges, 33, mHeights);
-    mGeometrieGrid = DRGeometrieManager::Instance().getGrid(33, GEO_FULL);
+    mGeometrieGrid = DRGeometrieManager::Instance().getGrid(50, GEO_FULL);
 }
 
 RenderSubPlanet::~RenderSubPlanet()
@@ -18,7 +17,8 @@ RenderSubPlanet::~RenderSubPlanet()
 
 DRReturn RenderSubPlanet::render(float fTime, Camera* cam)
 {   
-    //gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, 32*2, 32);
+    generateAndBindTexture();
+
     if(mGeometrieGrid->render()) 
         LOG_ERROR("Fehler bei Geometrie Grid", DR_ERROR);
     
@@ -26,7 +26,4 @@ DRReturn RenderSubPlanet::render(float fTime, Camera* cam)
     return DR_OK;
 }
 
-int RenderSubPlanet::TextureGenerateThread(void* data)
-{
-    return 0;
-}
+

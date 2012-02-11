@@ -9,7 +9,9 @@ public:
     ~RenderInStepsToTexture();
     
     // reset values, set step size
-    DRReturn init(float stepSize, DRVector2 textureSize, float clippingBorder[4], GLuint textureID);
+    DRReturn init(float stepSize, float clippingBorder[4], GLuint textureID);
+    //! erstellt eine neue Textur mit denselben Einstellungen, jedoch wird die texturgröße geändert
+    DRReturn reinit(GLuint textureID);
     // render with current step, add step
     DRReturn step();
     

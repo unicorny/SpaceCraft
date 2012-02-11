@@ -39,7 +39,10 @@ DRReturn Player::init()
     
     DRLog.writeToLog("Player Seed: %d", mSeed);
     // position, radius, id, parent
-    mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, NULL);
+    RootSektor* root = Server::getServer(mServerID)->getRootSektor();
+    mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, root);
+    root->addSektor(mCurrentSektor, mSeed);
+    
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
     Vector3Unit position(DRRandom::rVector3(1.0f), AE);
     position = position.normalize();
@@ -51,7 +54,7 @@ DRReturn Player::init()
         mCurrentSektor->moveAll(0.0f, &mCamera);
         mCameraFOV = 45.0f;
     }
-    Sektor* camSektor = mCurrentSektor->getSektorByPath(mCameraSektorPath);
+    Sektor* camSektor = root->getSektorByPath(mCameraSektorPath);
     if(camSektor)
         mCamera.setCurrentSektor(camSektor);
     else

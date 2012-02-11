@@ -36,38 +36,46 @@ DRReturn GlobalRenderer::init(const char* configFilename)
     return DR_OK;
 }
 
-void GlobalRenderer::addRenderTask(RenderInStepsToTexture* newRenderTask)
+void GlobalRenderer::addRenderTask(RenderInStepsToTexture* newRenderTask, bool preview/* = false*/)
 {
-    if(mRenderTasks.empty()) 
-    {
-        if(setupFrameBuffer(newRenderTask->getTextureID()))
-            LOG_ERROR_VOID("Fehler bei setupFrameBuffer"); 
-    }
-    mRenderTasks.push(newRenderTask);
+    if(preview)
+        mPreviewRenderTasks.push(newRenderTask);
+    else
+        mRenderTasks.push(newRenderTask);
 }
 
 DRReturn GlobalRenderer::renderTasks()
 {
     Uint32 start = SDL_GetTicks();
-    
-	if(mRenderTasks.empty()) return DR_OK;
-    RenderInStepsToTexture* current = mRenderTasks.front();
-    
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);   
-    if(current->step()) LOG_ERROR("Fehler bei Step a RenderTask", DR_ERROR);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);   
-    
-    if(current->isFinished())
-    {
-        mRenderTasks.pop(); //remove finished Task
-        if(mRenderTasks.empty()) return DR_OK; //return if no taks is left
+    RenderInStepsToTexture* current = NULL;
         
-        current = mRenderTasks.front(); //get new task
+    if(!mPreviewRenderTasks.empty())
+    {
+        current = mPreviewRenderTasks.front();
         if(setupFrameBuffer(current->getTextureID())) //setup framebuffer with new texture
-            LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
-    }
+            LOG_ERROR("Fehler bei setupFrameBuffer 1", DR_ERROR);
+        if(current->step()) LOG_ERROR("Fehler bei Step a PreviewRenderTask", DR_ERROR);
     
-    printf("\r time used: %f", static_cast<float>(SDL_GetTicks()-start)/1000.0f);
+        if(current->isFinished())
+            mPreviewRenderTasks.pop(); //remove finished Task
+    }
+    if(!mRenderTasks.empty())
+    {
+        current = mRenderTasks.front();
+        if(setupFrameBuffer(current->getTextureID())) //setup framebuffer with new texture
+            LOG_ERROR("Fehler bei setupFrameBuffer 2", DR_ERROR);
+        if(current->step()) LOG_ERROR("Fehler bei Step a RenderTask", DR_ERROR);
+    
+        if(current->isFinished())
+            mRenderTasks.pop(); //remove finished Task
+    }    
+    
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);   
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glEnable(GL_DEPTH_TEST);
+    
+    //printf("\r time used: %f", static_cast<float>(SDL_GetTicks()-start)/1000.0f);
     return DR_OK;
 }
 
@@ -87,7 +95,7 @@ DRReturn GlobalRenderer::setupFrameBuffer(GLuint textureID)
         DRLog.writeToLog("Fehler bei Check Framebuffer Status: %s", getFrameBufferEnumName(ret));
         LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
     }
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+   // glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     return DR_OK;
 }
 

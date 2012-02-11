@@ -1,5 +1,6 @@
 #include "main.h"
 
+
 PlanetHeightValues::PlanetHeightValues(GenerateNoisePlanet* noisePlanet)
 : mNoisePlanet(noisePlanet)
 {
@@ -24,25 +25,85 @@ DRColor PlanetHeightValues::getColorValue(const float height)
 
 // ********************************************************************************
 // *******************************************************************************
-RenderPlanet::RenderPlanet(SektorID seed)
-: RenderSektor(), mTextureRenderer(NULL), mTextureID(0)
+RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath)
+: RenderSektor(), mTextureRenderer(NULL), mTextureID(0), mPreviewTextureID(0), mInitalized(0)
 {
-    GlobalRenderer& gb = GlobalRenderer::Instance();
+    int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
+    init(seed, PI/2.0f, 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", size, texturePath);
+}
+
+RenderPlanet::RenderPlanet(SektorID seed, float theta,
+                           float cameraDistance, const DRMatrix& rotation, DRString texturePath)
+: RenderSektor(), mTextureRenderer(NULL), mTextureID(0), mPreviewTextureID(0), mInitalized(0)
+{
+    int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
+    init(seed, theta, cameraDistance, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", size, texturePath);
+}
+
+DRReturn RenderPlanet::init(SektorID seed, float theta, 
+              float cameraDistance, const DRMatrix& rotation, 
+              const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath)
+{
+    mTexturePath = texturePath;
+    //DRTextur tex(getPathAndFilename().data());
+    if(false/*tex.isLoaded()*/)
+    {
+      //  tex.bind();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        //mTextureID = tex.removeTexturID();
+        //tex.unload(true);
+    }
+    else
+    {
     
-    ShaderProgram* shader = ShaderManager::Instance().getShader("noise.vert", "noise.frag");
-    DRVector2 textureSize = gb.getTextureRenderMaxResolution();
-    mTextureRenderer = new RenderNoisePlanetToTexture(shader, textureSize);
-    mTextureID = DRTextureManager::Instance().getGLTextureMemory(static_cast<GLuint>(textureSize.x),
-                                                                 static_cast<GLuint>(textureSize.y),
-                                                                 GL_FLOAT, 4);    
-    float stepSize = static_cast<float>(gb.getTextureRenderStepSize());
-    mTextureRenderer->init(stepSize, PI/2.0f, 0.0f, mTextureID);    
-    gb.addRenderTask(mTextureRenderer);
+        GlobalRenderer& gb = GlobalRenderer::Instance();
+
+        int stepSizei = gb.getTextureRenderStepSize();
+        float stepSize = static_cast<float>(stepSizei);
+
+        mTextureRenderer = new RenderNoisePlanetToTexture(vertexShader, fragmentShader);
+        mTextureID = DRTextureManager::Instance().getGLTextureMemory(textureSize, textureSize,
+                                                                     GL_UNSIGNED_BYTE, 4);    
+        mPreviewTextureID = DRTextureManager::Instance().getGLTextureMemory(stepSizei, stepSizei,
+                                                                     GL_UNSIGNED_BYTE, 4);    
+        //clear texture
+        size_t bufferSize = textureSize*textureSize*4;
+        char* buffer = new char[bufferSize];
+
+        for(int i = 0; i < 2; i++)
+        {
+            memset(buffer, 0, bufferSize);
+            if(!i)
+            {
+                glBindTexture(GL_TEXTURE_2D, mTextureID);
+            }
+            else if(i == 1)
+            {
+                glBindTexture(GL_TEXTURE_2D, mPreviewTextureID);
+                textureSize = stepSizei;
+            }
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 
+                textureSize, textureSize,
+                GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        }
+        DR_SAVE_DELETE_ARRAY(buffer);
+
+        mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextureID, rotation);    
+    }
+    
+    return DR_OK;
+}
+
+DRString RenderPlanet::getPathAndFilename()
+{
+    return DRString(mTexturePath+DRString("planet.png"));
 }
 
 RenderPlanet::~RenderPlanet()
 {
-    ShaderManager::Instance().releaseShader("noise.vert", "noise.frag");
     DR_SAVE_DELETE(mTextureRenderer);
     if(mTextureID)
     {
@@ -50,9 +111,45 @@ RenderPlanet::~RenderPlanet()
         mTextureID = 0;
     }
 }
-
-DRReturn RenderPlanet::render(float fTime, Camera* cam)
+DRReturn RenderPlanet::generateAndBindTexture()
 {
+    if(!mInitalized && mTextureRenderer)
+    {
+        GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
+        mInitalized = 1;        
+    }
+    
+    if(mTextureRenderer && mTextureRenderer->isFinished())
+    {
+        if(mInitalized == 1)
+        {
+            mTextureRenderer->reinit(mTextureID);
+            GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
+        }
+        else
+        {
+            DRTextureManager::Instance().freeTexture(mPreviewTextureID);
+            mPreviewTextureID = 0;            
+            if(mTexturePath.size() > 0)
+            {
+                //DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
+                mTextureRenderer->saveImageToFile(getPathAndFilename().data());
+            }
+            DR_SAVE_DELETE(mTextureRenderer);
+        }
+        mInitalized++;
+    }    
+    glEnable(GL_TEXTURE_2D);
+    if(mPreviewTextureID)
+        glBindTexture(GL_TEXTURE_2D, mPreviewTextureID);
+    else
+        glBindTexture(GL_TEXTURE_2D, mTextureID);
+    
+    if(DRGrafikError("[RenderPlanet::generateAndBindTexture]")) return DR_ERROR;
+    return DR_OK;
+}
+DRReturn RenderPlanet::render(float fTime, Camera* cam)
+{    
     uint quadricDetails = 32;
     if(mDetailLevel > 9) quadricDetails = 256; // 10
     else if(mDetailLevel > 6) quadricDetails = 128; //7
@@ -60,14 +157,15 @@ DRReturn RenderPlanet::render(float fTime, Camera* cam)
     else if(mDetailLevel > 0.0f)  quadricDetails = 32; // 1
     else quadricDetails = 8;
     
-    if(mTextureRenderer && mTextureRenderer->isFinished())
-    {
-        DR_SAVE_DELETE(mTextureRenderer);
-    }    
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, mTextureID);
+    generateAndBindTexture();
     
+    //korrektur damit textur die selbe ist wie bei childs
+    glPushMatrix();
+    glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
+    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
     gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
+    
+    glPopMatrix();
     
     if(DRGrafikError("[RenderPlanet::render]")) return DR_ERROR;
     return DR_OK;

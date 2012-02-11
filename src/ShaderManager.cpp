@@ -1,4 +1,4 @@
-#include "main.h"
+#include "ShaderManager.h"
 
 ShaderManager::ShaderManager()
 : mInitalized(false)
@@ -96,6 +96,15 @@ void ShaderManager::releaseShader(const char* vertexShader, const char* fragment
     
     //suchen
     DHASH id = makeShaderHash(vertexShader, fragmentShader);
+    releaseShader(id);
+}
+
+void ShaderManager::releaseShader(ShaderProgram* shader)
+{
+    releaseShader(shader->getID());
+}
+void ShaderManager::releaseShader(DHASH id)
+{
     ShaderEntry* entry = static_cast<ShaderEntry*>(mShaderEntrys.findByHash(id));
     if(!entry) return;
 

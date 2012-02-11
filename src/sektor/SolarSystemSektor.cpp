@@ -17,7 +17,7 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     DRVector3 idVector(id.x, id.y, id.z);
 	idVector /= SHRT_MAX;
     int seed = (int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX);
-    Unit planetRadius(DRRandom::rDouble(7000, 1000), KM);
+    Unit planetRadius(DRRandom::rDouble(70000, 1000), KM);
         
     DRLog.writeToLog("Planeten Radius: %s", planetRadius.print().data());
     

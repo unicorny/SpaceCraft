@@ -11,7 +11,7 @@
 class ShaderProgram
 {
 public:
-    ShaderProgram();
+    ShaderProgram(DHASH id = 0);
     ~ShaderProgram();
     
     DRReturn init(const char* vertexShaderFile, const char* fragmentShaderFile);
@@ -19,10 +19,12 @@ public:
     static void unbind();
     
     __inline__ GLuint getProgram() {return mProgram;}
+    __inline__ DHASH getID() {return mId;}
     
 protected:
     unsigned char* readShaderFile(const char *filename);
     
+    DHASH  mId;
     GLuint mVertexShader;
     GLuint mFragmentShader;
     GLuint mProgram;

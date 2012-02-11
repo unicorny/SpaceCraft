@@ -8,6 +8,8 @@
 #ifndef SEKTORCHUNK_H
 #define	SEKTORCHUNK_H
 
+//#include "RenderBlock.h"
+
 class SektorChunk {
 public:
     SektorChunk();
@@ -15,7 +17,7 @@ public:
     virtual ~SektorChunk();
 private:
     
-    RenderBlock* mBlocks[16][16][16];
+    //RenderBlock* mBlocks[16][16][16];
 
 };
 

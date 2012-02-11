@@ -25,6 +25,7 @@ public:
     
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     virtual Sektor* getChild(SektorID childID);
+    __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     
 protected:
     GenerateNoisePlanet*        mNoiseGenerator;

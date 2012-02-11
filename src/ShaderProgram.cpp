@@ -1,7 +1,7 @@
 #include "main.h"
 
-ShaderProgram::ShaderProgram()
-: mVertexShader(0), mFragmentShader(0), mProgram(0)
+ShaderProgram::ShaderProgram(DHASH id/* = 0*/)
+: mId(id), mVertexShader(0), mFragmentShader(0), mProgram(0)
 {
     glClampColorARB(GL_CLAMP_READ_COLOR, GL_FALSE);
 }

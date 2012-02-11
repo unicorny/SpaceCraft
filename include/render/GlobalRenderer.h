@@ -34,7 +34,7 @@ public:
     
     //! put task onto stack, call it if it is on top, until it is finished, than remove task from stack
     //! memory will not be touched!!
-    void addRenderTask(RenderInStepsToTexture* newRenderTask);
+    void addRenderTask(RenderInStepsToTexture* newRenderTask, bool preview = false);
     
     // render current task
     DRReturn renderTasks();
@@ -52,6 +52,7 @@ private:
     //Render To texture
     GLuint                              mFrameBufferID;
     std::queue<RenderInStepsToTexture*> mRenderTasks;
+    std::queue<RenderInStepsToTexture*> mPreviewRenderTasks;
     
     // Config
     GLuint                               mTextureRenderStepSize;

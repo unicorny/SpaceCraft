@@ -1,4 +1,4 @@
-#include "main.h"
+#include "DRGeometrieManager.h"
 
 DRGeometrieManager::DRGeometrieManager()
 : mInitalized(false)

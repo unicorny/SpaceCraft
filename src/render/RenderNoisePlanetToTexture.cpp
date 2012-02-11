@@ -1,20 +1,21 @@
 #include "main.h"
+#include "ShaderManager.h"
+#include "DRGeometrieManager.h"
 
-RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(ShaderProgram* shader, DRVector2 textureSize)
-: RenderInStepsToTexture(), mShader(shader), mRenderSphere(NULL)
+RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(const char* vertexShaderName, const char* fragmentShaderName)
+: RenderInStepsToTexture(), mShader(NULL), mRenderSphere(NULL)
 {
-    if(!mShader)
+    if(!vertexShaderName || !fragmentShaderName)
         LOG_ERROR_VOID("Fehler kein Shader");
-	if(textureSize.lengthSq() == 0.0f)
-		LOG_ERROR_VOID("Fehler, texture size is zero");
-    
+	
+    mShader = ShaderManager::Instance().getShader(vertexShaderName, fragmentShaderName);    
     mRenderSphere = DRGeometrieManager::Instance().getGrid(50, GEO_FULL);
-    
-    mTextureSize = textureSize;    
+       
 }
 
 RenderNoisePlanetToTexture::~RenderNoisePlanetToTexture()
 {
+    ShaderManager::Instance().releaseShader(mShader);
     DRGeometrieManager::Instance().freeGrid(50, GEO_FULL);
 }
 
@@ -141,5 +142,5 @@ DRReturn RenderNoisePlanetToTexture::init(float stepSize, float theta, float h, 
     mRotation = rotation;
     float clippingPlanes[4] = {1.0f, -1.0f, 1.0f, -1.0f};
     
-    return RenderInStepsToTexture::init(stepSize, mTextureSize, clippingPlanes, textureID);    
+    return RenderInStepsToTexture::init(stepSize, clippingPlanes, textureID);    
 }

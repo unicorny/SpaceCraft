@@ -2,9 +2,10 @@
 
 Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent) 
 : mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
-    mIdleSeconds(0.0)
+  mIdleSeconds(0.0)
 {
     getSektorPath(mSektorPath);
+    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
 }
 
 Sektor::~Sektor()
@@ -71,6 +72,7 @@ DRReturn Sektor::renderAll(float fTime, Camera* cam, bool rootRendered/* = false
             if(ret) LOG_ERROR("Fehler bei render all", DR_ERROR);
             glPopMatrix();
         }
+        DRGrafikError("Sektor::renderAll");
         return ret;
     }
     return DR_ERROR;
@@ -142,6 +144,20 @@ Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex)
 	return child->getSektorByPath(path, thisIndex);
         
     return NULL;
+}
+
+DRString Sektor::getSektorPathName() const
+{
+    std::stringstream s(std::stringstream::in|std::stringstream::out);
+
+    std::vector<SektorID> path;
+    getSektorPath(path);
+    s << "./data/_" << path[0] << "/";
+    for(int i = 1; i < path.size(); i++)
+    {
+        s << "_" << path[i] << "/";
+    }
+    return s.str();
 }
 
 const char* Sektor::getSektorTypeName(SektorType type)

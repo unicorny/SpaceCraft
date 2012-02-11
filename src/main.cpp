@@ -1,4 +1,14 @@
 #include "main.h"
+#include "ShaderManager.h"
+#include "DRGeometrieManager.h"
+
+struct ControlMode
+{
+    ControlMode() {}
+    ControlMode(Unit value) : mValue(value) {}
+    ControlMode(double value, UnitTypes type) : mValue(value, type) {}
+    Unit mValue;
+};
 
 // Globale Variablen
 Player g_Player;
@@ -16,6 +26,8 @@ bool            wireframe = false;
 //DRGeometrieIcoSphere g_geo;
 
 GLint sphereList = 0;
+
+
 
 int rekursionTest(int zahl)
 {
@@ -311,16 +323,7 @@ DRReturn move(float fTime)
         g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
     else
         g_cam->translateRel_SektorPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
-    /*if(gCurrentControlMode == 1)
-    // kamera bewegung abhängig von den Tasten a, d (links/rechts), bild up, bild down (hoch/runter), Pfeil hoch und Pfeil runter (vorwärts/rückwärts)
-        g_cam->translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
-    else if(gCurrentControlMode == 2)
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*1000.0f, KM);
-    else if(gCurrentControlMode == 3)
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*0.005f, AE);
-    else if(gCurrentControlMode == 4)
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*50.0f, KM);
-    */
+    
     //set control mode
     if(EnIsButtonPressed(SDLK_1)) gCurrentControlMode = 0;
     else if(EnIsButtonPressed(SDLK_2)) gCurrentControlMode = 1;

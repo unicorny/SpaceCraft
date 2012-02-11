@@ -1,4 +1,4 @@
-#include "main.h"
+#include "DRGeometrieHeightfield.h"
 
 
 DRGeometrieHeightfield::DRGeometrieHeightfield(DRVector3 sphericalCenter/* = DRVector3(0.0f)*/)

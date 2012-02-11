@@ -1,6 +1,9 @@
 #ifndef __SC_SHADER_MANAGER__
 #define __SC_SHADER_MANAGER__
 
+#include "main.h"
+#include "ShaderProgram.h"
+
 class ShaderManager
 {
 public:
@@ -20,6 +23,8 @@ public:
     ShaderProgram* getShader(const char* vertexShader, const char* fragmentShader);
     //! reduziert reference, bei null wird Textur gelöscht und OpenGL Texture in liste eingetragen
     void      releaseShader(const char* vertexShader, const char* fragmentShader);
+    void      releaseShader(ShaderProgram* shader);
+    void      releaseShader(DHASH id);
     
     
 private:

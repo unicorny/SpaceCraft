@@ -1,7 +1,8 @@
 #ifndef __DR_GEOMETRIE_MANAGER__
 #define __DR_GEOMETRIE_MANAGER__
 
-
+#include "main.h"
+#include "DRGeometrieHeightfield.h"
 
 class DRGeometrieManager
 {

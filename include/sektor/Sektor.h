@@ -121,6 +121,8 @@ public:
     //! begin with root sektor (place zero)
     void getSektorPath(std::vector<SektorID>& storage) const;
     
+    DRString getSektorPathName() const;
+    
 protected:
     
     
@@ -143,6 +145,7 @@ protected:
     
     //! renderer for this sektor
     RenderSektor*       mRenderer;
+    
     
     //! seconds since last use (visible for camera)
     double              mIdleSeconds;

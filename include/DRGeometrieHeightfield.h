@@ -1,6 +1,8 @@
 #ifndef __DR_GEOMETRIE_HEIGHTFIELD__
 #define __DR_GEOMETRIE_HEIGHTFIELD__
 
+#include "main.h"
+
 enum GeometrieGridFormat
 {
     GEO_FULL = 1,

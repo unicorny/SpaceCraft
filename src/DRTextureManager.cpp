@@ -142,8 +142,8 @@ void DRTextureManager::freeTexture(GLuint textureID)
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &entry.height);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_DEPTH, &entry.bpp);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &entry.format);
-    printf("Infos ueber eine zu befreiende Texture: ");
-    entry.print(); printf("\n");
+    //printf("Infos ueber eine zu befreiende Texture: ");
+    //entry.print(); printf("\n");
     entry.textureID = textureID;
     entry.timeout = 600.0f;
     DHASH id = makeTextureHash(entry);
@@ -160,6 +160,7 @@ DRReturn DRTextureManager::move(float fTime)
         it->second.timeout -= fTime;
         if(it->second.timeout < 0.0f)
         {
+            printf("DRTextureManager::move, timeout texture will be deleted\n");
             glDeleteTextures(1, &it->second.textureID);
             mTextureMemoryEntrys.erase(it);
         }

@@ -24,7 +24,7 @@ public:
     DRReturn saveToFile();
     DRReturn loadFromFile();
     
-    Sektor* getRootSektor() {return mRootSektor;}
+    RootSektor* getRootSektor() {return mRootSektor;}
     
 private:
     Server(u64 serverID);
@@ -35,7 +35,7 @@ private:
     virtual ~Server();
     
     u64 mServerID;
-    Sektor* mRootSektor;
+    RootSektor* mRootSektor;
 };
 
 #endif	/* SERVER_H */

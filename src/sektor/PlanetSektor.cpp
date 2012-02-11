@@ -1,4 +1,5 @@
 #include "main.h"
+#include "ShaderManager.h"
 
 SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1),SektorID(1,0,0),SektorID(0,0, 1),// front, right, back
                                         SektorID(-1,0,0),SektorID(0,1,0),SektorID(0,-1,0)};// left, top, bottom
@@ -32,7 +33,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
     mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
     
-    mRenderer = new RenderPlanet(id);
+    mRenderer = new RenderPlanet(id, getSektorPathName());
 }
 
 PlanetSektor::~PlanetSektor()
@@ -51,6 +52,15 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
     distance = distance.convertTo(KM);
     //printf("\rEntfernung zur Oberflaeche: %s", distance.print().data());
+    Vector3Unit cameraPlanet = -mLastRelativeCameraPosition;
+    Unit l = cameraPlanet.length();
+    double theta = acos(mRadius/l); // if theta < 0.5 Grad, using ebene
+    //theta = cos(0.617940);
+    //printf("\rtheta: %f (%f Grad), distance: %f", theta, theta*RADTOGRAD,  (float)mRadius/mLastRelativeCameraPosition.length());
+//    mLastRelativeCameraPosition.print("cameraPos");
+    DRVector3 v = mLastRelativeCameraPosition.getVector3();
+    
+    //printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
@@ -60,7 +70,17 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
             double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))-PI/4.0;            
             if(angle < horizontAngle)
+            {
+                Eigen::Vector3f center = Eigen::Vector3f(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z);
+                Eigen::Affine3f affine;
+                Eigen::Quaternionf q;
+                q =   Eigen::Quaternionf(Eigen::AngleAxisf(acosf(45.0f*GRADTORAD), Eigen::Vector3f::UnitX())
+                    * Eigen::AngleAxisf(acosf(45.0f*GRADTORAD), Eigen::Vector3f::UnitY()));
+                center = q * center;
+                center *= 1000;
+                //getChild(SektorID(center(0), center(1), center(2)));            
                 getChild(mSubPlanets[i]);            
+            }
             //else
                 //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
         }
@@ -75,6 +95,12 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
 
 DRReturn PlanetSektor::render(float fTime, Camera* cam)
 {
+#if SDL_VERSION_ATLEAST(1,3,0)
+	Uint8 *keystate = SDL_GetKeyboardState(NULL);
+#else
+	Uint8 *keystate = SDL_GetKeyState(NULL);
+#endif
+    
     //if(isObjectInSektor(cam->getSektorPosition())) return DR_OK;
 	//Unit distance1 = Vector3Unit(mSektorPosition - cam->getSektorPosition()).length();
     //Unit distance1 = Vector3Unit(mSektorPosition - mLastRelativeCameraPosition).length();    
@@ -111,27 +137,38 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     glScaled(radius2, radius2, radius2);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
+    //DRReturn ret = mRenderer->render(fTime, cam);
     if(mRenderer && !isObjectInSektor(mLastRelativeCameraPosition))
     {
       //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
-        //glPushMatrix();
+        glPushMatrix();
+        static float angleX = 0.0f;
+        static float angleY = 0.0f; //90
+        static float angleZ = 0.0f; //-90
+        
+        float speed = 20.0f;
+        angleY += (keystate[11] - keystate[9])*fTime*speed;
+        angleX += (keystate[23] - keystate[10]) * fTime*speed;
+        angleZ += (keystate[28] - keystate[24]) * fTime*speed;
+        
+        glRotatef(angleZ, 0.0f, 0.0f, 1.0f);
+        glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+        glRotatef(angleY, 0.0f, 1.0f, 0.0f);
+        
+        printf("\rx: %f, y: %f, z: %f", angleX, angleY, angleZ);
         
         DRReturn ret = mRenderer->render(fTime, cam);
 //		GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
-        //glPopMatrix();
+        glPopMatrix();
         if(ret) LOG_ERROR("Fehler bei call planet renderer", DR_ERROR);
         //child didn't need to render
         return DR_NOT_ERROR;
+        //return DR_OK;
     } 
     else
     {
         mSphericalShaderForSubPlanet->bind();
-        GLint p = mSphericalShaderForSubPlanet->getProgram();
-        int sphereCenterLocation = glGetUniformLocation(p, "SphericalCenter");
-        int thetaLocation = glGetUniformLocation(p, "theta");
-        
-        glUniform3fv(sphereCenterLocation, 1, static_cast<float*>(DRVector3(0.0f, 0.0f, -1.0f*(1.0f-spherePartH))));
-        glUniform1f(thetaLocation, static_cast<float>(theta));
+        GLint p = mSphericalShaderForSubPlanet->getProgram();        
     }
     
     return DR_OK;
@@ -156,7 +193,9 @@ Sektor* PlanetSektor::getChild(SektorID childID)
 
         Unit radius = mRadius * faktorH;
         printf("radius: %s\n", radius.print().data());
-        SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, NULL);
+        //SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, mRadius/mLastRelativeCameraPosition.length());
+        SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, 0.617940f);
+        
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 
         //Set neighbor pointer
@@ -202,9 +241,16 @@ Sektor* PlanetSektor::getChild(SektorID childID)
 
 bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
 {    
+    Unit l = positionInSektor.length();
+
+    double theta = acos(mRadius/l); // if theta < 0.5 Grad, using ebene
+    //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
+    return theta <=70.0f*GRADTORAD;
+    /*
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;
     radiusSquare *= radiusSquare;
     //Unit distance = Vector3Unit(positionInParentSektor - mSektorPosition).length();
     //return Vector3Unit(positionInParentSektor.convertTo(AE) - mSektorPosition).lengthSq() <= radiusSquare;    
     return positionInSektor.convertTo(AE).lengthSq() <= radiusSquare;    
+     * */
 }

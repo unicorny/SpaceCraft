@@ -124,8 +124,8 @@ void main()
 					   alpha);
 
 	//gl_FragColor = vec4(gl_TexCoord[2].xyz*0.5+0.5, 0.0);
-	vec3 c = v_texCoord3D;//*0.5+0.5;
+	//vec3 c = v_texCoord3D;//*0.5+0.5;
 	//gl_FragColor = vec4(vec3(n)*0.5+0.5, 1.0);
-	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+	//gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 	
 }

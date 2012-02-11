@@ -11,10 +11,14 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
     
 }
 
-DRReturn RenderInStepsToTexture::init(float stepSize, DRVector2 textureSize, float clippingBorder[4], GLuint textureID)
+DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], GLuint textureID)
 {
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &mTextureSize.x);
+    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &mTextureSize.y);
+        
     mStepSize = stepSize;
-    mTextureSize = textureSize;
+    //mTextureSize = textureSize;
     mCursorIndex = mTextureSize/2.0f - stepSize/2.0f;
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
@@ -22,6 +26,24 @@ DRReturn RenderInStepsToTexture::init(float stepSize, DRVector2 textureSize, flo
     mTextureID = textureID;
     mFinished = false;
     memcpy(mClippingBorder, clippingBorder, sizeof(float)*4);
+    
+    return DR_OK;
+}
+
+DRReturn RenderInStepsToTexture::reinit(GLuint textureID)
+{
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &mTextureSize.x);
+    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &mTextureSize.y);
+    
+   // mTextureSize *= textureSizeScalar;
+ //   mTextureSize = textureSize;
+    mTextureID = textureID;
+    mCursorIndex = mTextureSize/2.0f - mStepSize/2.0f;
+    mIndexStepMode = 0;
+    mCursorMaxCount = 1;
+    mCursorCurrentCount = 0;
+    mFinished = false;
     
     return DR_OK;
 }

@@ -5,7 +5,7 @@
  * Created on 21. August 2011, 08:04
  */
 
-#include "main.h"
+#include "SektorChunk.h"
 
 SektorChunk::SektorChunk() {
 }

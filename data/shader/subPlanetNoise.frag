@@ -36,6 +36,7 @@
 uniform sampler2D texture;
 
 varying vec3 v_texCoord3D;
+varying vec4 c_color;
 
 uniform float CONTINENT_FREQUENCY;
 uniform float CONTINENT_LACUNARITY;
@@ -551,6 +552,7 @@ vec4 gradientColor(float value, GradientColor points[10], int pointsCount)
 
   // Now perform the linear interpolation given the alpha value.
   return LinearInterpColor (color0, color1, alpha);
+  //return LinearInterpColor (color0, color1, value*0.5+0.5);
 }
 
 float blend(vec3 value)
@@ -1514,9 +1516,9 @@ void main( void )
 										   continentsWithBadlands_ma, vec2(SEA_LEVEL, CONTINENT_HEIGHT_SCALE + SEA_LEVEL),
 										   CONTINENT_HEIGHT_SCALE - SEA_LEVEL);
 
-
 	if(n == 0.0)
 	   	n = continentsWithRivers_se;
+//*/
 	GradientColor gradient[10];
 	gradient[0] =  GradientColor(-2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     0.0,     1.0));
     gradient[1] =  GradientColor(-0.03125 	  	+ SEA_LEVEL_IN_METRES, vec4(0.02353, 0.22745, 0.49804, 1.0));
@@ -1530,8 +1532,9 @@ void main( void )
     gradient[9] =  GradientColor( 2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     1.0,     1.0));
 
    	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
-	//gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), 1.0);
 	vec4 color = vec4(v_texCoord3D, 1.0);
+	//gl_FragColor = vec4(color.x+color.x, color.y*color.y, color.z*color.z, 1.0);
+	//gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), 1.0);
 	//gl_FragColor = color;
-	
+	//gl_FragColor(v_texCoord3D*0.5+0.5, 1.0);
 }
