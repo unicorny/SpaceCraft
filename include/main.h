@@ -1,7 +1,7 @@
 #include "Engine2Main.h"
 //includes which will be later go into Engine
 //#include "DRGeometrieHeightfield.h"
-#include "DRTextureManager.h"
+
 //#include "DRGeometrieManager.h"
 
 #include <iostream>
@@ -14,6 +14,9 @@
 #include "Eigen/Dense"
 #include "Eigen/Geometry"
 
+#include "Texture.h"
+#include "DRTextureManager.h"
+
 // Tools
 #include "ShaderProgram.h"
 //#include "ShaderManager.h"
@@ -21,6 +24,7 @@
 #include "Vector3Unit.h"
 #include "GenerateNoisePlanet.h"
 #include "Camera.h"
+
 
 // View
 #include "Block.h"

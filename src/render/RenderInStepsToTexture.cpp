@@ -1,7 +1,7 @@
 #include "main.h"
 
 RenderInStepsToTexture::RenderInStepsToTexture()
-: mTextureID(0), mStepSize(0), mIndexStepMode(0), mFinished(false)
+: mTexture(NULL), mStepSize(0), mIndexStepMode(0), mFinished(false)
 {
     
 }
@@ -11,11 +11,13 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
     
 }
 
-DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], GLuint textureID)
+DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], Texture* texture)
 {
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &mTextureSize.x);
-    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &mTextureSize.y);
+	if(!texture) return DR_ZERO_POINTER;
+	Eigen::Vector2i texSize = texture->getResolution();
+	if(texSize(0) <= 0 || texSize(1) <= 0)
+		LOG_ERROR("textureSize is invalid", DR_ERROR);
+	mTextureSize = DRVector2(texSize(0), texSize(1));
         
     mStepSize = stepSize;
     //mTextureSize = textureSize;
@@ -23,22 +25,24 @@ DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], G
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
     mCursorCurrentCount = 0;
-    mTextureID = textureID;
+    mTexture = texture;
     mFinished = false;
     memcpy(mClippingBorder, clippingBorder, sizeof(float)*4);
     
     return DR_OK;
 }
 
-DRReturn RenderInStepsToTexture::reinit(GLuint textureID)
+DRReturn RenderInStepsToTexture::reinit(Texture* texture)
 {
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &mTextureSize.x);
-    glGetTexLevelParameterfv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &mTextureSize.y);
+	if(!texture) return DR_ZERO_POINTER;
+	Eigen::Vector2i texSize = texture->getResolution();
+	if(texSize(0) <= 0 || texSize(1) <= 0)
+		LOG_ERROR("textureSize is invalid", DR_ERROR);
+	mTextureSize = DRVector2(texSize(0), texSize(1));
     
    // mTextureSize *= textureSizeScalar;
  //   mTextureSize = textureSize;
-    mTextureID = textureID;
+    mTexture = texture;
     mCursorIndex = mTextureSize/2.0f - mStepSize/2.0f;
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
@@ -59,8 +63,11 @@ DRReturn RenderInStepsToTexture::step()
     //mFrameBuffer->bindToRender();
     
     //render stuff
-    glClearColor(0.0, 1.0, 1.0, 0);
-    //glClear (GL_COLOR_BUFFER_BIT);   
+    if(mCursorIndex == mTextureSize/2.0f - mStepSize/2.0f)
+    {
+        glClearColor(0.0, 0.0, 0.0, 0);
+        glClear (GL_COLOR_BUFFER_BIT);   
+    }
     
     glColor3f(0.0f, 1.0f, 0.0f);    
     
@@ -119,7 +126,8 @@ DRReturn RenderInStepsToTexture::saveImageToFile(const char* path)
 {
     DRIImage* image = DRIImage::newImage();
     u8* buffer = (u8*)malloc(mTextureSize.x*mTextureSize.y*4*sizeof(u8));
-    glBindTexture(GL_TEXTURE_2D, mTextureID);
+	mTexture->bind();
+    //glBindTexture(GL_TEXTURE_2D, mTextureID);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
     if(DRGrafikError("RenderInStepsToTexture::saveImageToFile")) LOG_ERROR("Fehler bei getting texture Data!", DR_ERROR);
     image->setSize(mTextureSize);

@@ -9,9 +9,9 @@ public:
     ~RenderInStepsToTexture();
     
     // reset values, set step size
-    DRReturn init(float stepSize, float clippingBorder[4], GLuint textureID);
+    DRReturn init(float stepSize, float clippingBorder[4], Texture* texture);
     //! erstellt eine neue Textur mit denselben Einstellungen, jedoch wird die texturgröße geändert
-    DRReturn reinit(GLuint textureID);
+    DRReturn reinit(Texture* texture);
     // render with current step, add step
     DRReturn step();
     
@@ -21,12 +21,12 @@ public:
     virtual DRReturn renderStuff() = 0;        
     
     __inline__ bool isFinished() {return mFinished;}
-    __inline__ GLuint getTextureID() {return mTextureID;}
+    __inline__ Texture* getTextur() {return mTexture;}
     
 protected:
     float       mClippingBorder[4]; //left, rigt, bottom, top
     DRVector2   mTextureSize;    
-    GLuint      mTextureID;
+    Texture*     mTexture;
     
 private:
     DRVector2   mCursorIndex;

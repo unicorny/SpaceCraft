@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -121,7 +121,7 @@ extern DECLSPEC void SDLCALL SDL_LogSetPriority(int category,
                                                 SDL_LogPriority priority);
 
 /**
- *  \brief Set the priority of a particular log category
+ *  \brief Get the priority of a particular log category
  */
 extern DECLSPEC SDL_LogPriority SDLCALL SDL_LogGetPriority(int category);
 

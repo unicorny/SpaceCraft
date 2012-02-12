@@ -155,6 +155,7 @@ void test()
 void sizeOfClasses()
 {
     DRLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
+	DRLog.writeToLog("Textur: %d", sizeof(Texture));
     DRLog.writeToLog("Camera: %d", sizeof(Camera));
     DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
     DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
@@ -202,6 +203,7 @@ DRReturn load()
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
         LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
+	LOG_WARNING_SDL();
 
     
     g_Font = new DRFont();
@@ -336,12 +338,14 @@ DRReturn move(float fTime)
     else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
      
     // R-Taste
-    if(EnIsButtonPressed(21)) wireframe = !wireframe;
+    if(EnIsButtonPressed(SDLK_r)) wireframe = !wireframe;
     
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
     if(keystate[SDLK_z]) blockCount++;
     
     if(fTime == 0.0f) fTime = 0.00166f;
+
+	DRTextureManager::Instance().move(fTime);
     //if(g_Player.getSektor()->moveAll(fTime, g_cam))
     if(g_Player.getSektor()->moveAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei move sektor", DR_ERROR);

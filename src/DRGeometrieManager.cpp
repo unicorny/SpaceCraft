@@ -34,7 +34,8 @@ void DRGeometrieManager::exit()
 
 DHASH DRGeometrieManager::makeGeometrieHash(GLuint gridSize, GeometrieGridFormat format)
 {
-    return gridSize | format<<4 | DRMakeStringHash("grid")>>9;    
+    DHASH id = gridSize | format<<4 | DRMakeStringHash("grid")>>9;
+    return id;    
 }
 
 DRGeometrieHeightfield* DRGeometrieManager::getGrid(GLuint gridSize, GeometrieGridFormat gridFormat)

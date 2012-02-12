@@ -10,7 +10,7 @@ public:
     ~RenderNoisePlanetToTexture();
     
     void update(float theta, float h) {mTheta = theta; mH = h;}
-    DRReturn init(float stepSize, float theta, float h, GLuint textureID, const DRMatrix& rotation = DRMatrix::identity());
+    DRReturn init(float stepSize, float theta, float h, Texture* texture, const DRMatrix& rotation = DRMatrix::identity());
     
     virtual DRReturn renderStuff();
     

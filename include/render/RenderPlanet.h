@@ -9,8 +9,10 @@
 #define	__SC_RENDER_PLANET_H
 
 #include "noiseutils.h"
+
 //#include "RenderNoisePlanetToTexture.h"
 class RenderNoisePlanetToTexture;
+class Texture;
 
 class PlanetHeightValues: public DRHeightValueStorage
 {
@@ -41,7 +43,6 @@ public:
     virtual DRReturn render(float fTime, Camera* cam);
     void setTexturePath(DRString texturePath) {mTexturePath = texturePath;}
     
-    
 protected:
     RenderPlanet(SektorID seed, float theta, 
                  float cameraDistance, const DRMatrix& rotation, DRString texturePath);
@@ -53,8 +54,8 @@ protected:
     DRString getPathAndFilename();
         
     RenderNoisePlanetToTexture* mTextureRenderer;
-    GLuint                      mTextureID;    
-    GLuint                      mPreviewTextureID;
+	Texture*						mTexture;
+	Texture*						mPreviewTextur;
     short                       mInitalized;
     DRString                    mTexturePath;
     

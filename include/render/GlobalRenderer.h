@@ -41,7 +41,7 @@ public:
     
 private:
     GlobalRenderer();
-    DRReturn setupFrameBuffer(GLuint textureID);
+    DRReturn setupFrameBuffer(Texture* texture);
     static const char* getFrameBufferEnumName(GLenum name);
     
     bool				m_bInitialized;

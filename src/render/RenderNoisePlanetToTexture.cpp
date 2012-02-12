@@ -135,12 +135,12 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     return DR_OK;
 }
 
-DRReturn RenderNoisePlanetToTexture::init(float stepSize, float theta, float h, GLuint textureID, const DRMatrix& rotation /*= DRMatrix::Identity()*/)
+DRReturn RenderNoisePlanetToTexture::init(float stepSize, float theta, float h, Texture* texture, const DRMatrix& rotation /*= DRMatrix::Identity()*/)
 {
     mTheta = theta;
     mH = h;
     mRotation = rotation;
     float clippingPlanes[4] = {1.0f, -1.0f, 1.0f, -1.0f};
     
-    return RenderInStepsToTexture::init(stepSize, clippingPlanes, textureID);    
+    return RenderInStepsToTexture::init(stepSize, clippingPlanes, texture);    
 }

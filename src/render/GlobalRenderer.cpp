@@ -52,7 +52,7 @@ DRReturn GlobalRenderer::renderTasks()
     if(!mPreviewRenderTasks.empty())
     {
         current = mPreviewRenderTasks.front();
-        if(setupFrameBuffer(current->getTextureID())) //setup framebuffer with new texture
+        if(setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
             LOG_ERROR("Fehler bei setupFrameBuffer 1", DR_ERROR);
         if(current->step()) LOG_ERROR("Fehler bei Step a PreviewRenderTask", DR_ERROR);
     
@@ -62,7 +62,7 @@ DRReturn GlobalRenderer::renderTasks()
     if(!mRenderTasks.empty())
     {
         current = mRenderTasks.front();
-        if(setupFrameBuffer(current->getTextureID())) //setup framebuffer with new texture
+        if(setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
             LOG_ERROR("Fehler bei setupFrameBuffer 2", DR_ERROR);
         if(current->step()) LOG_ERROR("Fehler bei Step a RenderTask", DR_ERROR);
     
@@ -79,15 +79,15 @@ DRReturn GlobalRenderer::renderTasks()
     return DR_OK;
 }
 
-DRReturn GlobalRenderer::setupFrameBuffer(GLuint textureID)
+DRReturn GlobalRenderer::setupFrameBuffer(Texture* texture)
 {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
     //create texture
     //bind to the new texture ID
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    texture->bind();
     
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                              GL_TEXTURE_2D, textureID, 0);
+                              GL_TEXTURE_2D, texture->getId(), 0);
     GLenum ret = GL_FRAMEBUFFER_COMPLETE_EXT;
     ret = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if(ret != GL_FRAMEBUFFER_COMPLETE_EXT)

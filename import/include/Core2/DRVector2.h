@@ -53,6 +53,7 @@ public:
 	DRVector2(const DRReal f) : x(f), y(f)										{}
 	DRVector2(const DRReal _x, const DRReal _y) : x(_x), y(_y)					{}
 	DRVector2(const DRReal* pfComponent) : x(pfComponent[0]), y(pfComponent[1])	{}
+        DRVector2(const int _x, const int _y): x(static_cast<float>(_x)), y(static_cast<float>(_y)) {}
 
 	//Operatoren
 	//Casting

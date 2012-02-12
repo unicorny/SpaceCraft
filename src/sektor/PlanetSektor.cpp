@@ -141,25 +141,10 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     if(mRenderer && !isObjectInSektor(mLastRelativeCameraPosition))
     {
       //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
-        glPushMatrix();
-        static float angleX = 0.0f;
-        static float angleY = 0.0f; //90
-        static float angleZ = 0.0f; //-90
         
-        float speed = 20.0f;
-        angleY += (keystate[11] - keystate[9])*fTime*speed;
-        angleX += (keystate[23] - keystate[10]) * fTime*speed;
-        angleZ += (keystate[28] - keystate[24]) * fTime*speed;
-        
-        glRotatef(angleZ, 0.0f, 0.0f, 1.0f);
-        glRotatef(angleX, 1.0f, 0.0f, 0.0f);
-        glRotatef(angleY, 0.0f, 1.0f, 0.0f);
-        
-        printf("\rx: %f, y: %f, z: %f", angleX, angleY, angleZ);
         
         DRReturn ret = mRenderer->render(fTime, cam);
 //		GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
-        glPopMatrix();
         if(ret) LOG_ERROR("Fehler bei call planet renderer", DR_ERROR);
         //child didn't need to render
         return DR_NOT_ERROR;

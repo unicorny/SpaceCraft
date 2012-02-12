@@ -72,7 +72,7 @@ DRReturn Player::init()
 void Player::exit()
 {
     saveIntoFile();
-    DR_SAVE_DELETE(mCurrentSektor);
+    //DR_SAVE_DELETE(mCurrentSektor);
 }
 
 DRReturn Player::loadFromFile(const char* file)
