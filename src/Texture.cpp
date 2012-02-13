@@ -114,6 +114,7 @@ DRReturn Texture::getPixelsToSave(const char* path)
 	{
 		glGenBuffersARB(1, &mPboSaveID);
 	}
+	mFilename = path;
 	bind();
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, mPboSaveID);
 	Eigen::Vector2i size = getResolution();
@@ -130,20 +131,32 @@ DRReturn Texture::getPixelsToSave(const char* path)
 	{
 		mImage->setSize(DRVector2(size(0), size(1)));
 		mImage->setImageFormat(-1);
-		mImage->setPixel(ptr);
-	//	if(mImage->saveIntoFile(path))
-	//		LOG_ERROR("fehler bei save", DR_ERROR);
+		mImage->setPixel(ptr);		
 
 		glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB);
 	}
 	
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 	
-	DRIImage::deleteImage(mImage);
-	mImage = NULL;
-
 	if(DRGrafikError("Texture::getPixelsToSave(): error by asynchronously saving an image!"))
 		LOG_ERROR("Fehler bei save image", DR_ERROR);
+	mSavingState = 1;
+
+	return DR_OK;
+}
+
+DRReturn Texture::saveImage()
+{
+	if(!mImage) return DR_ZERO_POINTER;
+	if(mSavingState < 1) LOG_ERROR("Image data not saved!", DR_ERROR);
+	if(mSavingState > 1) LOG_ERROR("ImageData already saved!", DR_OK);
+
+	if(mImage->saveIntoFile(mFilename.data()))
+		LOG_ERROR("fehler bei save", DR_ERROR);
+	DRIImage::deleteImage(mImage);
+	mImage = NULL;
+		
+	mSavingState = 2;
 	printf("image saved\n");
 	return DR_OK;
 }

@@ -200,10 +200,10 @@ DRReturn DRTextureManager::move(float fTime)
     return DR_OK;
 }
 
-void DRTextureManager::addAsynchronTextureLoadTask(Texture* textur)
+void DRTextureManager::addAsynchronTextureLoadTask(Texture* texture)
 {
 	SDL_LockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
-	mAsynchronLoadTextures.push(textur);
+	mAsynchronLoadTextures.push(texture);
 
 	//send the texture load Thread a signal to continue
 	if(SDL_CondSignal(mTextureLoadCondition)== -1) //LOG_ERROR_SDL(DR_ERROR);
@@ -214,6 +214,22 @@ void DRTextureManager::addAsynchronTextureLoadTask(Texture* textur)
 
 	SDL_UnlockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
 }
+
+void DRTextureManager::addAsynchronTextureSaveTask(Texture* texture)
+{
+	SDL_LockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
+	mAsynchronSaveTextures.push(texture);
+
+	//send the texture load Thread a signal to continue
+	if(SDL_CondSignal(mTextureLoadCondition)== -1) //LOG_ERROR_SDL(DR_ERROR);
+	{
+		LOG_WARNING_SDL();
+		LOG_WARNING("Fehler beim Aufruf von SDL_CondSignal"); 
+	}
+
+	SDL_UnlockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
+}
+
 
 int DRTextureManager::asynchronTextureLoadThread(void* data)
 {
@@ -238,9 +254,18 @@ int DRTextureManager::asynchronTextureLoadThread(void* data)
 				// push it onto the other queue
 				t.mLoadedAsynchronLoadTextures.push(cur);
 				//SDL_UnlockMutex(t.mTextureLoadMutex);
-
 			}
-			SDL_UnlockMutex(t.mTextureLoadMutex); LOG_ERROR_SDL(-1);
+			if(!t.mAsynchronSaveTextures.empty())
+			{
+				// get top textur
+				Texture* cur = t.mAsynchronSaveTextures.front();
+				t.mAsynchronSaveTextures.pop();
+				SDL_UnlockMutex(t.mTextureLoadMutex);
+				// call load
+				cur->saveImage();
+			}
+			else
+				SDL_UnlockMutex(t.mTextureLoadMutex); LOG_ERROR_SDL(-1);
 		}
 		else
 		{

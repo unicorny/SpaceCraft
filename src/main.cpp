@@ -159,6 +159,7 @@ void sizeOfClasses()
     DRLog.writeToLog("Camera: %d", sizeof(Camera));
     DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
     DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
+	DRLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
     DRLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
     DRLog.writeToLog("GenerateNoisePlanet: %d", sizeof(GenerateNoisePlanet));
     DRLog.writeToLog("PlanetHeightValues: %d", sizeof(PlanetHeightValues));

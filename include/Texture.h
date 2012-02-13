@@ -23,11 +23,13 @@ public:
 	DRReturn pixelsCopyToRenderer();
 	__inline__ bool isLoadingFinished() {return mLoadingState == 2;}
 	__inline__ bool isTextureEmpty() {return mLoadingState == 3;}
+	__inline__ bool isTextureSaved() {return mSavingState == 2;}
 
 	void bind();
 	__inline__ static void unbind() {glBindTexture(GL_TEXTURE_2D, 0);}
 
 	DRReturn getPixelsToSave(const char* path);
+	DRReturn saveImage();
 
 	//Parameter
 	void setWrappingMode(GLint mode);

@@ -121,6 +121,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
 				//DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
 				mTexture->getPixelsToSave(getPathAndFilename().data());
+				DRTextureManager::Instance().addAsynchronTextureSaveTask(mTexture);
 			}
 			DR_SAVE_DELETE(mTextureRenderer);
 		}

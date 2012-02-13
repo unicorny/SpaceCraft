@@ -26,7 +26,8 @@ public:
     //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
     void      freeTexture(GLuint textureID);
 
-	void	  addAsynchronTextureLoadTask(Texture* textur);
+	void	  addAsynchronTextureLoadTask(Texture* texture);
+	void	  addAsynchronTextureSaveTask(Texture* texture);
     
     // update timeout, release lange nicht verwendete Texturen
     DRReturn move(float fTime);     
@@ -70,6 +71,7 @@ private:
 
 	std::queue<Texture*> mAsynchronLoadTextures;
 	std::queue<Texture*> mLoadedAsynchronLoadTextures;
+	std::queue<Texture*> mAsynchronSaveTextures;
 	SDL_mutex*			mTextureLoadMutex;
 	SDL_Thread*		    mTextureLoadThread;
 	SDL_cond*			mTextureLoadCondition;
