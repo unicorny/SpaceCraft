@@ -132,6 +132,13 @@ DRReturn RenderPlanet::generateAndBindTexture()
         DR_SAVE_DELETE(mTextureRenderer);
 		mInitalized++;
     }    
+	if(mTexture->isLoadingError())
+	{
+		DR_SAVE_DELETE(mTexture);
+		int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
+		mTexture = new Texture(size, size, GL_UNSIGNED_BYTE, 4);
+		mInitalized = 0;
+	}
     glEnable(GL_TEXTURE_2D);
     if(mPreviewTextur)
         mPreviewTextur->bind();

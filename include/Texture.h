@@ -23,12 +23,16 @@ public:
 	DRReturn pixelsCopyToRenderer();
 	__inline__ bool isLoadingFinished() {return mLoadingState == 2;}
 	__inline__ bool isTextureEmpty() {return mLoadingState == 3;}
-	__inline__ bool isTextureSaved() {return mSavingState == 2;}
+	__inline__ bool isTextureReadyToSave() {return mSavingState == 2;}
+	__inline__ bool isTextureSaved() {return mSavingState == 3;}
+	__inline__ bool isLoadingError() {return mLoadingState == -1;}
+	__inline__ void setErrorByLoading() {mLoadingState = -1;}
 
 	void bind();
 	__inline__ static void unbind() {glBindTexture(GL_TEXTURE_2D, 0);}
 
 	DRReturn getPixelsToSave(const char* path);
+	DRReturn putPixelsToImage();
 	DRReturn saveImage();
 
 	//Parameter
@@ -45,7 +49,11 @@ protected:
     DRString    mFilename;
     short       mLoadingState; // 0 = empty, 1 = textur im arbeitsspeicher, 2 = Textur bei OpenGL, 3 = empty Textur 
 	short		mSavingState; //
+	GLuint		mSavingCursor;
+	u8*			mSavingBuffer;
 	DRIImage*	mImage;
+	GLuint		mTextureWidth;
+	GLuint		mTextureHeight;
 private:
     
     

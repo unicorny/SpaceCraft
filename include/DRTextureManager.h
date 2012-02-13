@@ -72,6 +72,7 @@ private:
 	std::queue<Texture*> mAsynchronLoadTextures;
 	std::queue<Texture*> mLoadedAsynchronLoadTextures;
 	std::queue<Texture*> mAsynchronSaveTextures;
+	std::queue<Texture*> mAsynchronReadyToSaveTextures;
 	SDL_mutex*			mTextureLoadMutex;
 	SDL_Thread*		    mTextureLoadThread;
 	SDL_cond*			mTextureLoadCondition;

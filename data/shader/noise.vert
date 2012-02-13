@@ -1,4 +1,5 @@
 
+#version 120
 varying vec3 v_texCoord3D;
 
 const float PI = 3.1415926535;
