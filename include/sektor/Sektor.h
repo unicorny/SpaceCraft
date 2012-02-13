@@ -125,8 +125,7 @@ public:
 
 	__inline__ const DRMatrix& getMatrix() {return mMatrix;}
     
-protected:
-    
+protected:    
     
     virtual void removeInactiveChilds(double idleThreshold = 1.0);
     void updateCameraSektor(Camera* cam);

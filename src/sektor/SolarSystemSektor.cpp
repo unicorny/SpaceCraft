@@ -46,15 +46,6 @@ DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
 
 DRReturn SolarSystemSektor::render(float fTime, Camera* cam)
 {
-    //Reseten der Matrixen
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    gluPerspective(45.0f, (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.01f, 1000.0f);
-    glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
-
-    glLoadIdentity();                    // Reset (init) the modelview matrix
-    cam->setKameraMatrixRotation();
-    
+    mMatrix = cam->getKameraMatrixRotation();
     return DR_OK;
 }

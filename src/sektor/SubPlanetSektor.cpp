@@ -77,17 +77,24 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     if(mIdleSeconds > 0.0f) return DR_OK;
     //DRVector3 pos = mSektorPosition.getVector3().normalize();
     
-    glMultMatrixf(mRotation);
-    glTranslatef(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
+    //glMultMatrixf(mRotation);
+    //glTranslatef(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
+	DRVector3 translate = DRVector3(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
+	mMatrix = DRMatrix::translation(translate) * mRotation * mParent->getMatrix();
+	ShaderProgram* shader = mRenderer->getShaderProgram();
+	if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
+	shader->bind();
+	shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix());
+	shader->setUniformMatrix("modelview", mMatrix);
+	
 
     //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
     //if(mHorizontCulling > 70.0)
     //{
-        int thetaLocation = glGetUniformLocation(mPlanet->getShaderProgram(), "theta");        
-        int sphereCenterLocation = glGetUniformLocation(mPlanet->getShaderProgram(), "SphericalCenter");
-        glUniform1f(thetaLocation, mTheta);
-        glUniform3fv(sphereCenterLocation, 1, static_cast<float*>(DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter))));
+		shader->setUniform1f("theta", mTheta);
+		shader->setUniform3fv("SphericalCenter", DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter)));
         mRenderer->render(fTime, cam);
+		shader->unbind();
         //GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
         // childs didn't need to render
         return DR_NOT_ERROR;
@@ -108,7 +115,6 @@ Sektor* SubPlanetSektor::getChild(SektorID childID)
     if(mChilds.find(childID) == mChilds.end())
     {
         // subPlanet seiten eines Würfels mit Kantenlänge 2 (intern)
-        
         
         DRVector3 center = DRVector3(0.0f, 0.0f, 1.0);
         

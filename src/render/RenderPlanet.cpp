@@ -1,5 +1,5 @@
 #include "main.h"
-
+#include "ShaderManager.h"
 
 PlanetHeightValues::PlanetHeightValues(GenerateNoisePlanet* noisePlanet)
 : mNoisePlanet(noisePlanet)
@@ -47,6 +47,7 @@ DRReturn RenderPlanet::init(SektorID seed, float theta,
               const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath)
 {
 	GlobalRenderer& gb = GlobalRenderer::Instance();
+	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
 
 	int stepSizei = gb.getTextureRenderStepSize();
 	float stepSize = static_cast<float>(stepSizei);
@@ -96,6 +97,7 @@ DRString RenderPlanet::getPathAndFilename()
 
 RenderPlanet::~RenderPlanet()
 {
+	ShaderManager::Instance().releaseShader(mShader);
     DR_SAVE_DELETE(mTextureRenderer);
   	DR_SAVE_DELETE(mTexture);
 	DR_SAVE_DELETE(mPreviewTextur);
@@ -158,15 +160,14 @@ DRReturn RenderPlanet::render(float fTime, Camera* cam)
     else quadricDetails = 8;
     
     generateAndBindTexture();
-    
-    //korrektur damit textur die selbe ist wie bei childs
-    glPushMatrix();
-    glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+
+	//korrektur damit gluSphere textur die selbe ist wie bei childs
+	DRMatrix currentModelview = mShader->getUniformMatrix("modelview");
+	currentModelview = DRMatrix::rotationY(PI/2.0f) * DRMatrix::rotationZ(-PI/2.0f) * currentModelview;
+	mShader->setUniformMatrix("modelview", currentModelview);
+
     gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
-    
-    glPopMatrix();
-    
+        
     if(DRGrafikError("[RenderPlanet::render]")) return DR_ERROR;
     return DR_OK;
 }

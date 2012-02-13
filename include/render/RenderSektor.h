@@ -9,8 +9,10 @@ public:
         
     virtual DRReturn render(float fTime, Camera* cam) = 0;
     __inline__ void setCurrentDetail(int detail) {mDetailLevel = detail;}
+	__inline__ ShaderProgram* getShaderProgram() {return mShader;}
 protected:    
     int                         mDetailLevel;
+	ShaderProgram*				mShader;
     
 private:
 };

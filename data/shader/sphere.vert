@@ -2,6 +2,8 @@
 
 uniform vec3 SphericalCenter;
 uniform float theta;
+uniform mat4 projection;
+uniform mat4 modelview;
 
 uniform sampler2D texture;
 
@@ -19,7 +21,7 @@ void main()
 	float h = texture2D(texture, gl_TexCoord[0].xy).z;
 	vec4 newVertex = scaledVertex + (dir / l) * ((1.0 - l)+((h*2.0-1.0)/6378.0*6.0));
 		
-	gl_Position    = gl_ModelViewProjectionMatrix * newVertex;
+	gl_Position    = projection * modelview * newVertex;
 
 	gl_FrontColor  = gl_Color;
 }

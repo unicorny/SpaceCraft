@@ -27,6 +27,7 @@ protected:
     float       mClippingBorder[4]; //left, rigt, bottom, top
     DRVector2   mTextureSize;    
     Texture*     mTexture;
+	DRMatrix	mProjectionMatrix;
     
 private:
     DRVector2   mCursorIndex;

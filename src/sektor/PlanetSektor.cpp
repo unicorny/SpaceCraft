@@ -60,7 +60,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
 //    mLastRelativeCameraPosition.print("cameraPos");
     DRVector3 v = mLastRelativeCameraPosition.getVector3();
     
-    //printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
+   // printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
@@ -133,17 +133,27 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 									   absCameraPosition.x.print().data(), absCameraPosition.y.print().data(),
 									   absCameraPosition.z.print().data(), diff.x, diff.y, diff.z);
 										   //*/
-    glTranslatef(pos.x, pos.y, pos.z);
-    glScaled(radius2, radius2, radius2);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glTranslatef(pos.x, pos.y, pos.z);
+    //glScaled(radius2, radius2, radius2);
+	
+	mMatrix = DRMatrix::scaling(DRVector3(radius2)) * DRMatrix::translation(pos) * mParent->getMatrix() ;
+	
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
     if(mRenderer && !isObjectInSektor(mLastRelativeCameraPosition))
     {
       //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
-        
+        ShaderProgram* shader = mRenderer->getShaderProgram();
+		if(!shader) LOG_ERROR("RenderPlanet hasn't valid shader", DR_ERROR);
+		shader->bind();
+		
+		shader->setUniformMatrix("modelview", mMatrix);
+		shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix().transpose());
+		DRGrafikError("PlanetSektor::render");
         
         DRReturn ret = mRenderer->render(fTime, cam);
+		shader->unbind();
 //		GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
         if(ret) LOG_ERROR("Fehler bei call planet renderer", DR_ERROR);
         //child didn't need to render
@@ -152,8 +162,8 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     } 
     else
     {
-        mSphericalShaderForSubPlanet->bind();
-        GLint p = mSphericalShaderForSubPlanet->getProgram();        
+        //mSphericalShaderForSubPlanet->bind();
+        //GLint p = mSphericalShaderForSubPlanet->getProgram();        
     }
     
     return DR_OK;

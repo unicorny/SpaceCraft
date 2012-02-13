@@ -581,8 +581,7 @@ DRReturn render(float fTime)
     glDisable(GL_LIGHTING);
     glEnable(GL_CULL_FACE);
     
-    glClear (GL_DEPTH_BUFFER_BIT);
-     
+    glClear (GL_DEPTH_BUFFER_BIT);     
     
     //Reseten der Matrixen
     glMatrixMode(GL_TEXTURE);
@@ -592,7 +591,7 @@ DRReturn render(float fTime)
     glLoadIdentity();
 
     //gluPerspective(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
-    glMultMatrixf(DRMatrix::view_frustum(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
+    glMultMatrixf(DRMatrix::perspective_projection(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
     DRFrustumCulling cull(g_cam, g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 1000.0f);
     glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
 

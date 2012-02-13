@@ -275,7 +275,9 @@ public:
     //!                    0   0   0   1 </p>
     static DRMatrix	scaling(const DRVector3& v);		// Skalierungsmatrix berechnen
 
-    static DRMatrix view_frustum(const float angle_of_view, const float aspect_ratio, const float z_near, const float z_far);
+    static DRMatrix perspective_projection(const float angle_of_view, const float aspect_ratio, const float z_near, const float z_far);
+    static DRMatrix ortho_projection(const float left, const float right, const float bottom, const float top,
+                                     const float zNear, const float zFar);
 
     //! \brief liefert eine transponierte DRMatrix zur&uuml;ck, const
     //! \return eine neue DRMatrix, diese transponiert

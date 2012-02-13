@@ -59,18 +59,15 @@ DRReturn Sektor::renderAll(float fTime, Camera* cam, bool rootRendered/* = false
         for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
         {
             Sektor* temp = it->second;     
-            glPushMatrix();
             ret = temp->render(fTime, cam);
             if(ret == DR_NOT_ERROR) 
             {
-                glPopMatrix();
                 ret = DR_OK;
                 continue;
             }
             if(ret) LOG_ERROR("Fehler bei render", DR_ERROR);
             ret = temp->renderAll(fTime, cam, true);
             if(ret) LOG_ERROR("Fehler bei render all", DR_ERROR);
-            glPopMatrix();
         }
         DRGrafikError("Sektor::renderAll");
         return ret;

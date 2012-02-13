@@ -38,6 +38,9 @@ public:
     
     // render current task
     DRReturn renderTasks();
+
+	const DRMatrix& getProjectionMatrix() {return mProjectionMatrix;}
+	void setProjectionMatrix(const DRMatrix& projectionMatrix) {mProjectionMatrix = projectionMatrix;}
     
 private:
     GlobalRenderer();
@@ -48,6 +51,8 @@ private:
     GLUquadricObj*                      mQuadratic; 
     GenerateNoisePlanet*                mPlanetGen;
     ShaderProgram                       mPlanetShader;
+
+	DRMatrix							mProjectionMatrix;
     
     //Render To texture
     GLuint                              mFrameBufferID;
