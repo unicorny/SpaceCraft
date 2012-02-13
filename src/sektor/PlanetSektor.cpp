@@ -1,5 +1,8 @@
-#include "main.h"
+#include "PlanetSektor.h"
 #include "ShaderManager.h"
+#include "GlobalRenderer.h"
+#include "noise/noise.h"
+#include "SubPlanetSektor.h"
 
 SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1),SektorID(1,0,0),SektorID(0,0, 1),// front, right, back
                                         SektorID(-1,0,0),SektorID(0,1,0),SektorID(0,-1,0)};// left, top, bottom
@@ -9,29 +12,12 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
 {
     mType = PLANET;
     
-    mNoiseGenerator = new GenerateNoisePlanet();
-    mHeights = new PlanetHeightValues(mNoiseGenerator);
     mSphericalShaderForSubPlanet = ShaderManager::Instance().getShader("sphere.vert", "sphere.frag");
         
     noise::module::Perlin p;
     if(id.count) p.SetSeed(id.count);
     DRVector3 idVector(id.x, id.y, id.z);
     idVector /= SHRT_MAX;
-    mNoiseGenerator->setupGenerator((int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX));
-    
-    double seaLevelInMeters = mNoiseGenerator->getSeaLevelInMetres();
-    
-    mHeights->ClearGradientPoints ();
-    mHeights->AddGradientPoint (-2.0 + seaLevelInMeters, noise::utils::Color (  0,   0,   0, 255));
-    mHeights->AddGradientPoint (    -0.03125 + seaLevelInMeters, noise::utils::Color (  6,  58, 127, 255));
-    mHeights->AddGradientPoint (    -0.0001220703 + seaLevelInMeters, noise::utils::Color ( 14, 112, 192, 255));
-    mHeights->AddGradientPoint (     0.0 + seaLevelInMeters, noise::utils::Color ( 70, 120,  60, 255));
-    mHeights->AddGradientPoint (  0.125 + seaLevelInMeters, noise::utils::Color (110, 140,  75, 255));
-    mHeights->AddGradientPoint (  0.25 + seaLevelInMeters, noise::utils::Color (160, 140, 111, 255));
-    mHeights->AddGradientPoint (  0.375 + seaLevelInMeters, noise::utils::Color (184, 163, 141, 255));
-    mHeights->AddGradientPoint (  0.5 + seaLevelInMeters, noise::utils::Color (255, 255, 255, 255));
-    mHeights->AddGradientPoint (  0.75 + seaLevelInMeters, noise::utils::Color (128, 255, 255, 255));
-    mHeights->AddGradientPoint ( 2.0 + seaLevelInMeters, noise::utils::Color (  0,   0, 255, 255));
     
     mRenderer = new RenderPlanet(id, getSektorPathName());
 }
@@ -41,8 +27,6 @@ PlanetSektor::~PlanetSektor()
     ShaderManager::Instance().releaseShader("sphere.vert", "sphere.frag");
     mSphericalShaderForSubPlanet = NULL;
     DR_SAVE_DELETE(mRenderer);
-    DR_SAVE_DELETE(mHeights);
-    DR_SAVE_DELETE(mNoiseGenerator);
 }
 
 DRReturn PlanetSektor::move(float fTime, Camera* cam)
@@ -79,7 +63,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
                 center = q * center;
                 center *= 1000;
                 //getChild(SektorID(center(0), center(1), center(2)));            
-                getChild(mSubPlanets[i]);            
+                getChild(mSubPlanets[i], DRVector3(0.0f));            
             }
             //else
                 //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
@@ -169,7 +153,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     return DR_OK;
 }
 
-Sektor* PlanetSektor::getChild(SektorID childID)
+Sektor* PlanetSektor::getChild(SektorID childID, DRVector3 centerPosition)
 {        
     if(mChilds.find(childID) == mChilds.end())
     {

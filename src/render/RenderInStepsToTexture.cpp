@@ -1,4 +1,4 @@
-#include "main.h"
+#include "RenderInStepsToTexture.h"
 
 RenderInStepsToTexture::RenderInStepsToTexture()
 : mTexture(NULL), mStepSize(0), mIndexStepMode(0), mFinished(false)

@@ -1,6 +1,10 @@
 #ifndef __SC_SEKTOR_
 #define __SC_SEKTOR_
 
+#include "Vector3Unit.h"
+#include "Camera.h"
+#include "RenderSektor.h"
+
 struct SektorID
 {
     SektorID(u64 id) : id(id) {}

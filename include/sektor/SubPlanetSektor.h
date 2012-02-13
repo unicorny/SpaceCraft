@@ -6,6 +6,8 @@
 #define NEIGHBOR_RIGHT 2
 #define NEIGHBOR_DOWN 3
 
+#include "PlanetSektor.h"
+#include "RenderSubPlanet.h"
 
 class SubPlanetSektor : public Sektor
 {

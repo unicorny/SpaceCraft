@@ -23,7 +23,7 @@ void ShaderManager::exit()
 {
     mInitalized = false;
         
-    for (int i = 0; i < mShaderEntrys.getNItems(); i++)
+    for (uint i = 0; i < mShaderEntrys.getNItems(); i++)
 	{
 		ShaderEntry* shader = static_cast<ShaderEntry*>(mShaderEntrys.findByIndex(i));
         DR_SAVE_DELETE(shader->shader);

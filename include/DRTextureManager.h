@@ -2,6 +2,7 @@
 #define __DR_TEXTURE_MANAGER__
 
 #include "Sdl/SDL_thread.h"
+#include "Texture.h"
 
 class DRTextureManager
 {

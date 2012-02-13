@@ -1,4 +1,5 @@
-#include "main.h"
+#include "SubPlanetSektor.h"
+#include "GlobalRenderer.h"
 
 SubPlanetSektor::SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float cameraDistance/* = 0.0f*/, int subLevel/* = 6*/)

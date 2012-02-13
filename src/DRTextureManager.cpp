@@ -1,4 +1,4 @@
-#include "main.h"
+#include "DRTextureManager.h"
 
 DRTextureManager::DRTextureManager()
 : mInitalized(false), mTextureLoadMutex(NULL), mTextureLoadThread(NULL), mTextureLoadCondition(NULL),
@@ -37,7 +37,7 @@ void DRTextureManager::exit()
     }
     mTextureMemoryEntrys.clear();
     
-    for (int i = 0; i < mTextureEntrys.getNItems(); i++)
+    for (uint i = 0; i < mTextureEntrys.getNItems(); i++)
 	{
 		TextureEntry* texture = static_cast<TextureEntry*>(mTextureEntrys.findByIndex(i));
         DR_SAVE_DELETE(texture->texture);

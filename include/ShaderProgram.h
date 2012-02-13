@@ -8,6 +8,8 @@
 #ifndef __SC_SHADER_H
 #define	__SC_SHADER_H
 
+#include "main.h"
+
 class ShaderProgram
 {
 public:

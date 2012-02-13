@@ -1,4 +1,4 @@
-#include "main.h"
+#include "ShaderProgram.h"
 
 ShaderProgram::ShaderProgram(DHASH id/* = 0*/)
 : mId(id), mVertexShader(0), mFragmentShader(0), mProgram(0)

@@ -1,6 +1,8 @@
 #ifndef __SC_ROOT_SEKTOR__
 #define __SC_ROOT_SEKTOR__
 
+#include "Sektor.h"
+
 class RootSektor : public Sektor
 {
 public:

@@ -1,6 +1,8 @@
 #ifndef __SC_RENDER_IN_STEPS_TO_TEXTURE__
 #define __SC_RENDER_IN_STEPS_TO_TEXTURE__
 
+#include "Texture.h"
+
 class RenderInStepsToTexture
 {
 public:

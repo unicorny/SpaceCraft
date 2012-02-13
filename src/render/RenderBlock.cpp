@@ -5,7 +5,7 @@
  * Created on 20. August 2011, 23:50
  */
 
-#include "main.h"
+#include "RenderBlock.h"
 
 RenderBlock::RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg) 
 : mTexture(texture)

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "RenderNoisePlanetToTexture.h"
 #include "ShaderManager.h"
 #include "DRGeometrieManager.h"
 

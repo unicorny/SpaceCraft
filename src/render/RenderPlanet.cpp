@@ -1,30 +1,9 @@
-#include "main.h"
+#include "RenderPlanet.h"
 #include "ShaderManager.h"
+#include "GlobalRenderer.h"
+#include "DRTextureManager.h"
 
-PlanetHeightValues::PlanetHeightValues(GenerateNoisePlanet* noisePlanet)
-: mNoisePlanet(noisePlanet)
-{
-    
-}
 
-PlanetHeightValues::~PlanetHeightValues()
-{
-
-}
-
-float PlanetHeightValues::getHeightValue(DRVector3& position)
-{
-    return mNoisePlanet->getValue(position);//*0.00128441521;
-}
-
-DRColor PlanetHeightValues::getColorValue(const float height)
-{
-    noise::utils::Color c = mColor.GetColor(height);///0.00128441521);
-    return DRColor(c.red, c.green, c.blue, c.alpha);
-}
-
-// ********************************************************************************
-// *******************************************************************************
 RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath)
 : RenderSektor(), mTextureRenderer(NULL), mTexture(NULL),
   mPreviewTextur(NULL), mInitalized(0)

@@ -8,6 +8,11 @@
 #ifndef SPACE_CRAFT_GLOBAL_RENDERER_H
 #define	SPACE_CRAFT_GLOBAL_RENDERER_H
 
+#include "ShaderProgram.h"
+#include "RenderInStepsToTexture.h"
+
+//class RenderInStepsToTexture;
+
 class GlobalRenderer
 {
 public:
@@ -24,7 +29,6 @@ public:
     void exit();
     
     inline ShaderProgram* getPlanetShaderPtr() {return &mPlanetShader;}
-    inline GenerateNoisePlanet* getGenerateNoisePlanet() {return mPlanetGen;}
     
     GLUquadricObj* getQuadric() {if(m_bInitialized) return mQuadratic; else return NULL;}
     
@@ -49,7 +53,6 @@ private:
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
-    GenerateNoisePlanet*                mPlanetGen;
     ShaderProgram                       mPlanetShader;
 
 	DRMatrix							mProjectionMatrix;

@@ -8,6 +8,8 @@
 #ifndef __SPACE_CRAFT_VECTOR3_UNIT_H
 #define	__SPACE_CRAFT_VECTOR3_UNIT_H
 
+#include "Unit.h"
+
 class Vector3Unit
 {
 public:

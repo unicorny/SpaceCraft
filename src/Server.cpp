@@ -5,7 +5,7 @@
  * Created on 20. August 2011, 19:12
  */
 
-#include "main.h"
+#include "Server.h"
 
 std::map<u64, Server*> Server::mServerList;
 

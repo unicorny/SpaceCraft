@@ -8,7 +8,7 @@
 #ifndef __SC_PLAYER_H
 #define	__SC_PLAYER_H
 
-#include "Sektor.h"
+#include "Server.h"
 
 #define PLAYER_SAVE_VERSION 6
 

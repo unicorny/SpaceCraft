@@ -1,6 +1,16 @@
 #include "main.h"
 #include "ShaderManager.h"
 #include "DRGeometrieManager.h"
+#include "DRTextureManager.h"
+#include "GlobalRenderer.h"
+#include "RenderBlockLoader.h"
+#include "Camera.h"
+#include "Player.h"
+
+// for test only
+#include "RenderNoisePlanetToTexture.h"
+#include "RenderSubPlanet.h"
+#include "SubPlanetSektor.h"
 
 struct ControlMode
 {
@@ -23,9 +33,6 @@ ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
 // Debug
 bool            wireframe = false;
-//DRGeometrieIcoSphere g_geo;
-
-GLint sphereList = 0;
 
 
 
@@ -162,8 +169,6 @@ void sizeOfClasses()
 	DRLog.writeToLog("DRMatrix: %d", sizeof(DRMatrix));
 	DRLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
     DRLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
-    DRLog.writeToLog("GenerateNoisePlanet: %d", sizeof(GenerateNoisePlanet));
-    DRLog.writeToLog("PlanetHeightValues: %d", sizeof(PlanetHeightValues));
     DRLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
     DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
     DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
@@ -177,7 +182,6 @@ void sizeOfClasses()
     DRLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
 }
 
-DRReturn generateSphere(DRReal radius);
 DRReturn load()
 {
     if(EnInit_Simple())
@@ -267,7 +271,6 @@ DRReturn load()
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
     
     Uint32 start = SDL_GetTicks();
-    generateSphere(2.0f);
     //g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
     DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
 
@@ -277,7 +280,6 @@ DRReturn load()
 void ende()
 {
     DR_SAVE_DELETE(g_tex);
-    glDeleteLists(sphereList, 1);
     g_Player.exit();
     DR_SAVE_DELETE(g_Font);
     DR_SAVE_DELETE(g_terrain);
@@ -355,206 +357,6 @@ DRReturn move(float fTime)
     return DR_OK;
 }
 
-#define TWOPI (PI*2.0f)
-#define PID2  (PI/2.0f)
-void CreateSphere(DRVector3 c,double r,int n)
-{
-	int i,j;
-	double theta1,theta2,theta3;
-	DRVector3 e,p;
-
-	if (r < 0)
-		r = -r;
-	if (n < 0)
-		n = -n;
-	if (n < 4 || r <= 0) {
-		glBegin(GL_POINTS);
-		glVertex3f(c.x,c.y,c.z);
-		glEnd();
-		return;
-	}
-
-	for (j=0;j<n/2;j++) {
-		theta1 = j * TWOPI / n - PID2;
-		theta2 = (j + 1) * TWOPI / n - PID2;
-
-		glBegin(GL_QUAD_STRIP);
-		for (i=0;i<=n;i++) {
-			theta3 = i * TWOPI / n;
-
-			e.x = cos(theta2) * cos(theta3);
-			e.y = sin(theta2);
-			e.z = cos(theta2) * sin(theta3);
-			p.x = c.x + r * e.x;
-			p.y = c.y + r * e.y;
-			p.z = c.z + r * e.z;
-
-			glNormal3f(e.x,e.y,e.z);
-			glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
-			glVertex3f(p.x,p.y,p.z);
-
-			e.x = cos(theta1) * cos(theta3);
-			e.y = sin(theta1);
-			e.z = cos(theta1) * sin(theta3);
-			p.x = c.x + r * e.x;
-			p.y = c.y + r * e.y;
-			p.z = c.z + r * e.z;
-
-			glNormal3f(e.x,e.y,e.z);
-			glTexCoord2f(i/(double)n,2*j/(double)n);
-			glVertex3f(p.x,p.y,p.z);
-		}
-		glEnd();
-	}
-}
-
-const float tao = 1.61803399;
-DRReturn generateSphere(DRReal radius)
-{
-    float percent = 1.0f;
-    const int iterator = 100;
-    
-    int totalSegments = 400;
-    int currentSegments = (int)((float)totalSegments*percent);
-        
-    int vertexCount = currentSegments*currentSegments;
-    int indexCount =  2*currentSegments*currentSegments-2*currentSegments; //2*currentSegments*currentSegments;//2*currentSegments-1+2*currentSegments*currentSegments;
-//    const int iSegments = 200;
-//    const int segs = 200;
-    printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
-    
-    //DRGeometrieIcoSphere geo2;        
-   DRGeometrieIcoSphere geo;        
-   // DRGeometrieSphere geo;    
-    geo.initIcoSphere(5);
-    for(int i = 0; i < 4; i++)
-        geo.changeGeometrieTo(3, true);
-    //geo.initSphere(totalSegments);
-    //geo.makeSphericalLandscape(iterator, 7157);
-    //geo.copyDataToVertexBuffer();
-    
-    
-    //if(geo.initSphere(totalSegments))
-      //  LOG_ERROR("Fehler bei SphereInit", DR_ERROR);
-    vertexCount = geo.getVertexCount();
-    currentSegments = sqrtf(vertexCount);
-    printf("currentSegments: %d ", currentSegments);
-    
-    DRVector3* points = geo.getVertexPointer();// new DRVector3[vertexCount];
-    DRColor* color = geo.getColorPointer();// new DRColor[vertexCount];
-    DRColor* heighMap = new DRColor[vertexCount];
-    GLuint*  indices = geo.getIndexPointer();        
-    
-    //*/
-   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //glDisable(GL_CULL_FACE);
-    
-    //glBegin(GL_LINE_LOOP);
-  
-    
-    const char* path = "data/planet.png";
-  
-    DRIImage* image = DRIImage::newImage();
-    DRReturn ret = image->loadFromFile(path);
-    float vektorLenght = 1.0f;
-    if(!ret && image->getWidth()*image->getHeight() == vertexCount)
-    {
-        image->getPixel(color);
-        int size = image->getWidth()*image->getHeight();
-        printf("size: %u\n", size);        
-    }
-    else
-    {
-        //geo.makeSphericalLandscape(iterator, 9312);
-        GenerateNoisePlanet* g = new GenerateNoisePlanet(); //GlobalRenderer::Instance().getGenerateNoisePlanet();
-        g->setupGenerator(182172);
-        
-        float max = 0.0f, min = 1.0f;
-        for(int i = 0; i < vertexCount; i++)
-        {
-            points[i] *= 1.0f+g->getValue(points[i])*0.01f;
-            float l = vektorLenght - points[i].length();
-            if(l == vektorLenght) continue;
-           // printf("%d: length: %f\n",i, points[i].length());
-            if(l > max) max = l;
-            if(l < min) min = l;
-        }
-        //einfärben
-        DRLog.writeToLog("min: %f, max: %f", min, max);
-        for(int j = 0; j < vertexCount; j++)
-        {
-        //    DRLog.writeToLog("\n---------- j:%d -------------", j);
-            float d = vektorLenght - points[j].length();
-            //d = g->getValue(points[j]);
-            heighMap[j] = DRColor((DRReal)(fabs((d+min))/(max+fabs(min))));
-			color[j] = heighMap[j];
-			continue;
-
-    //        if(j < 10)
-      //          DRLog.writeToLog("heighMapValue: %f, d: %f", fabs((d+min))/(max+fabs(min)), d);
-            d *= -1.0f;
-            //if(j < 10)
-          //      DRLog.writeToLog("d: %f", d);
-            if(d < 0)
-            {
-                if(d == -1.0f)
-                    color[j] = color[(int)fabs((float)(vertexCount-currentSegments-j))].interpolate(color[j-currentSegments], 0.5f);
-                else
-                    color[j] = DRColor(0.0f, (1.0f-(d/min))/10.0f, 1.0f-(d/min));
-            }
-            else if(d > 0)
-            {
-                if(d > max/2)
-                    color[j] = DRColor((d/max), (d/max)/2.0f, 0.1f);
-                else if(d < max-max/10)
-                    color[j] = DRColor((d/max)/2.0f, (d/max), 0.1f);
-                else
-                    color[j] = DRColor(d/max);
-            }
-            //DRLog.writeVector3ToLog(points[j]);
-            //DRLog.writeColorToLog(color[j]);
-        }
-        //DRLog.writeToLog("\n-------- ende -------------");
-        printf("%d Pixel in ein %d großes Bild\n", vertexCount, currentSegments * (currentSegments+2));
-        image->setWidth(currentSegments);
-        image->setHeight(currentSegments);
-        image->setImageFormat(-1);
-        image->setPixel(color);
-        image->saveIntoFile(path);    
-        
-        image->setPixel(heighMap);
-        image->saveIntoFile("data/heighmap.png");
-
-		DR_SAVE_DELETE(g);
-		
-    } 
-    
-    g_tex = new DRTextur(image);
-   // */
-	geo.copyDataToVertexBuffer();
-	geo.update();
-    sphereList = glGenLists(1);
-    glNewList(sphereList, GL_COMPILE);     
-    
-    glPushMatrix();          
-    glScalef(radius, radius, radius);
-    glColor3f(1.0f, 0.0f, 0.0f);
-    geo.render();
-    
-    glPopMatrix();
-    
-    glEndList();
-        
- //   DR_SAVE_DELETE_ARRAY(points);
-//    DR_SAVE_DELETE_ARRAY(color);
-//    DR_SAVE_DELETE_ARRAY(indices);
-    DR_SAVE_DELETE_ARRAY(heighMap);
-    
-//    g_tex = new DRTextur(path, GL_NEAREST, GL_NEAREST);
-   
-    
-    return DR_OK;
-}
 
 DRReturn render(float fTime)
 {
@@ -671,28 +473,7 @@ DRReturn render(float fTime)
     
     glDisable(GL_TEXTURE_2D);
     //glDisable(GL_LIGHTING);
-    glPushMatrix();
     
-    glTranslatef(0.0, 0.0f, -15.0f);
-    //renderSphere(5.0f);
-    
-    static float sphereRotate = 0;
-    glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
-    
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    //GlobalRenderer::Instance().getPlanetShaderPtr()->bind();
-    if(sphereList)
-        glCallList(sphereList);
-    glTranslatef(5.0f, 0.0f, 0.0f);
-    CreateSphere(DRVector3(), 1.0f, 20.0f);
-    //GlobalRenderer::Instance().getPlanetShaderPtr()->unbind();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    //g_geo.render();
-    
-    //sphereRotate += fTime*10.0f;
-      
-    
-    glPopMatrix();
     //*/
     static u32 start = 0;
     float dir[] = {1.0f, 1.0f};

@@ -1,4 +1,4 @@
-#include "main.h"
+#include "RenderSubPlanet.h"
 #include "DRGeometrieManager.h"
 #include "ShaderManager.h"
 

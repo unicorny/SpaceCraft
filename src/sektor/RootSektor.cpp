@@ -1,4 +1,5 @@
-#include "main.h"
+#include "RootSektor.h"
+#include "GlobalRenderer.h"
 
 RootSektor::RootSektor(SektorID id)
 : Sektor(Vector3Unit(1.0), Unit(0.0, M), id, NULL)

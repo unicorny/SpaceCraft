@@ -8,6 +8,9 @@
 #ifndef RENDERBLOCKLOADER_H
 #define	RENDERBLOCKLOADER_H
 
+//#include "main.h"
+#include "RenderBlock.h"
+
 class RenderBlockLoader {
 public:
     RenderBlockLoader();

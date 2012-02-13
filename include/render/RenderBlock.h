@@ -8,6 +8,9 @@
 #ifndef RENDERBLOCK_H
 #define	RENDERBLOCK_H
 
+#include "main.h"
+#include "Block.h"
+
 class RenderBlock {
 public:
     RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg);

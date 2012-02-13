@@ -5,7 +5,8 @@
  * Created on 20. August 2011, 18:56
  */
 
-#include "main.h"
+#include "Player.h"
+#include "SolarSystemSektor.h"
 
 Player::Player()
 : mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)

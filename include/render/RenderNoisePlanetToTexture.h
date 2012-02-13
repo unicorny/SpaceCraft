@@ -1,6 +1,8 @@
 #ifndef __SC_RENDER_NOISE_PLANET_TO_TEXTURE__
 #define __SC_RENDER_NOISE_PLANET_TO_TEXTURE__
 
+#include "RenderInStepsToTexture.h"
+#include "ShaderProgram.h"
 class DRGeometrieHeightfield;
 
 class RenderNoisePlanetToTexture : public RenderInStepsToTexture

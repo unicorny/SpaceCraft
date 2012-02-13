@@ -3,6 +3,8 @@
 
 #define TEXTURE_WRAPPING_CLAMP_TO_EDGE GL_CLAMP_TO_EDGE
 
+#include "main.h"
+
 class Texture
 {
 public:

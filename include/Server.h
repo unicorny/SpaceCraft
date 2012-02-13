@@ -8,6 +8,8 @@
 #ifndef __SC_SERVER_H
 #define	__SC_SERVER_H
 
+#include "RootSektor.h"
+
 class Server {
 public:    
     static Server* getServer(u64 ServerID);

@@ -11,6 +11,11 @@
 class Sektor;
 struct SektorID;
 
+//#include "main.h"
+#include "Sektor.h"
+#include "Vector3Unit.h"
+
+
 class Camera : public DRObjekt
 {
 public:

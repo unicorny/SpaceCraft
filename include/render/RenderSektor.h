@@ -1,6 +1,10 @@
 #ifndef __SC_RENDER_SEKTOR__
 #define __SC_RENDER_SEKTOR__
 
+#include "ShaderProgram.h"
+
+class Camera;
+
 class RenderSektor
 {
 public:

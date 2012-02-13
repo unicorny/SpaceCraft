@@ -1,4 +1,6 @@
-#include "main.h"
+#include "Texture.h"
+#include "GlobalRenderer.h"
+
 
 Texture::Texture(const char* filename, GLint glMinFilter /* = GL_LINEAR */, GLint glMagFilter /* = GL_LINEAR */)
 : mTexturID(0), mPboID(0), mFilename(filename), mLoadingState(0), 

@@ -1,6 +1,8 @@
 #ifndef __SC_SOLAR_SYSTEM_SEKTOR__
 #define __SC_SOLAR_SYSTEM_SEKTOR__
 
+#include "PlanetSektor.h"
+
 class SolarSystemSektor : public Sektor
 {
 public:
