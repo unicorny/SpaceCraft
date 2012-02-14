@@ -150,7 +150,7 @@ DRString Sektor::getSektorPathName() const
     std::vector<SektorID> path;
     getSektorPath(path);
     s << "./data/_" << path[0] << "/";
-    for(int i = 1; i < path.size(); i++)
+    for(uint i = 1; i < path.size(); i++)
     {
         s << "_" << path[i] << "/";
     }

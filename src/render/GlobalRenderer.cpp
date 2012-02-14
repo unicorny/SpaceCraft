@@ -22,10 +22,7 @@ DRReturn GlobalRenderer::init(const char* configFilename)
     
     //render to texture
      glGenFramebuffersEXT(1, &mFrameBufferID);
-    
-    if(mPlanetShader.init("data/shader/planet2.vert", "data/shader/planet2.frag"))
-        LOG_ERROR("Fehler beim laden des Shaders", DR_ERROR);
-    
+        
     DRIni cfg(configFilename);
     mTextureRenderStepSize = cfg.getInt("RenderToTexte", "StepSize");
     mTextureRenderMaxResolution = cfg.getInt("RenderToTexte", "Resolution");

@@ -8,7 +8,6 @@
 #ifndef SPACE_CRAFT_GLOBAL_RENDERER_H
 #define	SPACE_CRAFT_GLOBAL_RENDERER_H
 
-#include "ShaderProgram.h"
 #include "RenderInStepsToTexture.h"
 
 //class RenderInStepsToTexture;
@@ -27,8 +26,6 @@ public:
     //init und exit
     DRReturn init(const char* configFilename);
     void exit();
-    
-    inline ShaderProgram* getPlanetShaderPtr() {return &mPlanetShader;}
     
     GLUquadricObj* getQuadric() {if(m_bInitialized) return mQuadratic; else return NULL;}
     
@@ -53,9 +50,7 @@ private:
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
-    ShaderProgram                       mPlanetShader;
-
-	DRMatrix							mProjectionMatrix;
+    DRMatrix							mProjectionMatrix;
     
     //Render To texture
     GLuint                              mFrameBufferID;

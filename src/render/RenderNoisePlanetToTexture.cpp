@@ -102,7 +102,7 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     
     // Calculate the sea level, in meters.
     float MAX_ELEV = 1.0f; float MIN_ELEV = -1.0f;
-    float seaLevelInMeters = (((SEA_LEVEL + 1.0) / 2.0)
+    float seaLevelInMeters = (((SEA_LEVEL + 1.0f) / 2.0f)
     * (MAX_ELEV - MIN_ELEV)) + MIN_ELEV;
 	mShader->setUniform1f("SEA_LEVEL_IN_METRES", seaLevelInMeters);
     //printf("seaLevelInMeters: %f\n", seaLevelInMeters);
