@@ -1,18 +1,14 @@
 #ifndef __SC_SEKTOR_
 #define __SC_SEKTOR_
 
-#include "Vector3Unit.h"
-#include "Camera.h"
-#include "RenderSektor.h"
+#include "main.h"
 
 struct SektorID
 {
     SektorID(u64 id) : id(id) {}
     SektorID(s16 _x, s16 _y, s16 _z): x(_x), y(_y), z(_z), count(0) {}
     
-    bool operator() (const SektorID& x, const SektorID& y) const {
-        return x.id<y.id;
-    }
+    bool operator() (const SektorID& x, const SektorID& y) const {return x.id<y.id;}
     operator u64() {return id;}
     
     union
@@ -63,8 +59,6 @@ enum SektorType
  * a super-galaxie-heap, a super-galaxie 
  */
 
-//! TODO: Matrix-Stack ersetzen durch manuelle implementation, OpenGL Matrix Stack kann mindestens 32 matritzen halten
-
 class Sektor
 {
 public:
@@ -106,33 +100,19 @@ public:
     static const char* getSektorTypeName(SektorType type);
     
     //! inline getter and setter
-    __inline__ RenderSektor* getRenderer() const {return mRenderer;}
-    __inline__ Vector3Unit getPosition() const {return mSektorPosition;}
-    __inline__ Unit getRadius() const {return mRadius;}
+    __inline__ RenderSektor* getRenderer() {return mRenderer;}
+    __inline__ Vector3Unit getPosition() {return mSektorPosition;}
+    __inline__ Unit getRadius() {return mRadius;}
     __inline__ void setParent(Sektor* parent) {mParent = parent;}
-    __inline__ Sektor* getParent() const {return mParent;}
-    virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
     
     __inline__ SektorType getType() const {return mType;} 
     
-    // is the position inside the current sektor
-    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual bool isObjectInSektor(Vector3Unit positionInParentSektor);
     
-    Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);
+protected:
     
-    //! \brief fill a vector with all sektorID
-    //!
-    //! begin with root sektor (place zero)
-    void getSektorPath(std::vector<SektorID>& storage) const;
-    
-    DRString getSektorPathName() const;
-
-	__inline__ const DRMatrix& getMatrix() {return mMatrix;}
-    
-protected:    
     
     virtual void removeInactiveChilds(double idleThreshold = 1.0);
-    void updateCameraSektor(Camera* cam);
     
     DRReturn callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data);
     
@@ -141,8 +121,6 @@ protected:
     SektorType          mType;
     //! Position of sektor inside the parent
     Vector3Unit         mSektorPosition; 
-    //! last known camera position in sektor space
-    Vector3Unit         mLastRelativeCameraPosition;
     //! die größe des Sektors, oder der Sektor-Einschließenden Kugel
     Unit                mRadius;
     //! Pointer at the parent-sektor
@@ -150,18 +128,12 @@ protected:
     
     //! renderer for this sektor
     RenderSektor*       mRenderer;
-
-	//! matrix for this sektor, contain rotation, translation and scaling of this sector
-	DRMatrix			mMatrix;
-    
     
     //! seconds since last use (visible for camera)
     double              mIdleSeconds;
     
     std::map<u64, Sektor*> mChilds;
     typedef std::pair<u64, Sektor*> SEKTOR_ENTRY;
-    
-    std::vector<SektorID> mSektorPath;
     
 private:
     

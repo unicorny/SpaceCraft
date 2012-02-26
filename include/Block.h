@@ -5,8 +5,8 @@
  * Created on 20. August 2011, 23:52
  */
 
-#ifndef BLOCK_H
-#define	BLOCK_H
+#ifndef __SC_BLOCK_H
+#define	__SC_BLOCK_H
 
 #include "main.h"
 
@@ -39,5 +39,5 @@ private:
 
 };
 
-#endif	/* BLOCK_H */
+#endif	/* __SC_BLOCK_H */
 

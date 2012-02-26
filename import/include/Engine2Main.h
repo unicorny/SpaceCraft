@@ -123,7 +123,6 @@ const float PI = 3.1415926535f;
 #include "DRINetwork.h"
 #include "DRIvlc.h"
 #include "DRIImage.h"
-#include "DRRandom.h"
 #include "DRVideoConfig.h"
 #include "DRTextur.h"
 #include "DRGeometrie.h"

@@ -5,8 +5,9 @@
  * Created on 20. August 2011, 23:52
  */
 
-#ifndef BLOCKLOADER_H
-#define	BLOCKLOADER_H
+#ifndef __SC_BLOCK_LOADER_H
+#define	__SC_BLOCK_LOADER_H
+
 
 class BlockLoader {
 public:
@@ -17,5 +18,5 @@ private:
 
 };
 
-#endif	/* BLOCKLOADER_H */
+#endif	/* __SC_BLOCK_LOADER_H */
 

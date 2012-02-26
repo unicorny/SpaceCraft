@@ -5,8 +5,8 @@
  * Created on 20. August 2011, 18:56
  */
 
-#include "Player.h"
-#include "SolarSystemSektor.h"
+#include "main.h"
+#include "Server.h"
 
 Player::Player()
 : mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
@@ -29,6 +29,8 @@ DRReturn Player::init()
     if(loadFromFile())
     {
         mServerID = Server::createNewServer();
+        //root->seed();
+        //root->addSektor(new Sektor(root, SOLAR_SYSTEM, 0, rand(), mServerID));
         newPlayer = true;
         srand(mSeed);
         mSeed = rand();
@@ -40,10 +42,7 @@ DRReturn Player::init()
     
     DRLog.writeToLog("Player Seed: %d", mSeed);
     // position, radius, id, parent
-    RootSektor* root = Server::getServer(mServerID)->getRootSektor();
-    mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, root);
-    root->addSektor(mCurrentSektor, mSeed);
-    
+    mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, NULL);
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
     Vector3Unit position(DRRandom::rVector3(1.0f), AE);
     position = position.normalize();
@@ -55,12 +54,7 @@ DRReturn Player::init()
         mCurrentSektor->moveAll(0.0f, &mCamera);
         mCameraFOV = 45.0f;
     }
-    Sektor* camSektor = root->getSektorByPath(mCameraSektorPath);
-    if(camSektor)
-        mCamera.setCurrentSektor(camSektor);
-    else
-        mCamera.setCurrentSektor(mCurrentSektor);
-    mCamera.updateSektorPath();
+    mCamera.setCurrentSektor(mCurrentSektor);
     
     int seed = rand();
     Unit radius(DRRandom::rDouble(72000, 1000), KM);
@@ -73,7 +67,7 @@ DRReturn Player::init()
 void Player::exit()
 {
     saveIntoFile();
-    //DR_SAVE_DELETE(mCurrentSektor);
+    DR_SAVE_DELETE(mCurrentSektor);
 }
 
 DRReturn Player::loadFromFile(const char* file)
@@ -103,15 +97,6 @@ DRReturn Player::loadFromFile(const char* file)
     f.read(&t, sizeof(Vector3Unit), 1);
     mCamera.setSektorPosition(t);
     
-    int size = 0;
-    f.read(&size, sizeof(int), 1);
-    for(int i = 0; i < size; i++)
-    {
-        SektorID tempID = 0;
-        f.read(&tempID, sizeof(SektorID), 1);
-        mCameraSektorPath.push_back(tempID);
-    }    
-    
     f.close();
     LOG_INFO("Player sucessfull loaded");
     
@@ -137,13 +122,6 @@ DRReturn Player::saveIntoFile(const char* file)
     f.write(&mPosition, sizeof(Vector3Unit), 1);
     Vector3Unit temp = mCamera.getSektorPosition();
     f.write(&temp, sizeof(Vector3Unit), 1);
-    
-    std::vector<SektorID> sektorPath;
-    mCamera.getCurrentSektor()->getSektorPath(sektorPath);
-    int size = sektorPath.size();
-    f.write(&size, sizeof(int), 1);
-    for(int i = 0; i < size; i++)
-        f.write(&sektorPath[i], sizeof(SektorID), 1);
     
     f.close();
     LOG_INFO("Player sucessfull saved");

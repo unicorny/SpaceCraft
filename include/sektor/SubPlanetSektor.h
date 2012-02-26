@@ -1,20 +1,13 @@
 #ifndef __SC_SUB_PLANET_SEKTOR__
 #define __SC_SUB_PLANET_SEKTOR__
 
-#define NEIGHBOR_LEFT 0
-#define NEIGHBOR_UP 1
-#define NEIGHBOR_RIGHT 2
-#define NEIGHBOR_DOWN 3
-
-#include "PlanetSektor.h"
-#include "RenderSubPlanet.h"
+#include "Sektor.h"
 
 class SubPlanetSektor : public Sektor
 {
 public:
-    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
-                    float cameraDistance = 0.0f, int subLevel = 6);
-    virtual ~SubPlanetSektor();
+    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, int subLevel = 6);
+    virtual ~SubPlanetSektor() {}
     
     /*! \brief move sektor
      * 
@@ -31,23 +24,10 @@ public:
      */    
     DRReturn render(float fTime, Camera* cam);
     
-    __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
-    
-    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
-    
-    virtual Sektor* getChild(SektorID childID);
+    static double Wurzel_3;
     
 protected:
-    int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
-    SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
-    PlanetSektor*       mPlanet;
-    float               mTheta;
-    float               mEbeneDistanceToCenter;
-    DRMatrix            mRotation;
-    
-    // temporäre variablen      
-    double              mHorizontCulling;
-private:
+    int         mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     
     
 };

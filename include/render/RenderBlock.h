@@ -5,8 +5,9 @@
  * Created on 20. August 2011, 23:50
  */
 
-#ifndef RENDERBLOCK_H
-#define	RENDERBLOCK_H
+#ifndef __SC_RENDER_BLOCK_H
+#define	__SC_RENDER_BLOCK_H
+
 
 #include "main.h"
 #include "Block.h"
@@ -35,5 +36,5 @@ private:
 
 };
 
-#endif	/* RENDERBLOCK_H */
+#endif	/* __SC_RENDER_BLOCK_H */
 

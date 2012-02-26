@@ -131,6 +131,7 @@ enum /*CORE_API*/ DRReturn
 #include "DRColor.h"
 #include "DRPlane.h"
 #include "DRMatrix.h"
+#include "DRRandom.h"
 #include "DRObjekt.h"
 #include "DRFrustumCulling.h"
 #include "DRIni.h"
