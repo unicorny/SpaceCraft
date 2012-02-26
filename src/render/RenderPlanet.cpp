@@ -39,6 +39,7 @@ RenderPlanet::RenderPlanet(SektorID seed, float theta,
   mPreviewTextur(NULL), mInitalized(0)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
+	printf("size from GlobalRenderer: %d\n", size);
     init(seed, theta, cameraDistance, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", size, texturePath);
 }
 

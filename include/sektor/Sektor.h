@@ -122,6 +122,8 @@ public:
     void getSektorPath(std::vector<SektorID>& storage) const;
     
     DRString getSektorPathName() const;
+
+	__inline__ const DRMatrix& getMatrix() {return mMatrix;}
     
 protected:
     
@@ -145,6 +147,9 @@ protected:
     
     //! renderer for this sektor
     RenderSektor*       mRenderer;
+
+	//! matrix for this sektor, contain rotation, translation and scaling of this sector
+	DRMatrix			mMatrix;
     
     
     //! seconds since last use (visible for camera)
