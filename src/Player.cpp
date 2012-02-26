@@ -28,19 +28,18 @@ DRReturn Player::init()
     mSeed = SDL_GetTicks();
     if(loadFromFile())
     {
+        DRRandom::seed(mSeed / SDL_GetTicks());
         mServerID = Server::createNewServer();
         newPlayer = true;
-        srand(mSeed);
-        mSeed = rand();
+        mSeed = DRRandom::core2_rand();
     }
     //Server::getServer(mServerID);
     //mCurrentSektor = Server::getServer(mServerID)->getRootSektor();
-    
-    srand(mSeed);
-    
     DRLog.writeToLog("Player Seed: %d", mSeed);
+    
     // position, radius, id, parent
     RootSektor* root = Server::getServer(mServerID)->getRootSektor();
+    DRRandom::seed(mSeed);
     mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, root);
     root->addSektor(mCurrentSektor, mSeed);
     
@@ -61,11 +60,8 @@ DRReturn Player::init()
     else
         mCamera.setCurrentSektor(mCurrentSektor);
     mCamera.updateSektorPath();
-    
-    int seed = rand();
-    Unit radius(DRRandom::rDouble(72000, 1000), KM);
-    //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
-    //mCamera.setAbsPosition(Unit(0.0, KM));
+    //DRLog.writeToLog("camera sektor path after load: %s", mCamera.getCurrentSektor()->getSektorPathName().data());
+    //mCamera.getSektorPosition().print("camera position");
    
     return DR_OK;
 }
@@ -105,10 +101,12 @@ DRReturn Player::loadFromFile(const char* file)
     
     int size = 0;
     f.read(&size, sizeof(int), 1);
+    //printf("load Sektor, size: %d\n", size);
     for(int i = 0; i < size; i++)
     {
         SektorID tempID = 0;
         f.read(&tempID, sizeof(SektorID), 1);
+        //printf("%d id: %uld", i, (u64)tempID);
         mCameraSektorPath.push_back(tempID);
     }    
     
@@ -140,6 +138,8 @@ DRReturn Player::saveIntoFile(const char* file)
     
     std::vector<SektorID> sektorPath;
     mCamera.getCurrentSektor()->getSektorPath(sektorPath);
+    DRLog.writeToLog("camera sektor path by save: %s", mCamera.getCurrentSektor()->getSektorPathName().data());
+    temp.print("camera position");
     int size = sektorPath.size();
     f.write(&size, sizeof(int), 1);
     for(int i = 0; i < size; i++)

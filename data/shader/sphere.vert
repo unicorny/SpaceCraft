@@ -19,9 +19,9 @@ void main()
 	gl_TexCoord[1] = vec4(-gl_Vertex.x*0.5+0.5, -gl_Vertex.y*0.5+0.5, 0.0, 1.0);
 	
 	float h = texture2D(texture, gl_TexCoord[0].xy).z;
-	vec4 newVertex = scaledVertex + (dir / l) * ((1.0 - l)+((h*2.0-1.0)/6378.0*6.0));
+	vec4 newVertex = scaledVertex + (dir / l) * ((1.0 - l));//+((h*2.0-1.0)/6378.0*6.0));
 		
-	gl_Position    = projection * modelview * newVertex;
+	gl_Position    = projection * modelview * scaledVertex;
 
 	gl_FrontColor  = gl_Color;
 }

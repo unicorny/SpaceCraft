@@ -23,7 +23,9 @@ public:
     virtual DRReturn move(float fTime, Camera* cam);
     
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
-    virtual Sektor* getChild(SektorID childID, DRVector3 centerPosition);
+    
+    // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet
+    virtual Sektor* getChild(SektorID childID);
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     
 protected:

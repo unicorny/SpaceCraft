@@ -157,6 +157,9 @@ void test()
     DRLog.writeToLog("index10: (6): %d", tests[9]);
     
     DRTextureManager::Instance().test();
+    
+    // Random Test
+    
 }
 
 void sizeOfClasses()
@@ -190,9 +193,6 @@ DRReturn load()
     DRFileManager::Instance().addOrdner("data/shader");
     test();
     sizeOfClasses();
-        
-    DRRandom r;
-    srand(77111);
     
     //Steuerung
   

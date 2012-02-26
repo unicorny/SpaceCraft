@@ -125,16 +125,20 @@ void Sektor::updateCameraSektor(Camera* cam)
     }
 }
 
-Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex)
+Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 0*/)
 {
     if(thisIndex < 0) return NULL;
-	if(path.size() == 0) return NULL;
+    if(path.size() == 0) return NULL;
     if(thisIndex && path[thisIndex] != mID) return NULL;
     if(!thisIndex && *path.begin() != mID) return NULL;
     if(path[path.size()-1] == mID) return this;
     
     Sektor* child = getChild(path[++thisIndex]);
-	if(!child) LOG_ERROR("child din't exist", NULL);
+    if(!child)
+    {
+        printf("child: %uld\n", (u64)path[thisIndex]);
+        LOG_ERROR("child didn't exist", NULL);
+    }
     //Sektor* child = mChilds.find(path[thisIndex])->second;// mChilds[path[thisIndex]];
     //if(!child) LOG_ERROR("child didn't exist", NULL);
     //return child->getSektorByPath(path, thisIndex+1);

@@ -6,7 +6,7 @@ RenderSubPlanet::RenderSubPlanet(SektorID seed, float theta, float cameraDistanc
 : RenderPlanet(seed, theta, cameraDistance, rotation, texturePath), mGeometrieGrid(NULL)
 {
     mGeometrieGrid = DRGeometrieManager::Instance().getGrid(50, GEO_FULL);
-	if(mShader) ShaderManager::Instance().releaseShader(mShader);
+    if(mShader) ShaderManager::Instance().releaseShader(mShader);
 	mShader = ShaderManager::Instance().getShader("sphere.vert", "sphere.frag");
 }
 

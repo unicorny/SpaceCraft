@@ -44,7 +44,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
 //    mLastRelativeCameraPosition.print("cameraPos");
     DRVector3 v = mLastRelativeCameraPosition.getVector3();
     
-   // printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
+    printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
@@ -55,15 +55,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))-PI/4.0;            
             if(angle < horizontAngle)
             {
-                Eigen::Vector3f center = Eigen::Vector3f(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z);
-                Eigen::Affine3f affine;
-                Eigen::Quaternionf q;
-                q =   Eigen::Quaternionf(Eigen::AngleAxisf(acosf(45.0f*GRADTORAD), Eigen::Vector3f::UnitX())
-                    * Eigen::AngleAxisf(acosf(45.0f*GRADTORAD), Eigen::Vector3f::UnitY()));
-                center = q * center;
-                center *= 1000;
-                //getChild(SektorID(center(0), center(1), center(2)));            
-                getChild(mSubPlanets[i], DRVector3(0.0f));            
+                getChild(mSubPlanets[i]*static_cast<short>(1000));            
             }
             //else
                 //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
@@ -120,7 +112,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     //glTranslatef(pos.x, pos.y, pos.z);
     //glScaled(radius2, radius2, radius2);
 	
-	mMatrix = DRMatrix::scaling(DRVector3(radius2)) * DRMatrix::translation(pos) * mParent->getMatrix() ;
+    mMatrix = DRMatrix::scaling(DRVector3(radius2)) * DRMatrix::translation(pos) * mParent->getMatrix() ;
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
@@ -129,31 +121,26 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     {
       //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
         ShaderProgram* shader = mRenderer->getShaderProgram();
-		if(!shader) LOG_ERROR("RenderPlanet hasn't valid shader", DR_ERROR);
-		shader->bind();
-		
-		shader->setUniformMatrix("modelview", mMatrix);
-		shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix().transpose());
-		DRGrafikError("PlanetSektor::render");
+        if(!shader) LOG_ERROR("RenderPlanet hasn't valid shader", DR_ERROR);
+        shader->bind();
+
+        shader->setUniformMatrix("modelview", mMatrix);
+        shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix().transpose());
+        DRGrafikError("PlanetSektor::render");
         
         DRReturn ret = mRenderer->render(fTime, cam);
-		shader->unbind();
+        shader->unbind();
 //		GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
         if(ret) LOG_ERROR("Fehler bei call planet renderer", DR_ERROR);
         //child didn't need to render
         return DR_NOT_ERROR;
         //return DR_OK;
     } 
-    else
-    {
-        //mSphericalShaderForSubPlanet->bind();
-        //GLint p = mSphericalShaderForSubPlanet->getProgram();        
-    }
     
     return DR_OK;
 }
 
-Sektor* PlanetSektor::getChild(SektorID childID, DRVector3 centerPosition)
+Sektor* PlanetSektor::getChild(SektorID childID)
 {        
     if(mChilds.find(childID) == mChilds.end())
     {
@@ -167,12 +154,18 @@ Sektor* PlanetSektor::getChild(SektorID childID, DRVector3 centerPosition)
 
         // Position des Quadratmittelpunktes
         //Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius*faktor;
-        Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius;//*faktor;
+        DRVector3 childPos(childID.x, childID.y, childID.z);
+        childPos /= 1000.0f;
+        childPos = childPos.normalize();
+        printf("pos: %f, %f, %f\n", childPos.x, childPos.y, childPos.z);
+        Vector3Unit position = Vector3Unit(childPos.x, childPos.y, childPos.z, KM)*mRadius;//*faktor;
         //position.print("planet pos");
 
         Unit radius = mRadius * faktorH;
         printf("radius: %s\n", radius.print().data());
         //SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, mRadius/mLastRelativeCameraPosition.length());
+        //0.617940f theta bei 6 patches
+        //0.85-0.83 theta bei 6*4 patches
         SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, 0.617940f);
         
         mChilds.insert(SEKTOR_ENTRY(childID, temp));

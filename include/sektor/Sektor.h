@@ -14,6 +14,9 @@ struct SektorID
         return x.id<y.id;
     }
     operator u64() {return id;}
+    // multipliziert x, y und z ccordinate with scalar
+    __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar);}
+    __inline__ SektorID const operator /(short scalar) {return SektorID(x/scalar, y/scalar, z/scalar);}
     
     union
     {
@@ -42,7 +45,8 @@ enum SektorType
     SOLAR_SYSTEM = 7,
     STELLAR_BODY = 8,
     PLANET = 9,
-    SUB_PLANET = 10
+    SUB_PLANET = 10,
+    SUB_PATCH_PLANET = 11
 };
 
 /*!
@@ -127,7 +131,7 @@ public:
     
     DRString getSektorPathName() const;
 
-	__inline__ const DRMatrix& getMatrix() {return mMatrix;}
+    __inline__ const DRMatrix& getMatrix() {return mMatrix;}
     
 protected:    
     
