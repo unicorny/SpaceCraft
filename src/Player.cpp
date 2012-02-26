@@ -5,8 +5,8 @@
  * Created on 20. August 2011, 18:56
  */
 
-#include "main.h"
-#include "Server.h"
+#include "Player.h"
+#include "SolarSystemSektor.h"
 
 Player::Player()
 : mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
@@ -28,21 +28,21 @@ DRReturn Player::init()
     mSeed = SDL_GetTicks();
     if(loadFromFile())
     {
+        DRRandom::seed(mSeed / SDL_GetTicks());
         mServerID = Server::createNewServer();
-        //root->seed();
-        //root->addSektor(new Sektor(root, SOLAR_SYSTEM, 0, rand(), mServerID));
         newPlayer = true;
-        srand(mSeed);
-        mSeed = rand();
+        mSeed = DRRandom::core2_rand();
     }
     //Server::getServer(mServerID);
     //mCurrentSektor = Server::getServer(mServerID)->getRootSektor();
-    
-    srand(mSeed);
-    
     DRLog.writeToLog("Player Seed: %d", mSeed);
+    
     // position, radius, id, parent
-    mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, NULL);
+    RootSektor* root = Server::getServer(mServerID)->getRootSektor();
+    DRRandom::seed(mSeed);
+    mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, root);
+    root->addSektor(mCurrentSektor, mSeed);
+    
     if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
     Vector3Unit position(DRRandom::rVector3(1.0f), AE);
     position = position.normalize();
@@ -54,12 +54,14 @@ DRReturn Player::init()
         mCurrentSektor->moveAll(0.0f, &mCamera);
         mCameraFOV = 45.0f;
     }
-    mCamera.setCurrentSektor(mCurrentSektor);
-    
-    int seed = rand();
-    Unit radius(DRRandom::rDouble(72000, 1000), KM);
-    //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
-    //mCamera.setAbsPosition(Unit(0.0, KM));
+    Sektor* camSektor = root->getSektorByPath(mCameraSektorPath);
+    if(camSektor)
+        mCamera.setCurrentSektor(camSektor);
+    else
+        mCamera.setCurrentSektor(mCurrentSektor);
+    mCamera.updateSektorPath();
+    //DRLog.writeToLog("camera sektor path after load: %s", mCamera.getCurrentSektor()->getSektorPathName().data());
+    //mCamera.getSektorPosition().print("camera position");
    
     return DR_OK;
 }
@@ -67,7 +69,7 @@ DRReturn Player::init()
 void Player::exit()
 {
     saveIntoFile();
-    DR_SAVE_DELETE(mCurrentSektor);
+    //DR_SAVE_DELETE(mCurrentSektor);
 }
 
 DRReturn Player::loadFromFile(const char* file)
@@ -97,6 +99,17 @@ DRReturn Player::loadFromFile(const char* file)
     f.read(&t, sizeof(Vector3Unit), 1);
     mCamera.setSektorPosition(t);
     
+    int size = 0;
+    f.read(&size, sizeof(int), 1);
+    //printf("load Sektor, size: %d\n", size);
+    for(int i = 0; i < size; i++)
+    {
+        SektorID tempID = 0;
+        f.read(&tempID, sizeof(SektorID), 1);
+        //printf("%d id: %uld", i, (u64)tempID);
+        mCameraSektorPath.push_back(tempID);
+    }    
+    
     f.close();
     LOG_INFO("Player sucessfull loaded");
     
@@ -122,6 +135,15 @@ DRReturn Player::saveIntoFile(const char* file)
     f.write(&mPosition, sizeof(Vector3Unit), 1);
     Vector3Unit temp = mCamera.getSektorPosition();
     f.write(&temp, sizeof(Vector3Unit), 1);
+    
+    std::vector<SektorID> sektorPath;
+    mCamera.getCurrentSektor()->getSektorPath(sektorPath);
+    DRLog.writeToLog("camera sektor path by save: %s", mCamera.getCurrentSektor()->getSektorPathName().data());
+    temp.print("camera position");
+    int size = sektorPath.size();
+    f.write(&size, sizeof(int), 1);
+    for(int i = 0; i < size; i++)
+        f.write(&sektorPath[i], sizeof(SektorID), 1);
     
     f.close();
     LOG_INFO("Player sucessfull saved");

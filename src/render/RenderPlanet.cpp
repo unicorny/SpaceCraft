@@ -40,7 +40,7 @@ DRReturn RenderPlanet::init(SektorID seed, float theta,
 	DR_SAVE_DELETE_ARRAY(buffer);
 	buffer = NULL;
 	mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
-    mTexturePath = texturePath;
+        mTexturePath = texturePath;
 
 	mTextureRenderer = new RenderNoisePlanetToTexture(vertexShader, fragmentShader);
 	mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    
@@ -140,10 +140,10 @@ DRReturn RenderPlanet::render(float fTime, Camera* cam)
     
     generateAndBindTexture();
 
-	//korrektur damit gluSphere textur die selbe ist wie bei childs
-	DRMatrix currentModelview = mShader->getUniformMatrix("modelview");
-	currentModelview = DRMatrix::rotationY(PI/2.0f) * DRMatrix::rotationZ(-PI/2.0f) * currentModelview;
-	mShader->setUniformMatrix("modelview", currentModelview);
+    //korrektur damit gluSphere textur die selbe ist wie bei childs, daher wird die Kugel gedreht
+    DRMatrix currentModelview = mShader->getUniformMatrix("modelview");
+    currentModelview = DRMatrix::rotationY(PI/2.0f) * DRMatrix::rotationZ(-PI/2.0f) * currentModelview;
+    mShader->setUniformMatrix("modelview", currentModelview);
 
     gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
         
