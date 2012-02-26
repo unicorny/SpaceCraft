@@ -6,6 +6,8 @@
 #define NEIGHBOR_RIGHT 2
 #define NEIGHBOR_DOWN 3
 
+#include "PlanetSektor.h"
+#include "RenderSubPlanet.h"
 
 class SubPlanetSektor : public Sektor
 {
@@ -21,13 +23,13 @@ public:
      * generate all sektors, which are now visible,
      * 
      */
-    DRReturn move(float fTime, Camera* cam);
+    virtual DRReturn move(float fTime, Camera* cam);
     
     /*! \brief render sektor and childs
      * 
      *  using transformation and render sektor,     *  
      */    
-    DRReturn render(float fTime, Camera* cam);
+    virtual DRReturn render(float fTime, Camera* cam);
     
     __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
     
@@ -42,6 +44,7 @@ protected:
     float               mTheta;
     float               mEbeneDistanceToCenter;
     DRMatrix            mRotation;
+    DRVector3           mSphericalCenter;
     
     // temporäre variablen      
     double              mHorizontCulling;

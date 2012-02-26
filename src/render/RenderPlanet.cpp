@@ -1,30 +1,9 @@
-#include "main.h"
+#include "RenderPlanet.h"
+#include "ShaderManager.h"
+#include "GlobalRenderer.h"
+#include "DRTextureManager.h"
 
 
-PlanetHeightValues::PlanetHeightValues(GenerateNoisePlanet* noisePlanet)
-: mNoisePlanet(noisePlanet)
-{
-    
-}
-
-PlanetHeightValues::~PlanetHeightValues()
-{
-
-}
-
-float PlanetHeightValues::getHeightValue(DRVector3& position)
-{
-    return mNoisePlanet->getValue(position);//*0.00128441521;
-}
-
-DRColor PlanetHeightValues::getColorValue(const float height)
-{
-    noise::utils::Color c = mColor.GetColor(height);///0.00128441521);
-    return DRColor(c.red, c.green, c.blue, c.alpha);
-}
-
-// ********************************************************************************
-// *******************************************************************************
 RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath)
 : RenderSektor(), mTextureRenderer(NULL), mTexture(NULL),
   mPreviewTextur(NULL), mInitalized(0)
@@ -48,6 +27,7 @@ DRReturn RenderPlanet::init(SektorID seed, float theta,
               const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath)
 {
 	GlobalRenderer& gb = GlobalRenderer::Instance();
+	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
 
 	int stepSizei = gb.getTextureRenderStepSize();
 	float stepSize = static_cast<float>(stepSizei);
@@ -61,7 +41,7 @@ DRReturn RenderPlanet::init(SektorID seed, float theta,
 	DR_SAVE_DELETE_ARRAY(buffer);
 	buffer = NULL;
 	mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
-    mTexturePath = texturePath;
+        mTexturePath = texturePath;
 
 	mTextureRenderer = new RenderNoisePlanetToTexture(vertexShader, fragmentShader);
 	mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    
@@ -97,6 +77,7 @@ DRString RenderPlanet::getPathAndFilename()
 
 RenderPlanet::~RenderPlanet()
 {
+	ShaderManager::Instance().releaseShader(mShader);
     DR_SAVE_DELETE(mTextureRenderer);
   	DR_SAVE_DELETE(mTexture);
 	DR_SAVE_DELETE(mPreviewTextur);
@@ -133,6 +114,13 @@ DRReturn RenderPlanet::generateAndBindTexture()
         DR_SAVE_DELETE(mTextureRenderer);
 		mInitalized++;
     }    
+	if(mTexture->isLoadingError())
+	{
+		DR_SAVE_DELETE(mTexture);
+		int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
+		mTexture = new Texture(size, size, GL_UNSIGNED_BYTE, 4);
+		mInitalized = 0;
+	}
     glEnable(GL_TEXTURE_2D);
     if(mPreviewTextur)
         mPreviewTextur->bind();
@@ -152,15 +140,14 @@ DRReturn RenderPlanet::render(float fTime, Camera* cam)
     else quadricDetails = 8;
     
     generateAndBindTexture();
-    
-    //korrektur damit textur die selbe ist wie bei childs
-    glPushMatrix();
-    glRotatef(-90.0f, 0.0f, 0.0f, 1.0f);
-    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+
+    //korrektur damit gluSphere textur die selbe ist wie bei childs, daher wird die Kugel gedreht
+    DRMatrix currentModelview = mShader->getUniformMatrix("modelview");
+    currentModelview = DRMatrix::rotationY(PI/2.0f) * DRMatrix::rotationZ(-PI/2.0f) * currentModelview;
+    mShader->setUniformMatrix("modelview", currentModelview);
+
     gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
-    
-    glPopMatrix();
-    
+        
     if(DRGrafikError("[RenderPlanet::render]")) return DR_ERROR;
     return DR_OK;
 }

@@ -1,8 +1,7 @@
-#include "main.h"
-
+#include "GlobalRenderer.h"
 
 GlobalRenderer::GlobalRenderer()
-: m_bInitialized(false), mQuadratic(NULL), mPlanetGen(NULL), mFrameBufferID(0),
+: m_bInitialized(false), mQuadratic(NULL), mFrameBufferID(0),
   mTextureRenderStepSize(0), mTextureRenderMaxResolution(0)
 {
     
@@ -23,14 +22,10 @@ DRReturn GlobalRenderer::init(const char* configFilename)
     
     //render to texture
      glGenFramebuffersEXT(1, &mFrameBufferID);
-    
-    if(mPlanetShader.init("data/shader/planet2.vert", "data/shader/planet2.frag"))
-        LOG_ERROR("Fehler beim laden des Shaders", DR_ERROR);
-    
+        
     DRIni cfg(configFilename);
     mTextureRenderStepSize = cfg.getInt("RenderToTexte", "StepSize");
     mTextureRenderMaxResolution = cfg.getInt("RenderToTexte", "Resolution");
-   // mPlanetGen = new GenerateNoisePlanet;
     
     m_bInitialized= true;
     return DR_OK;
@@ -106,7 +101,6 @@ void GlobalRenderer::exit()
         glDeleteFramebuffersEXT(1, &mFrameBufferID);
     mFrameBufferID = 0;
     gluDeleteQuadric(mQuadratic); 
-    DR_SAVE_DELETE(mPlanetGen);
     m_bInitialized = false;    
 }
 

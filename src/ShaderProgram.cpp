@@ -1,4 +1,4 @@
-#include "main.h"
+#include "ShaderProgram.h"
 
 ShaderProgram::ShaderProgram(DHASH id/* = 0*/)
 : mId(id), mVertexShader(0), mFragmentShader(0), mProgram(0)
@@ -137,4 +137,31 @@ unsigned char* ShaderProgram::readShaderFile(const char *filename)
     return buffer;
 }
 
+void ShaderProgram::setUniform1f(const char* name, GLfloat data)
+{
+	int loc = glGetUniformLocation(mProgram, name);
+	glUniform1f(loc, data);
+	DRGrafikError("ShaderProgram::setUniform1f");
+}
+void ShaderProgram::setUniform3fv(const char* name, const DRVector3& data)
+{
+	int loc = glGetUniformLocation(mProgram, name);
+	glUniform3fv(loc, 1, static_cast<const GLfloat*>(data));
+	DRGrafikError("ShaderProgram::setUniform3fv");
+}
 
+void ShaderProgram::setUniformMatrix(const char* name, const DRMatrix& matrix, bool transpose /* = false*/)
+{
+	int loc = glGetUniformLocation(mProgram, name);
+	glUniformMatrix4fv(loc, 1, transpose, static_cast<const GLfloat*>(matrix));
+	DRGrafikError("ShaderProgramm::setUniformMatrix");
+}
+
+DRMatrix ShaderProgram::getUniformMatrix(const char* name)
+{
+	DRMatrix ret;
+	int loc = glGetUniformLocation(mProgram, name);
+	glGetUniformfv(mProgram, loc, ret);
+	DRGrafikError("ShaderProgramm::getUniformMatrix");
+	return ret;
+}

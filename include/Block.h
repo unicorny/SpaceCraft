@@ -8,6 +8,8 @@
 #ifndef BLOCK_H
 #define	BLOCK_H
 
+#include "main.h"
+
 struct BlockName
 {
     BlockName() : name(0) {}

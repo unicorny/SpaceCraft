@@ -5,7 +5,7 @@
  * Created on 20. August 2011, 23:50
  */
 
-#include "main.h"
+#include "RenderBlockLoader.h"
 
 RenderBlockLoader::RenderBlockLoader() 
 : mTextures(NULL), mRenderBlocks(NULL), mCfg(NULL)

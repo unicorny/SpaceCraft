@@ -1,4 +1,4 @@
-#include "main.h"
+#include "DRTextureManager.h"
 
 DRTextureManager::DRTextureManager()
 : mInitalized(false), mTextureLoadMutex(NULL), mTextureLoadThread(NULL), mTextureLoadCondition(NULL),
@@ -37,7 +37,7 @@ void DRTextureManager::exit()
     }
     mTextureMemoryEntrys.clear();
     
-    for (int i = 0; i < mTextureEntrys.getNItems(); i++)
+    for (uint i = 0; i < mTextureEntrys.getNItems(); i++)
 	{
 		TextureEntry* texture = static_cast<TextureEntry*>(mTextureEntrys.findByIndex(i));
         DR_SAVE_DELETE(texture->texture);
@@ -196,6 +196,22 @@ DRReturn DRTextureManager::move(float fTime)
 		mLoadedAsynchronLoadTextures.pop();
 	//	printf("\rtextures to load left: %d", mAsynchronLoadTextures.size());
 	}
+	if(!mAsynchronSaveTextures.empty())
+	{
+		Texture* cur = mAsynchronSaveTextures.front();
+		cur->putPixelsToImage();
+		if(cur->isTextureReadyToSave())
+		{
+			mAsynchronReadyToSaveTextures.push(cur);
+			mAsynchronSaveTextures.pop();
+			//send the texture load Thread a signal to continue
+			if(SDL_CondSignal(mTextureLoadCondition)== -1) //LOG_ERROR_SDL(DR_ERROR);
+			{
+				LOG_WARNING_SDL();
+				LOG_WARNING("Fehler beim Aufruf von SDL_CondSignal"); 
+			}
+		}
+	}
 	SDL_UnlockMutex(mTextureLoadMutex);
     return DR_OK;
 }
@@ -249,17 +265,24 @@ int DRTextureManager::asynchronTextureLoadThread(void* data)
 				t.mAsynchronLoadTextures.pop();
 				SDL_UnlockMutex(t.mTextureLoadMutex);
 				// call load
-				cur->loadFromFile();
+				DRReturn ret = cur->loadFromFile(); 
 				SDL_LockMutex(t.mTextureLoadMutex);
-				// push it onto the other queue
-				t.mLoadedAsynchronLoadTextures.push(cur);
+				if(ret)
+				{
+					cur->setErrorByLoading();
+				}
+				else
+				{
+					// push it onto the other queue
+					t.mLoadedAsynchronLoadTextures.push(cur);
+				}
 				//SDL_UnlockMutex(t.mTextureLoadMutex);
 			}
-			if(!t.mAsynchronSaveTextures.empty())
+			if(!t.mAsynchronReadyToSaveTextures.empty())
 			{
 				// get top textur
-				Texture* cur = t.mAsynchronSaveTextures.front();
-				t.mAsynchronSaveTextures.pop();
+				Texture* cur = t.mAsynchronReadyToSaveTextures.front();
+				t.mAsynchronReadyToSaveTextures.pop();
 				SDL_UnlockMutex(t.mTextureLoadMutex);
 				// call load
 				cur->saveImage();

@@ -11,6 +11,11 @@
 class Sektor;
 struct SektorID;
 
+//#include "main.h"
+#include "Sektor.h"
+#include "Vector3Unit.h"
+
+
 class Camera : public DRObjekt
 {
 public:
@@ -28,6 +33,8 @@ public:
     //! diese Funktion sollte vorm rendern aller anderen Objekte aufgerufen werden
     //! \brief setzt die Objekt-Rotation als Kameramatrix
     void setKameraMatrixRotation();
+
+	DRMatrix getKameraMatrixRotation() {return DRMatrix::axis(mXAxis, mYAxis, mZAxis);}
     
     __inline__ Vector3Unit getSektorPosition() const {return mSektorPosition;}
     //! \brief calculate camera sektor position relative to targetSektor

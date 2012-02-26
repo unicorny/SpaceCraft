@@ -1,4 +1,4 @@
-#include "main.h"
+#include "Unit.h"
 
 Unit::Unit(double value, UnitTypes unitType)
 : mValue(value), mUnitType(unitType)

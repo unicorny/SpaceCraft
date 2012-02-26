@@ -1,7 +1,11 @@
-#include "main.h"
+#include "Texture.h"
+#include "GlobalRenderer.h"
+
 
 Texture::Texture(const char* filename, GLint glMinFilter /* = GL_LINEAR */, GLint glMagFilter /* = GL_LINEAR */)
-: mTexturID(0), mPboID(0), mFilename(filename), mLoadingState(0), mSavingState(0), mImage(NULL)
+: mTexturID(0), mPboID(0), mFilename(filename), mLoadingState(0), 
+  mSavingState(0), mSavingCursor(0), mSavingBuffer(NULL), mImage(NULL),
+  mTextureWidth(0), mTextureHeight(0)
 {
 	glGenTextures(1, &mTexturID);
     //bind to the new texture ID
@@ -14,7 +18,9 @@ Texture::Texture(const char* filename, GLint glMinFilter /* = GL_LINEAR */, GLin
 }
 
 Texture::Texture(GLuint width, GLuint height, GLuint bpp, GLuint format, void* data, GLint dataSize)
-: mTexturID(0), mPboID(0), mFilename(""), mLoadingState(0), mSavingState(0), mImage(NULL)
+: mTexturID(0), mPboID(0), mFilename(""), mLoadingState(0),
+  mSavingState(0), mSavingCursor(0), mSavingBuffer(NULL), mImage(NULL),
+  mTextureWidth(width), mTextureHeight(height)
 {
 	glGenTextures(1, &mTexturID);
 	glBindTexture(GL_TEXTURE_2D, mTexturID);
@@ -60,6 +66,10 @@ Texture::~Texture()
 		DRIImage::deleteImage(mImage);
 		mImage = NULL;
 	}
+	if(mSavingBuffer)
+	{
+		DR_SAVE_DELETE_ARRAY(mSavingBuffer);
+	}
 }
 
 DRReturn Texture::loadFromFile()
@@ -76,6 +86,8 @@ DRReturn Texture::loadFromFile()
 		if(mImage->loadFromFile(DRString(DRString(path)+"/"+mFilename).data()))
 			LOG_ERROR("Fehler2 beim Textur laden", DR_ERROR);
 	}
+	mTextureWidth = mImage->getWidth();
+	mTextureHeight = mImage->getHeight();
 	mLoadingState = 1;
 	return DR_OK;
 }
@@ -83,6 +95,7 @@ DRReturn Texture::loadFromFile()
 DRReturn Texture::pixelsCopyToRenderer()
 {
 	if(!mImage) LOG_ERROR("fehler, mImage is zero", DR_NOT_ERROR);
+	if(isLoadingError()) LOG_ERROR("error by loading", DR_ERROR);
 	glBindTexture(GL_TEXTURE_2D, mTexturID);
 	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, mPboID);
 	GLenum format = mImage->getImageFormat();
@@ -100,7 +113,7 @@ DRReturn Texture::pixelsCopyToRenderer()
 	if(DRGrafikError("Error by copying pixels to OpenGL")) return DR_ERROR;
 
 	DRIImage::deleteImage(mImage); mImage = NULL;
-	printf("textur load\n");
+	printf("texture load\n");
 	
 	mLoadingState = 2;
 
@@ -109,7 +122,7 @@ DRReturn Texture::pixelsCopyToRenderer()
 
 DRReturn Texture::getPixelsToSave(const char* path)
 {
-	if(!mImage) mImage = DRIImage::newImage();
+	
 	if(!mPboSaveID)
 	{
 		glGenBuffersARB(1, &mPboSaveID);
@@ -117,25 +130,16 @@ DRReturn Texture::getPixelsToSave(const char* path)
 	mFilename = path;
 	bind();
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, mPboSaveID);
-	Eigen::Vector2i size = getResolution();
+	Eigen::Vector2i size = Eigen::Vector2i(mTextureWidth, mTextureHeight);
 	printf("size: %d, %d\n", size(0), size(1));
+	mSavingBuffer = new u8[size(0)*size(1)*4];
+	mSavingCursor = 0;
 	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, size(0)*size(1)*4*sizeof(u8), NULL, GL_STREAM_READ_ARB);
 
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
 	//glReadPixels(0, 0, size(0), size(1), GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 	DRGrafikError("glGetTexImage");
-	GLubyte* ptr = static_cast<GLubyte*>(glMapBufferARB(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB));
-	DRGrafikError("map Buffer");
-	//if(!ptr) LOG_ERROR("glMapBuffer return ZERO Pointer", DR_ERROR);
-	if(ptr)
-	{
-		mImage->setSize(DRVector2(size(0), size(1)));
-		mImage->setImageFormat(-1);
-		mImage->setPixel(ptr);		
-
-		glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB);
-	}
-	
+		
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 	
 	if(DRGrafikError("Texture::getPixelsToSave(): error by asynchronously saving an image!"))
@@ -145,18 +149,63 @@ DRReturn Texture::getPixelsToSave(const char* path)
 	return DR_OK;
 }
 
+DRReturn Texture::putPixelsToImage()
+{
+	if(!mImage) mImage = DRIImage::newImage();
+	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, mPboSaveID);
+	GLubyte* ptr = static_cast<GLubyte*>(glMapBufferARB(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB));
+	DRGrafikError("map Buffer");
+	//if(!ptr) LOG_ERROR("glMapBuffer return ZERO Pointer", DR_ERROR);
+	Eigen::Vector2i size = Eigen::Vector2i(mTextureWidth, mTextureHeight);
+	if(ptr)
+	{
+		GLuint stepSize = GlobalRenderer::Instance().getTextureRenderStepSize()*2*4;
+		stepSize *= stepSize;
+		GLuint bufferSize = size(0)*size(1)*4*sizeof(u8);
+		printf("\rstepSize KByte: %d, KBytes left: %d", stepSize/1024, (bufferSize-mSavingCursor)/1024);
+		if(mSavingCursor+stepSize >= bufferSize)
+		{
+			memcpy(&mSavingBuffer[mSavingCursor], &ptr[mSavingCursor], bufferSize-mSavingCursor);
+			mSavingState = 2;
+		}
+		else
+		{
+			memcpy(&mSavingBuffer[mSavingCursor], &ptr[mSavingCursor], stepSize);
+			mSavingCursor += stepSize;
+		}
+
+		glUnmapBufferARB(GL_PIXEL_PACK_BUFFER_ARB);
+	}
+
+	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
+
+	if(DRGrafikError("Texture::getPixelsToSave(): error by asynchronously saving an image!"))
+		LOG_ERROR("Fehler bei save image", DR_ERROR);
+	return DR_OK;
+}
+
 DRReturn Texture::saveImage()
 {
 	if(!mImage) return DR_ZERO_POINTER;
-	if(mSavingState < 1) LOG_ERROR("Image data not saved!", DR_ERROR);
-	if(mSavingState > 1) LOG_ERROR("ImageData already saved!", DR_OK);
+	if(mSavingState < 2) LOG_ERROR("Image data not ready!", DR_ERROR);
+	if(mSavingState > 2) LOG_ERROR("ImageData already saved!", DR_OK);
+
+	Eigen::Vector2i size = Eigen::Vector2i(mTextureWidth, mTextureHeight);
+	if(size(0) <= 0) LOG_ERROR("error getSize return zero", DR_ERROR);
+	if(mSavingBuffer)
+	{
+		mImage->setSize(DRVector2(size(0), size(1)));
+		mImage->setImageFormat(-1);
+		mImage->setPixel(mSavingBuffer);		
+		DR_SAVE_DELETE_ARRAY(mSavingBuffer);
+	}
 
 	if(mImage->saveIntoFile(mFilename.data()))
 		LOG_ERROR("fehler bei save", DR_ERROR);
 	DRIImage::deleteImage(mImage);
 	mImage = NULL;
 		
-	mSavingState = 2;
+	mSavingState = 3;
 	printf("image saved\n");
 	return DR_OK;
 }
@@ -178,11 +227,13 @@ void Texture::setWrappingMode(GLint mode)
 
 Eigen::Vector2i Texture::getResolution()
 {
+	return Eigen::Vector2i(mTextureWidth, mTextureHeight);
 	if(mLoadingState < 2) return Eigen::Vector2i(-1, -1);
 	
 	Eigen::Vector2i v;
 	glBindTexture(GL_TEXTURE_2D, mTexturID);
 	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &v(0));
 	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &v(1));
+	DRGrafikError("getResolution");
 	return v;
 }

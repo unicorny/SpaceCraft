@@ -1,4 +1,4 @@
-#include "main.h"
+#include "Sektor.h"
 
 Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent) 
 : mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
@@ -59,18 +59,15 @@ DRReturn Sektor::renderAll(float fTime, Camera* cam, bool rootRendered/* = false
         for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
         {
             Sektor* temp = it->second;     
-            glPushMatrix();
             ret = temp->render(fTime, cam);
             if(ret == DR_NOT_ERROR) 
             {
-                glPopMatrix();
                 ret = DR_OK;
                 continue;
             }
             if(ret) LOG_ERROR("Fehler bei render", DR_ERROR);
             ret = temp->renderAll(fTime, cam, true);
             if(ret) LOG_ERROR("Fehler bei render all", DR_ERROR);
-            glPopMatrix();
         }
         DRGrafikError("Sektor::renderAll");
         return ret;
@@ -128,16 +125,20 @@ void Sektor::updateCameraSektor(Camera* cam)
     }
 }
 
-Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex)
+Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 0*/)
 {
     if(thisIndex < 0) return NULL;
-	if(path.size() == 0) return NULL;
+    if(path.size() == 0) return NULL;
     if(thisIndex && path[thisIndex] != mID) return NULL;
     if(!thisIndex && *path.begin() != mID) return NULL;
     if(path[path.size()-1] == mID) return this;
     
     Sektor* child = getChild(path[++thisIndex]);
-	if(!child) LOG_ERROR("child din't exist", NULL);
+    if(!child)
+    {
+        printf("child: %uld\n", (u64)path[thisIndex]);
+        LOG_ERROR("child didn't exist", NULL);
+    }
     //Sektor* child = mChilds.find(path[thisIndex])->second;// mChilds[path[thisIndex]];
     //if(!child) LOG_ERROR("child didn't exist", NULL);
     //return child->getSektorByPath(path, thisIndex+1);
@@ -153,7 +154,7 @@ DRString Sektor::getSektorPathName() const
     std::vector<SektorID> path;
     getSektorPath(path);
     s << "./data/_" << path[0] << "/";
-    for(int i = 1; i < path.size(); i++)
+    for(uint i = 1; i < path.size(); i++)
     {
         s << "_" << path[i] << "/";
     }

@@ -1,8 +1,7 @@
 #ifndef __SC_RENDER_SUB_PLANET__
 #define __SC_RENDER_SUB_PLANET__
 
-//#include "DRGeometrieHeightfield.h"
-class DRGeometrieHeightfield;
+#include "RenderPlanet.h"
 
 class RenderSubPlanet : public RenderPlanet
 {

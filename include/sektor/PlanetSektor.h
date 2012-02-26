@@ -1,6 +1,8 @@
 #ifndef __SC_PLANET_SEKTOR__
 #define __SC_PLANET_SEKTOR__
 
+#include "RenderPlanet.h"
+
 class PlanetSektor : public Sektor
 {
 public:
@@ -20,16 +22,13 @@ public:
      */
     virtual DRReturn move(float fTime, Camera* cam);
     
-    __inline__ GenerateNoisePlanet* getNoiseGenerator() {return mNoiseGenerator;}
-    __inline__ PlanetHeightValues*  getHeightValues() {return mHeights;}
-    
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    
+    // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet
     virtual Sektor* getChild(SektorID childID);
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     
 protected:
-    GenerateNoisePlanet*        mNoiseGenerator;
-    PlanetHeightValues*         mHeights;
     ShaderProgram*              mSphericalShaderForSubPlanet;
         
 private:

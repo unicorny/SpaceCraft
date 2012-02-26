@@ -1,4 +1,4 @@
-#include "main.h"
+#include "RenderInStepsToTexture.h"
 
 RenderInStepsToTexture::RenderInStepsToTexture()
 : mTexture(NULL), mStepSize(0), mIndexStepMode(0), mFinished(false)
@@ -84,17 +84,19 @@ DRReturn RenderInStepsToTexture::step()
     //Reseten der Matrixen
     glViewport(mCursorIndex.x-mStepSize/2.0f, mCursorIndex.y-mStepSize/2.0f, mStepSize, mStepSize);
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+    //glMatrixMode(GL_PROJECTION);
+    //glLoadIdentity();
        
     // left, right, bottom, top, near, far    
-    glOrtho(cursor.x-halfStepSize.x, cursor.x+halfStepSize.x, cursor.y-halfStepSize.y, cursor.y+halfStepSize.y, -1.0, 1.0);
+//    glOrtho(cursor.x-halfStepSize.x, cursor.x+halfStepSize.x, cursor.y-halfStepSize.y, cursor.y+halfStepSize.y, -1.0, 1.0);
+	//glMultMatrixf(DRMatrix::ortho_projection(cursor.x-halfStepSize.x, cursor.x+halfStepSize.x, cursor.y-halfStepSize.y, cursor.y+halfStepSize.y, -1.0, 1.0));
+	mProjectionMatrix = DRMatrix::ortho_projection(cursor.x-halfStepSize.x, cursor.x+halfStepSize.x, cursor.y-halfStepSize.y, cursor.y+halfStepSize.y, -1.0, 1.0);
   //  printf("left: %f, right: %f, bottom: %f, top: %f, pixel cursor: %f, %f, stepSize: %f\n", 
     //        cursor.x-halfStepSize.x, cursor.x+halfStepSize.x, cursor.y-halfStepSize.y, cursor.y+halfStepSize.y, mCursorIndex.x, mCursorIndex.y, mStepSize);
     //glOrtho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
     
-    glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
-    glLoadIdentity();                    // Reset (init) the modelview matrix
+    //glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
+    //glLoadIdentity();                    // Reset (init) the modelview matrix
     
     DRReturn ret = renderStuff();
     

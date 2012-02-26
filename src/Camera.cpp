@@ -5,7 +5,7 @@
  * Created on 20. August 2011, 21:17
  */
 
-#include "main.h"
+#include "Camera.h"
 
 Camera::Camera()
 : mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL)

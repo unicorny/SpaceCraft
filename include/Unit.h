@@ -8,6 +8,8 @@
 #ifndef __SPACE_CRAFT_UNIT_H
 #define	__SPACE_CRAFT_UNIT_H
 
+#include "main.h"
+
 enum UnitTypes
 {
     NONE = 0,
