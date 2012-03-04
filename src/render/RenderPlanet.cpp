@@ -18,6 +18,7 @@ RenderPlanet::RenderPlanet(SektorID seed, float theta,
   mPreviewTextur(NULL), mInitalized(0)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
+	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
     init(seed, theta, cameraDistance, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", size, texturePath);
 }
 
@@ -77,6 +78,8 @@ DRString RenderPlanet::getPathAndFilename()
 RenderPlanet::~RenderPlanet()
 {
 	ShaderManager::Instance().releaseShader(mShader);
+    if(mTextureRenderer && !mTextureRenderer->isFinished())
+        GlobalRenderer::Instance().removeRenderTask(mTextureRenderer);
     DR_SAVE_DELETE(mTextureRenderer);
   	DR_SAVE_DELETE(mTexture);
 	DR_SAVE_DELETE(mPreviewTextur);
@@ -90,7 +93,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
         {
 			mTextureRenderer->reinit(mTexture);
 			GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
-			printf("reinint\n");
+			//printf("[RenderPlanet::generateAndBindTexture]  reinint\n");
 			mInitalized++;
 		}
 		//finish rendering texture

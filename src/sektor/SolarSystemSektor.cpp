@@ -10,7 +10,7 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     Vector3Unit planetPosition(DRRandom::rVector3(1.0f), AE);
     //planetPosition = planetPosition.normalize();
     //planetPosition = planetPosition * Unit(0.2f, AE);
-    planetPosition.print("Planeten position");
+    planetPosition.print("[SolarSystemSektor::SolarSystemSektor] Planeten position");
     
     noise::module::Perlin p;
     
@@ -20,7 +20,7 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     int seed = (int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX);
     Unit planetRadius(DRRandom::rDouble(70000, 1000), KM);
         
-    DRLog.writeToLog("Planeten Radius: %s", planetRadius.print().data());
+    DRLog.writeToLog("[SolarSystemSektor::SolarSystemSektor] Planeten Radius: %s", planetRadius.print().data());
     
     //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
     Sektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, this);

@@ -7,13 +7,8 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
 : SubPlanetSektor(position, radius, id, parent, planet, cameraDistance, subLevel)
 {
     mType = SUB_PATCH_PLANET;  
-    memset(mNeighbors, 0, sizeof(SubPlanetSektor*)*4);
-
-    //berechnen der Rotationsmatrix für die Texturgenerierung
-    DRVector3 sektorPos(id.x, id.y, id.z);
-    sektorPos /= 1000.0f;
-    mRotation = DRMatrix::translation(sektorPos);
     
+    mRotation = dynamic_cast<SubPlanetSektor*>(mParent)->getRotation();
     mRenderer = new RenderSubPatchPlanet(id, mTheta, cameraDistance, mRotation, getSektorPathName());
 }
 
@@ -48,7 +43,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     }
     else
     {
-        removeInactiveChilds(1.0f);
+        removeInactiveChilds(60.0f);
     }
     return DR_OK;
  }
@@ -56,13 +51,15 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
    
  DRReturn SubPatchPlanetSektor::render(float fTime, Camera* cam)
  {
-     if(mIdleSeconds > 0.0f) return DR_OK;
+     //if(mIdleSeconds > 0.0f) return DR_OK;
     //DRVector3 pos = mSektorPosition.getVector3().normalize();
     
     //glMultMatrixf(mRotation);
     //glTranslatef(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
-    //DRVector3 translate = DRVector3(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
-    mMatrix = mRotation * mParent->getMatrix();
+    DRVector3 translate = DRVector3(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
+     DRVector3 childPos(mID.x, mID.y, mID.z);
+     childPos /= 1000.0f;
+    mMatrix = DRMatrix::translation(translate) * mRotation * mPlanet->getMatrix();//  mParent->getMatrix();
     ShaderProgram* shader = mRenderer->getShaderProgram();
     if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
     shader->bind();
@@ -73,6 +70,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     //if(mHorizontCulling > 70.0)
     {
         shader->setUniform1f("theta", mTheta);
+        shader->setUniform1f("cameraDistance", mEbeneDistanceToCenter);
         DRVector3 sp = mSphericalCenter;
         sp = DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter));
         shader->setUniform3fv("SphericalCenter", sp);//DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter)));

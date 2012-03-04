@@ -48,7 +48,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
-        for(u32 i = 0; i < 6; i++)
+        for(u32 i = 0; i < 1; i++)
         {
             //horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
@@ -157,12 +157,12 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         DRVector3 childPos(childID.x, childID.y, childID.z);
         childPos /= 1000.0f;
         childPos = childPos.normalize();
-        printf("pos: %f, %f, %f\n", childPos.x, childPos.y, childPos.z);
+        printf("[PlanetSektor::getChild] pos: %f, %f, %f\n", childPos.x, childPos.y, childPos.z);
         Vector3Unit position = Vector3Unit(childPos.x, childPos.y, childPos.z, KM)*mRadius;//*faktor;
         //position.print("planet pos");
 
         Unit radius = mRadius * faktorH;
-        printf("radius: %s\n", radius.print().data());
+        printf("[PlanetSektor::getChild] radius: %s\n", radius.print().data());
         //SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, mRadius/mLastRelativeCameraPosition.length());
         //0.617940f theta bei 6 patches
         //0.85-0.83 theta bei 6*4 patches

@@ -8,9 +8,9 @@
 #ifndef SPACE_CRAFT_GLOBAL_RENDERER_H
 #define	SPACE_CRAFT_GLOBAL_RENDERER_H
 
-#include "Engine2Main.h"
-#include "ShaderProgram.h"
-#include "GenerateNoisePlanet.h"
+#include "RenderInStepsToTexture.h"
+
+//class RenderInStepsToTexture;
 
 class GlobalRenderer
 {
@@ -24,21 +24,45 @@ public:
     static bool	isInitialized()	{return Instance().m_bInitialized;};
 
     //init und exit
-    DRReturn init();
+    DRReturn init(const char* configFilename);
     void exit();
-    
-    inline ShaderProgram* getPlanetShaderPtr() {return &mPlanetShader;}
-    inline GenerateNoisePlanet* getGenerateNoisePlanet() {return mPlanetGen;}
     
     GLUquadricObj* getQuadric() {if(m_bInitialized) return mQuadratic; else return NULL;}
     
+    //Config Details
+    __inline__ GLuint getTextureRenderStepSize() {return mTextureRenderStepSize;}
+    __inline__ GLuint getTextureRenderMaxResolution() {return mTextureRenderMaxResolution;}
+    
+    //! put task onto stack, call it if it is on top, until it is finished, than remove task from stack
+    //! memory will not be touched!!
+    void addRenderTask(RenderInStepsToTexture* newRenderTask, bool preview = false);
+    void removeRenderTask(RenderInStepsToTexture* renderTaskToDelete);
+    
+    // render current task
+    DRReturn renderTasks();
+
+    const DRMatrix& getProjectionMatrix() {return mProjectionMatrix;}
+    void setProjectionMatrix(const DRMatrix& projectionMatrix) {mProjectionMatrix = projectionMatrix;}
+    
 private:
     GlobalRenderer();
+    DRReturn setupFrameBuffer(Texture* texture);
+    static const char* getFrameBufferEnumName(GLenum name);
+    DRReturn renderTaskFromQueue(std::queue<RenderInStepsToTexture*>* list);
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
-    GenerateNoisePlanet*                mPlanetGen;
-    ShaderProgram                       mPlanetShader;
+    DRMatrix							mProjectionMatrix;
+    
+    //Render To texture
+    GLuint                              mFrameBufferID;
+    std::queue<RenderInStepsToTexture*> mRenderTasks;
+    std::queue<RenderInStepsToTexture*> mPreviewRenderTasks;
+    DRHashList                          mDeleted;
+    
+    // Config
+    GLuint                               mTextureRenderStepSize;
+    GLuint                               mTextureRenderMaxResolution;
 };
 
 

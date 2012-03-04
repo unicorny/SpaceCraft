@@ -9,7 +9,6 @@ SubPlanetSektor::SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id,
 {
     mType = SUB_PLANET;  
     memset(mNeighbors, 0, sizeof(SubPlanetSektor*)*4);
-    if(subLevel > 6) return;
     
     //berechnen der Rotationsmatrix für die Texturgenerierung
     DRVector3 centerPosition = position.getVector3().normalize(); 
@@ -24,9 +23,12 @@ SubPlanetSektor::SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id,
             //*Eigen::AngleAxisf(acosf(5.0f*GRADTORAD*faktor), Eigen::Vector3f(0.0f, 0.0f, 1.0f));
 
     mRotation = DRMatrix(affine.data());
+    printf("[SubPlanetSektor::SubPlanetSektor] CameraDistance: %f\n", mEbeneDistanceToCenter);
     //mRotation = DRMatrix::identity();
     //mSphericalCenter = mSphericalCenter.transformCoords(mRotation.invert() );
-    printf("center: %f %f %f, spherical: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z, mSphericalCenter.x, mSphericalCenter.y, mSphericalCenter.z);
+    printf("[SubPlanetSektor::SubPlanetSektor] center: %f %f %f, spherical: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z, mSphericalCenter.x, mSphericalCenter.y, mSphericalCenter.z);
+    
+    if(subLevel > 6) return;
     
     mRenderer = new RenderSubPlanet(id, mTheta, cameraDistance, mRotation, getSektorPathName());
 }
@@ -67,17 +69,27 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     
     if(mHorizontCulling <= 70.0)
     {
-        short value = 310;
+        short value = 309;
+        value = 10;
         //sub sektoren erstellen
-        getChild(SektorID(-value, -value, 0)); // rechts unten
+        getChild(SektorID(value, value, 0)); // rechts unten
         getChild(SektorID( value, -value, 0)); // links unten
         getChild(SektorID(-value,  value, 0)); //rechts oben
         getChild(SektorID(-value, -value, 0)); //rechts unten
     //* */
+        
+        //0,0,-1
+/*        getChild(SektorID(250, 250, -750));
+        getChild(SektorID(250, -250, -750));
+        getChild(SektorID(-250, 250, -750));
+        getChild(SektorID(-250, -250, -750));
+        //*/
+        
+
     }
     else
     {
-        removeInactiveChilds(1.0f);
+        removeInactiveChilds(60.0f);
     }
 
     return DR_OK;
@@ -85,11 +97,12 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
 
 DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
 {
-    if(mIdleSeconds > 0.0f) return DR_OK;
+    //if(mIdleSeconds > 0.0f) return DR_OK;
     //DRVector3 pos = mSektorPosition.getVector3().normalize();
     
     //glMultMatrixf(mRotation);
     //glTranslatef(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
+    // Spherical Center
     DRVector3 translate = DRVector3(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
     mMatrix = DRMatrix::translation(translate) * mRotation * mParent->getMatrix();
     ShaderProgram* shader = mRenderer->getShaderProgram();
@@ -99,9 +112,10 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     shader->setUniformMatrix("modelview", mMatrix);
 	
 
-    if(mHorizontCulling > 70.0)
+    if(mHorizontCulling > 70.0 && mIdleSeconds <= 0.0f)
     {
         shader->setUniform1f("theta", mTheta);
+        shader->setUniform1f("cameraDistance", mEbeneDistanceToCenter);
         DRVector3 sp = mSphericalCenter;
         sp = DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter));
         shader->setUniform3fv("SphericalCenter", sp);//DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter)));
@@ -133,12 +147,12 @@ Sektor* SubPlanetSektor::getChild(SektorID childID)
         childPos /= 1000.0f;
         Vector3Unit position = Vector3Unit(childPos*mRadius);
         position = position.convertTo(KM);
-        position.print("planet pos"); printf("subLevel: %d, %s\n", mSubLevel+1, position.length().print().data());
+        position.print("[SubPlanetSektor::getChild] planet pos"); printf("[SubPlanetSektor::getChild] subLevel: %d, %s\n", mSubLevel+1, position.length().print().data());
 
         Unit radius = mRadius;// * faktorH;
         //printf("radius: %s\n", radius.print().data());
         //906 ist zu groß (lücken links und rechts)
-        SubPlanetSektor* temp = new SubPatchPlanetSektor(position, radius, childID, this, mPlanet, 0.905f, mSubLevel + 1);
+        SubPlanetSektor* temp = new SubPatchPlanetSektor(position, radius, childID, this, mPlanet, 1.0f-mEbeneDistanceToCenter/4.0f, mSubLevel + 1);
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 
         //Set neighbor pointer

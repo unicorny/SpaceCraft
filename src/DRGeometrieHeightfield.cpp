@@ -49,8 +49,8 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     }
 
     
-    DRLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
-    DRLog.writeVector3ToLog(mSphericalCenter, "Spherical Center");    
+    //DRLog.writeToLog("[DRGeometrieHeightfield::initHeightfield] vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
+    //DRLog.writeVector3ToLog(mSphericalCenter, "Spherical Center");    
     for(u32 i = 0; i < mVertexCount; i++)
     {
         if(mSphericalCenter != DRVector3(0.0f))
