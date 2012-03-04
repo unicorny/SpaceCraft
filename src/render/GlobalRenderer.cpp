@@ -38,32 +38,50 @@ void GlobalRenderer::addRenderTask(RenderInStepsToTexture* newRenderTask, bool p
     else
         mRenderTasks.push(newRenderTask);
 }
+void GlobalRenderer::removeRenderTask(RenderInStepsToTexture* renderTaskToDelete)
+{
+    mDeleted.addByHash(reinterpret_cast<DHASH>(renderTaskToDelete), reinterpret_cast<void*>(1));
+}
+
+DRReturn GlobalRenderer::renderTaskFromQueue(std::queue<RenderInStepsToTexture*>* list)
+{
+    //remove already deleted objects (which can be find in mDeleted List)
+    while(!list->empty() && 
+           mDeleted.getNItems() > 0 &&  
+           mDeleted.findByHash(reinterpret_cast<DHASH>(list->front())))
+    {
+        mDeleted.removeByHash(reinterpret_cast<DHASH>(list->front()));
+        list->pop();
+    }
+    RenderInStepsToTexture* current = NULL;
+    //procceed list
+    if(!list->empty())
+    {
+        current = list->front();
+		DHASH hash = reinterpret_cast<DHASH>(list->front());
+        
+        if(setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
+            LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
+        if(current->step()) LOG_ERROR("Fehler bei Step", DR_ERROR);
+    
+        if(current->isFinished())
+            list->pop(); //remove finished Task
+    }
+    return DR_OK;
+}
 
 DRReturn GlobalRenderer::renderTasks()
 {
     Uint32 start = SDL_GetTicks();
     RenderInStepsToTexture* current = NULL;
-        
-    if(!mPreviewRenderTasks.empty())
-    {
-        current = mPreviewRenderTasks.front();
-        if(setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
-            LOG_ERROR("Fehler bei setupFrameBuffer 1", DR_ERROR);
-        if(current->step()) LOG_ERROR("Fehler bei Step a PreviewRenderTask", DR_ERROR);
+     
     
-        if(current->isFinished())
-            mPreviewRenderTasks.pop(); //remove finished Task
-    }
-    if(!mRenderTasks.empty())
-    {
-        current = mRenderTasks.front();
-        if(setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
-            LOG_ERROR("Fehler bei setupFrameBuffer 2", DR_ERROR);
-        if(current->step()) LOG_ERROR("Fehler bei Step a RenderTask", DR_ERROR);
-    
-        if(current->isFinished())
-            mRenderTasks.pop(); //remove finished Task
-    }    
+    // proceed mPreviewRenderTasks
+    if(renderTaskFromQueue(&mPreviewRenderTasks)) 
+        LOG_ERROR("Fehler bei mPreviewRenderTasks", DR_ERROR);
+    // procceed mRenderTasks
+    if(renderTaskFromQueue(&mRenderTasks))
+        LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
     
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);   
     glMatrixMode(GL_TEXTURE);
@@ -79,7 +97,7 @@ DRReturn GlobalRenderer::setupFrameBuffer(Texture* texture)
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
     //create texture
     //bind to the new texture ID
-    texture->bind();
+    texture->bind();    
     
     glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
                               GL_TEXTURE_2D, texture->getId(), 0);

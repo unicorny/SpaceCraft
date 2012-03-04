@@ -36,17 +36,19 @@ public:
     //! put task onto stack, call it if it is on top, until it is finished, than remove task from stack
     //! memory will not be touched!!
     void addRenderTask(RenderInStepsToTexture* newRenderTask, bool preview = false);
+    void removeRenderTask(RenderInStepsToTexture* renderTaskToDelete);
     
     // render current task
     DRReturn renderTasks();
 
-	const DRMatrix& getProjectionMatrix() {return mProjectionMatrix;}
-	void setProjectionMatrix(const DRMatrix& projectionMatrix) {mProjectionMatrix = projectionMatrix;}
+    const DRMatrix& getProjectionMatrix() {return mProjectionMatrix;}
+    void setProjectionMatrix(const DRMatrix& projectionMatrix) {mProjectionMatrix = projectionMatrix;}
     
 private:
     GlobalRenderer();
     DRReturn setupFrameBuffer(Texture* texture);
     static const char* getFrameBufferEnumName(GLenum name);
+    DRReturn renderTaskFromQueue(std::queue<RenderInStepsToTexture*>* list);
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
@@ -56,6 +58,7 @@ private:
     GLuint                              mFrameBufferID;
     std::queue<RenderInStepsToTexture*> mRenderTasks;
     std::queue<RenderInStepsToTexture*> mPreviewRenderTasks;
+    DRHashList                          mDeleted;
     
     // Config
     GLuint                               mTextureRenderStepSize;

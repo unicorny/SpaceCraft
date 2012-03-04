@@ -215,7 +215,12 @@ void Texture::bind()
 	if(mLoadingState >= 2)
 	{
 		glBindTexture(GL_TEXTURE_2D, mTexturID);
+        DRGrafikError("[Texture::bind]");
 	}
+    else
+    {
+        //DRLog.writeToLog("[Texture::bind] texture not load");
+    }
 }
 
 void Texture::setWrappingMode(GLint mode)

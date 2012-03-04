@@ -97,7 +97,6 @@ DRReturn RenderInStepsToTexture::step()
     
     //glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
     //glLoadIdentity();                    // Reset (init) the modelview matrix
-    
     DRReturn ret = renderStuff();
     
     //clean up

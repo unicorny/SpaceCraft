@@ -110,6 +110,7 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
 	mShader->setUniformMatrix("projection", mProjectionMatrix);
 	mShader->setUniformMatrix("texture", mRotation);
     
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     mRenderSphere->render();    
     
     mShader->unbind();

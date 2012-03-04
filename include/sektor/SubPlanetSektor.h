@@ -37,6 +37,8 @@ public:
     
     virtual Sektor* getChild(SektorID childID);
     
+    const DRMatrix& getRotation() {return mRotation;}
+    
 protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
