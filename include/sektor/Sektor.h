@@ -130,6 +130,8 @@ public:
     void getSektorPath(std::vector<SektorID>& storage) const;
     
     DRString getSektorPathName() const;
+    
+    __inline__ const Vector3Unit& getCameraPosition() {return mLastRelativeCameraPosition;}
 
     __inline__ const DRMatrix& getMatrix() {return mMatrix;}
     

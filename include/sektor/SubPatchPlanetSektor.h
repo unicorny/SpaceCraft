@@ -8,7 +8,7 @@ class SubPatchPlanetSektor : public SubPlanetSektor
 {
 public:
     SubPatchPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
-                    float cameraDistance = 0.0f, int subLevel = 7);
+                    float patchScaling = 1.0f, int subLevel = 7);
     virtual ~SubPatchPlanetSektor();
     
     /*! \brief move sektor
@@ -28,9 +28,12 @@ public:
     
     //__inline__ void setNeighbor(u8 index, SubPatchPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
     
-    //virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
     //virtual Sektor* getChild(SektorID childID);
+    
+protected:
+    DRVector3    mVectorToPlanetCenter;        
     
 };
 

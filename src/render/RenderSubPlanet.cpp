@@ -2,8 +2,8 @@
 #include "DRGeometrieManager.h"
 #include "ShaderManager.h"
 
-RenderSubPlanet::RenderSubPlanet(SektorID seed, float theta, float cameraDistance, const DRMatrix& rotation, DRString texturePath)
-: RenderPlanet(seed, theta, cameraDistance, rotation, texturePath), mGeometrieGrid(NULL)
+RenderSubPlanet::RenderSubPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath)
+: RenderPlanet(seed, translate, patchScaling, rotation, texturePath), mGeometrieGrid(NULL)
 {
     mGeometrieGrid = DRGeometrieManager::Instance().getGrid(50, GEO_FULL);
     if(mShader) ShaderManager::Instance().releaseShader(mShader);

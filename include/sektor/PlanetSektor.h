@@ -27,9 +27,11 @@ public:
     // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet
     virtual Sektor* getChild(SektorID childID);
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
+    __inline__ double getTheta() {return mTheta;}
     
 protected:
     ShaderProgram*              mSphericalShaderForSubPlanet;
+    double                      mTheta;
         
 private:
     static SektorID mSubPlanets[];

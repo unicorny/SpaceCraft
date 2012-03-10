@@ -13,7 +13,7 @@ class SubPlanetSektor : public Sektor
 {
 public:
     SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
-                    float cameraDistance = 0.0f, int subLevel = 6);
+                    float patchScaling = 1.0f, int subLevel = 6);
     virtual ~SubPlanetSektor();
     
     /*! \brief move sektor
@@ -43,13 +43,12 @@ protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
     PlanetSektor*       mPlanet;
-    float               mTheta;
-    float               mEbeneDistanceToCenter;
+    float               mPatchScaling;
     DRMatrix            mRotation;
-    DRVector3           mSphericalCenter;
     
     // temporäre variablen      
     double              mHorizontCulling;
+    double              mTheta;
 private:
     
     

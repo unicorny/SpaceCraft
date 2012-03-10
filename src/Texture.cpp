@@ -110,10 +110,10 @@ DRReturn Texture::pixelsCopyToRenderer()
 		0, format, GL_UNSIGNED_BYTE, NULL);
 
 	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-	if(DRGrafikError("Error by copying pixels to OpenGL")) return DR_ERROR;
+	if(DRGrafikError("[Texture::pixelsCopyToRenderer] Error by copying pixels to OpenGL")) return DR_ERROR;
 
 	DRIImage::deleteImage(mImage); mImage = NULL;
-	printf("texture load\n");
+	//printf("[Texture::pixelsCopyToRenderer] texture load\n");
 	
 	mLoadingState = 2;
 
@@ -131,18 +131,18 @@ DRReturn Texture::getPixelsToSave(const char* path)
 	bind();
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, mPboSaveID);
 	Eigen::Vector2i size = Eigen::Vector2i(mTextureWidth, mTextureHeight);
-	printf("size: %d, %d\n", size(0), size(1));
+	//printf("8Texture::getPixelsToSave] size: %d, %d\n", size(0), size(1));
 	mSavingBuffer = new u8[size(0)*size(1)*4];
 	mSavingCursor = 0;
 	glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, size(0)*size(1)*4*sizeof(u8), NULL, GL_STREAM_READ_ARB);
 
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
 	//glReadPixels(0, 0, size(0), size(1), GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	DRGrafikError("glGetTexImage");
+	DRGrafikError("[Texture::getPixelsToSave] glGetTexImage");
 		
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 	
-	if(DRGrafikError("Texture::getPixelsToSave(): error by asynchronously saving an image!"))
+	if(DRGrafikError("[Texture::getPixelsToSave()] error by asynchronously saving an image!"))
 		LOG_ERROR("Fehler bei save image", DR_ERROR);
 	mSavingState = 1;
 
@@ -154,7 +154,7 @@ DRReturn Texture::putPixelsToImage()
 	if(!mImage) mImage = DRIImage::newImage();
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, mPboSaveID);
 	GLubyte* ptr = static_cast<GLubyte*>(glMapBufferARB(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB));
-	DRGrafikError("map Buffer");
+	DRGrafikError("[Texture::putPixelsToImage] map Buffer");
 	//if(!ptr) LOG_ERROR("glMapBuffer return ZERO Pointer", DR_ERROR);
 	Eigen::Vector2i size = Eigen::Vector2i(mTextureWidth, mTextureHeight);
 	if(ptr)
@@ -162,7 +162,7 @@ DRReturn Texture::putPixelsToImage()
 		GLuint stepSize = GlobalRenderer::Instance().getTextureRenderStepSize()*2*4;
 		stepSize *= stepSize;
 		GLuint bufferSize = size(0)*size(1)*4*sizeof(u8);
-		printf("\rstepSize KByte: %d, KBytes left: %d", stepSize/1024, (bufferSize-mSavingCursor)/1024);
+		//printf("\rstepSize KByte: %d, KBytes left: %d", stepSize/1024, (bufferSize-mSavingCursor)/1024);
 		if(mSavingCursor+stepSize >= bufferSize)
 		{
 			memcpy(&mSavingBuffer[mSavingCursor], &ptr[mSavingCursor], bufferSize-mSavingCursor);
@@ -179,7 +179,7 @@ DRReturn Texture::putPixelsToImage()
 
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, 0);
 
-	if(DRGrafikError("Texture::getPixelsToSave(): error by asynchronously saving an image!"))
+	if(DRGrafikError("[Texture::getPixelsToSave()] error by asynchronously saving an image!"))
 		LOG_ERROR("Fehler bei save image", DR_ERROR);
 	return DR_OK;
 }
@@ -206,7 +206,7 @@ DRReturn Texture::saveImage()
 	mImage = NULL;
 		
 	mSavingState = 3;
-	printf("image saved\n");
+	//printf("image saved\n");
 	return DR_OK;
 }
 
@@ -239,6 +239,6 @@ Eigen::Vector2i Texture::getResolution()
 	glBindTexture(GL_TEXTURE_2D, mTexturID);
 	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &v(0));
 	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &v(1));
-	DRGrafikError("getResolution");
+	DRGrafikError("[Texture::getResolution]");
 	return v;
 }

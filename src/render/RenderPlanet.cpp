@@ -9,21 +9,21 @@ RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath)
   mPreviewTextur(NULL), mInitalized(0)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
-    init(seed, PI/2.0f, 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", size, texturePath);
+    init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", size, texturePath);
 }
 
-RenderPlanet::RenderPlanet(SektorID seed, float theta,
-                           float cameraDistance, const DRMatrix& rotation, DRString texturePath)
+RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
+                           float patchScaling, const DRMatrix& rotation, DRString texturePath)
 : RenderSektor(), mTextureRenderer(NULL), mTexture(NULL), 
   mPreviewTextur(NULL), mInitalized(0)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
-    init(seed, theta, cameraDistance, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", size, texturePath);
+    init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", size, texturePath);
 }
 
-DRReturn RenderPlanet::init(SektorID seed, float theta, 
-              float cameraDistance, const DRMatrix& rotation, 
+DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
+              float patchScaling, const DRMatrix& rotation, 
               const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath)
 {
 	GlobalRenderer& gb = GlobalRenderer::Instance();
@@ -44,7 +44,7 @@ DRReturn RenderPlanet::init(SektorID seed, float theta,
         mTexturePath = texturePath;
 
 	mTextureRenderer = new RenderNoisePlanetToTexture(vertexShader, fragmentShader);
-	mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    
+	mTextureRenderer->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
 	GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
 		
     if(DRIsFileExist(getPathAndFilename().data()))

@@ -3,13 +3,19 @@
 
 SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius, 
                                            SektorID id, Sektor* parent, PlanetSektor* planet,
-                                           float cameraDistance/* = 0.0f*/, int subLevel/* = 7*/)
-: SubPlanetSektor(position, radius, id, parent, planet, cameraDistance, subLevel)
+                                           float patchScaling/* = 1.0f*/, int subLevel/* = 7*/)
+: SubPlanetSektor(position, radius, id, parent, planet, patchScaling, subLevel), mVectorToPlanetCenter(DRVector3(0.0f, 0.0f, -1.0f))
 {
     mType = SUB_PATCH_PLANET;  
-    
-    mRotation = dynamic_cast<SubPlanetSektor*>(mParent)->getRotation();
-    mRenderer = new RenderSubPatchPlanet(id, mTheta, cameraDistance, mRotation, getSektorPathName());
+    DRVector3 childPos(mID.x, mID.y, mID.z);
+    childPos /= 1000.0f;
+             
+    DRMatrix rotation = dynamic_cast<SubPlanetSektor*>(mParent)->getRotation();
+    //mRotation = mRotation * rotation;
+    mVectorToPlanetCenter = (mParent->getPosition()+mSektorPosition).getVector3().normalize();
+    printf("[SubPatchPlanetSektor::SubPatchPlanetSektor] vector to planet center: %f %f %f\n",
+            mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
+    mRenderer = new RenderSubPatchPlanet(id, childPos, patchScaling, rotation, getSektorPathName());
 }
 
  SubPatchPlanetSektor::~SubPatchPlanetSektor()
@@ -19,11 +25,15 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
 
  DRReturn SubPatchPlanetSektor::move(float fTime, Camera* cam)
  {
-    mHorizontCulling = 75.0;
     if(mSubLevel != 7) return DR_OK;
     //teilen bei Camera Distance von 1.5 radius
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    mHorizontCulling = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
+    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this).convertTo(KM);
+  //  mLastRelativeCameraPosition.convertTo(KM).print("[SubPatchPlanetSektor::move] camera Position");
+    DRVector3 patchPosition = mSektorPosition.getVector3().normalize();
+    DRVector3 cameraPosition = mLastRelativeCameraPosition.getVector3().normalize();
+    if(EnIsButtonPressed(SDLK_y))
+        cam->setSektorPosition(DRVector3(0.0f));
+    mHorizontCulling = acos(cameraPosition.dot(patchPosition))*RADTOGRAD;  
     if(mParent)
     {
         if(!isObjectInSektor(mLastRelativeCameraPosition))    
@@ -32,7 +42,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
             mIdleSeconds = 0.0f;
     }
     
-    if(mHorizontCulling <= 70.0)
+    if(mHorizontCulling <= 50.0)
     {
         /*///sub sektoren erstellen
         getChild(SektorID(-500, -500, 0)); // rechts unten
@@ -51,29 +61,26 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
    
  DRReturn SubPatchPlanetSektor::render(float fTime, Camera* cam)
  {
-     //if(mIdleSeconds > 0.0f) return DR_OK;
+     if(mIdleSeconds > 0.0f) return DR_OK;
     //DRVector3 pos = mSektorPosition.getVector3().normalize();
     
     //glMultMatrixf(mRotation);
     //glTranslatef(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
-    DRVector3 translate = DRVector3(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
      DRVector3 childPos(mID.x, mID.y, mID.z);
      childPos /= 1000.0f;
-    mMatrix = DRMatrix::translation(translate) * mRotation * mPlanet->getMatrix();//  mParent->getMatrix();
+     
+    mMatrix = /*DRMatrix::translation(childPos) */ mParent->getMatrix();//  mParent->getMatrix();
     ShaderProgram* shader = mRenderer->getShaderProgram();
     if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
     shader->bind();
     shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix());
     shader->setUniformMatrix("modelview", mMatrix);
-	
-
-    //if(mHorizontCulling > 70.0)
+    shader->setUniform3fv("translate", childPos);
+    
+    //if(mPlanet->getHorizontAngle() > 50.0)
     {
-        shader->setUniform1f("theta", mTheta);
-        shader->setUniform1f("cameraDistance", mEbeneDistanceToCenter);
-        DRVector3 sp = mSphericalCenter;
-        sp = DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter));
-        shader->setUniform3fv("SphericalCenter", sp);//DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mEbeneDistanceToCenter)));
+        //shader->setUniform1f("theta", mTheta);
+        shader->setUniform1f("patchScaling", mPatchScaling);
         mRenderer->render(fTime, cam);
         shader->unbind();
         //GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
@@ -82,3 +89,18 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     }
     return DR_OK;
  }
+ 
+ bool SubPatchPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
+{    
+    //double angle = acos(positionInSektor.normalize().dot(mSektorPosition.getVector3().normalize()));   
+    DRVector3 posInSektorNorm = positionInSektor.getVector3().normalize();
+    DRVector3 sektorPosNorm = mSektorPosition.getVector3().normalize();
+    double angle = acos(posInSektorNorm.dot(mVectorToPlanetCenter));   
+    double d = posInSektorNorm.dot(mVectorToPlanetCenter);
+    //positionInSektor.print("sektorpos");
+    //printf("\r angle: %f (dot: %f)", angle*RADTOGRAD, d);
+    //*/
+    if(angle*RADTOGRAD > 110)
+        return false;
+    return true;   
+}

@@ -8,7 +8,7 @@ SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1),SektorID(1,0,0),SektorI
                                         SektorID(-1,0,0),SektorID(0,1,0),SektorID(0,-1,0)};// left, top, bottom
 
 PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
-: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL)
+: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f)
 {
     mType = PLANET;
     
@@ -32,28 +32,29 @@ PlanetSektor::~PlanetSektor()
 DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    double horizontAngle = acos(mRadius/mLastRelativeCameraPosition.length());
+    mTheta = acos(mRadius/mLastRelativeCameraPosition.length());
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
     distance = distance.convertTo(KM);
     //printf("\rEntfernung zur Oberflaeche: %s", distance.print().data());
-    Vector3Unit cameraPlanet = -mLastRelativeCameraPosition;
-    Unit l = cameraPlanet.length();
-    double theta = acos(mRadius/l); // if theta < 0.5 Grad, using ebene
+    //Vector3Unit cameraPlanet = -mLastRelativeCameraPosition;
+    //Unit l = cameraPlanet.length();
+    //double theta = acos(mRadius/l); // if theta < 0.5 Grad, using ebene
     //theta = cos(0.617940);
     //printf("\rtheta: %f (%f Grad), distance: %f", theta, theta*RADTOGRAD,  (float)mRadius/mLastRelativeCameraPosition.length());
 //    mLastRelativeCameraPosition.print("cameraPos");
     DRVector3 v = mLastRelativeCameraPosition.getVector3();
     
-    printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
+    
+    //printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
-        for(u32 i = 0; i < 1; i++)
+        for(u32 i = 0; i < 6; i++)
         {
             //horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
             double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))-PI/4.0;            
-            if(angle < horizontAngle)
+            if(angle < mTheta)
             {
                 getChild(mSubPlanets[i]*static_cast<short>(1000));            
             }
@@ -149,8 +150,8 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         // Wurzel(3)       1
         //  ------    =  -----   => Wurzel(3) = 1/faktor => faktor = 1/Wurzel(3)
         //     1         faktor
-        double faktor = 1.0/sqrt(3.0);// sqrtf(3.0) = ca. 1.73205, faktor = ca. 0.577
-        double faktorH = sqrt(2.0/sqrt(3.0)-1.0/3.0);
+    //    double faktor = 1.0/sqrt(3.0);// sqrtf(3.0) = ca. 1.73205, faktor = ca. 0.577
+     //   double faktorH = sqrt(2.0/sqrt(3.0)-1.0/3.0);
 
         // Position des Quadratmittelpunktes
         //Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius*faktor;
@@ -161,12 +162,11 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         Vector3Unit position = Vector3Unit(childPos.x, childPos.y, childPos.z, KM)*mRadius;//*faktor;
         //position.print("planet pos");
 
-        Unit radius = mRadius * faktorH;
-        printf("[PlanetSektor::getChild] radius: %s\n", radius.print().data());
+        printf("[PlanetSektor::getChild] radius: %s\n", mRadius.print().data());
         //SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, mRadius/mLastRelativeCameraPosition.length());
         //0.617940f theta bei 6 patches
         //0.85-0.83 theta bei 6*4 patches
-        SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, 0.617940f);
+        SubPlanetSektor* temp = new SubPlanetSektor(position, mRadius, childID, this, this, 1.0f);
         
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 

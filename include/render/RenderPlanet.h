@@ -23,18 +23,16 @@ public:
     void setTexturePath(DRString texturePath) {mTexturePath = texturePath;}
     
 protected:
-    RenderPlanet(SektorID seed, float theta, 
-                 float cameraDistance, const DRMatrix& rotation, DRString texturePath);
-    DRReturn init(SektorID seed, float theta, 
-                 float cameraDistance, const DRMatrix& rotation,
-                 const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath);
+    RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath);
+    DRReturn init(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, 
+                  const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath);
     
     DRReturn generateAndBindTexture();
     DRString getPathAndFilename();
         
     RenderNoisePlanetToTexture* mTextureRenderer;
-	Texture*						mTexture;
-	Texture*						mPreviewTextur;
+    Texture*			mTexture;
+    Texture*			mPreviewTextur;
     short                       mInitalized;
     DRString                    mTexturePath;
     

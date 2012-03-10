@@ -154,7 +154,11 @@ void ShaderProgram::setUniformMatrix(const char* name, const DRMatrix& matrix, b
 {
 	int loc = glGetUniformLocation(mProgram, name);
 	glUniformMatrix4fv(loc, 1, transpose, static_cast<const GLfloat*>(matrix));
-	DRGrafikError("ShaderProgramm::setUniformMatrix");
+	if(DRGrafikError("ShaderProgramm::setUniformMatrix"))
+    {
+        DRLog.writeToLog("[ShaderProgram::setUniformMatrix] name: %s, transpose: %d", name, transpose);
+        DRLog.writeMatrixToLog(matrix, "[ShaderProgram::setUniformMatrix] matrix");
+    }
 }
 
 DRMatrix ShaderProgram::getUniformMatrix(const char* name)

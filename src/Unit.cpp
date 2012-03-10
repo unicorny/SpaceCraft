@@ -45,99 +45,57 @@ Unit Unit::convertTo(UnitTypes type) const
     return Unit(this->mValue * getConversionFaktor(this->mUnitType, type), type);
 }
 
-Unit Unit::operator + (const Unit& b) const
+void Unit::makeSameType(Unit& a, Unit& b)
 {
-    if(this->mUnitType == b.mUnitType)
+    if(a.mUnitType != b.mUnitType)
     {
-        return Unit(mValue + b.mValue, this->mUnitType); 
-    }
-    else
-    {
-        if((int)this->mUnitType < (int)b.mUnitType)
-            return *this + b.convertTo(this->mUnitType);
+        if((int)a.mUnitType > (int)b.mUnitType)
+            b = b.convertTo(a.mUnitType);
         else
-            return convertTo(b.mUnitType) + b;
+            a = a.convertTo(b.mUnitType);
        //convertTo() 
     }
+}
+
+Unit Unit::operator + (const Unit& b) const
+{
+    Unit a = *this, b2 = b;
+    makeSameType(a, b2);
+    return Unit(a.mValue + b2.mValue, a.mUnitType);
 }
 
 Unit Unit::operator - (const Unit& b) const
 {
-    if(this->mUnitType == b.mUnitType)
-    {
-        return Unit(mValue - b.mValue, this->mUnitType); 
-    }
-    else
-    {
-        if((int)this->mUnitType < (int)b.mUnitType)
-            return *this - b.convertTo(this->mUnitType);
-        else
-            return convertTo(b.mUnitType) - b;
-       //convertTo() 
-    }
+    Unit a = *this, b2 = b;
+    makeSameType(a, b2);
+    return Unit(a.mValue - b2.mValue, a.mUnitType);
 }
 
 Unit Unit::operator * (const Unit& b) const
 {
-    if(this->mUnitType == b.mUnitType)
-    {
-        return Unit(mValue * b.mValue, this->mUnitType); 
-    }
-    else
-    {
-        if((int)this->mUnitType < (int)b.mUnitType)
-            return *this * b.convertTo(this->mUnitType);
-        else
-            return convertTo(b.mUnitType) * b;
-       //convertTo() 
-    }
+    Unit a = *this, b2 = b;
+    makeSameType(a, b2);
+    return Unit(a.mValue * b2.mValue, a.mUnitType);   
 }
 
 Unit Unit::operator / (const Unit& b) const
 {
-    if(this->mUnitType == b.mUnitType)
-    {
-        return Unit(mValue / b.mValue, this->mUnitType); 
-    }
-    else
-    {
-        if((int)this->mUnitType < (int)b.mUnitType)
-            return *this / b.convertTo(this->mUnitType);
-        else
-            return convertTo(b.mUnitType) / b;
-       //convertTo() 
-    }
+    Unit a = *this, b2 = b;
+    makeSameType(a, b2);
+    return Unit(a.mValue / b2.mValue, a.mUnitType);
 }
 
 bool Unit::operator < (const Unit& b) const
 {
-    if(this->mUnitType == b.mUnitType)
-    {
-        return mValue < b.mValue; 
-    }
-    else
-    {
-        if((int)this->mUnitType < (int)b.mUnitType)
-            return mValue < b.convertTo(this->mUnitType).mValue;
-        else
-            return convertTo(b.mUnitType).mValue < b.mValue;
-       //convertTo() 
-    }
+    Unit a = *this, b2 = b;
+    makeSameType(a, b2);
+    return a.mValue < b2.mValue;   
 }
 bool Unit::operator <= (const Unit& b) const
 {
-    if(this->mUnitType == b.mUnitType)
-    {
-        return mValue <= b.mValue; 
-    }
-    else
-    {
-        if((int)this->mUnitType < (int)b.mUnitType)
-            return mValue <= b.convertTo(this->mUnitType).mValue;
-        else
-            return convertTo(b.mUnitType).mValue <= b.mValue;
-       //convertTo() 
-    }
+    Unit a = *this, b2 = b;
+    makeSameType(a, b2);
+    return a.mValue <= b2.mValue;    
 }
 
 double Unit::getConversionFaktor(UnitTypes a, UnitTypes b)

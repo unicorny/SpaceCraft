@@ -23,8 +23,9 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
 {
     mShader->bind();
     
-    mShader->setUniform3fv("SphericalCenter", DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mH)));
-	mShader->setUniform1f("theta", mTheta);
+    //mShader->setUniform3fv("SphericalCenter", DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mH)));
+	mShader->setUniform1f("patchScaling", mPatchScaling);
+    mShader->setUniform3fv("translate", mTranslate);
     
     //printf("theta:%f\n", 90.0*GRADTORAD);
     
@@ -117,10 +118,10 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     return DR_OK;
 }
 
-DRReturn RenderNoisePlanetToTexture::init(float stepSize, float theta, float h, Texture* texture, const DRMatrix& rotation /*= DRMatrix::Identity()*/)
+DRReturn RenderNoisePlanetToTexture::init(float stepSize, DRVector3 translate, float patchScaling, Texture* texture, const DRMatrix& rotation /*= DRMatrix::Identity()*/)
 {
-    mTheta = theta;
-    mH = h;
+    mPatchScaling = patchScaling;
+    mTranslate = translate;
     mRotation = rotation;
     float clippingPlanes[4] = {1.0f, -1.0f, 1.0f, -1.0f};
     

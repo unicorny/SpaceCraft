@@ -11,21 +11,21 @@ public:
     RenderNoisePlanetToTexture(const char* vertexShaderName, const char* fragmentShaderName);
     ~RenderNoisePlanetToTexture();
     
-    void update(float theta, float h) {mTheta = theta; mH = h;}
-    DRReturn init(float stepSize, float theta, float h, Texture* texture, const DRMatrix& rotation = DRMatrix::identity());
+    //__inline__ void update(float patchScaling) {mPatchScaling = patchScaling;}
+    DRReturn init(float stepSize, DRVector3 translate, float patchScaling, Texture* texture, const DRMatrix& rotation = DRMatrix::identity());
     
     virtual DRReturn renderStuff();
     
     __inline__ const DRMatrix& getRotationsMatrix() {return mRotation;}
-    __inline float getTheta() {return mTheta;}
+    __inline__ float getPatchScaling() {return mPatchScaling;}
 
     
 protected:
 private:
     ShaderProgram* mShader;
     DRGeometrieHeightfield* mRenderSphere;
-    float         mTheta;
-    float         mH;
+    float         mPatchScaling;
+    DRVector3     mTranslate;
     DRMatrix      mRotation;
 };
 

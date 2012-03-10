@@ -56,10 +56,10 @@ DRGeometrieHeightfield* DRGeometrieManager::getGrid(GLuint gridSize, GeometrieGr
 	entry->referenzCounter = 0;
     
     DRVector3 edges[4];
-    edges[0] = DRVector3(1.0f, 1.0f, 0.0f);
-    edges[1] = DRVector3(-1.0f, 1.0f, 0.0f);
-    edges[2] = DRVector3(1.0f, -1.0f, 0.0f);
-    edges[3] = DRVector3(-1.0f, -1.0f, 0.0f);
+    edges[0] = DRVector3(1.0f, 1.0f, 1.0f);
+    edges[1] = DRVector3(-1.0f, 1.0f, 1.0f);
+    edges[2] = DRVector3(1.0f, -1.0f, 1.0f);
+    edges[3] = DRVector3(-1.0f, -1.0f, 1.0f);
     entry->geometrie = new DRGeometrieHeightfield();
     dynamic_cast<DRGeometrieHeightfield*>(entry->geometrie)->init(gridSize, edges, gridFormat);
     
