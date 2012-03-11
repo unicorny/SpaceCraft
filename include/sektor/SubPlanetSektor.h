@@ -48,7 +48,6 @@ protected:
     
     // temporäre variablen      
     double              mHorizontCulling;
-    double              mTheta;
 private:
     
     

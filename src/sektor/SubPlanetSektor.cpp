@@ -5,7 +5,7 @@
 SubPlanetSektor::SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
 : Sektor(position, radius, id, parent), mSubLevel(subLevel), mPlanet(planet),
-  mPatchScaling(patchScaling), mHorizontCulling(0.0), mTheta(0.0)
+  mPatchScaling(patchScaling), mHorizontCulling(0.0)
 {
     mType = SUB_PLANET;  
     memset(mNeighbors, 0, sizeof(SubPlanetSektor*)*4);
@@ -61,11 +61,9 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     DRVector3 patchPosition = mSektorPosition.getVector3().normalize();
     DRVector3 cameraPosition = mLastRelativeCameraPosition.getVector3().normalize();
     mHorizontCulling = acos(cameraPosition.dot(patchPosition))*RADTOGRAD;    
-    mTheta = acos(mRadius/mLastRelativeCameraPosition.length());
     //mLastRelativeCameraPosition.print("[SubPlanetSektor::move] camPos");
    // printf(" radius: %s\n", mRadius.print().data());
-    //printf("\rhorizont: %f, theta: %f (/:%f)", mHorizontCulling, mTheta*RADTOGRAD, static_cast<double>(mRadius/mLastRelativeCameraPosition.length()));
-    mTheta = mRadius/mLastRelativeCameraPosition.length();
+    //printf("\rhorizont: %f, theta: %f", mHorizontCulling, mPlanet->getTheta());
     if(mParent)
     {
         if(!isObjectInSektor(mLastRelativeCameraPosition))    
@@ -74,7 +72,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
             mIdleSeconds = 0.0f;
     }
     
-    if(mPlanet->getTheta() <= 50.0*GRADTORAD && mHorizontCulling < 120.0f)
+    if(mPlanet->getTheta() <= 50.0*GRADTORAD && mHorizontCulling < 112.0f)
     {
         short value = 309;
         value = 500;
@@ -114,7 +112,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     
     mMatrix = mRotation * mParent->getMatrix();
        
-    if(mIdleSeconds <= 0.0f && mTheta < 0.9 || mPlanet->getTheta() > 50.0*GRADTORAD)
+    if(mIdleSeconds <= 0.0f && mHorizontCulling > 112.0f || mPlanet->getTheta() > 50.0*GRADTORAD)
     {
         ShaderProgram* shader = mRenderer->getShaderProgram();
         if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
