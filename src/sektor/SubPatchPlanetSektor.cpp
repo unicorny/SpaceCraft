@@ -15,7 +15,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     mVectorToPlanetCenter = (mParent->getPosition()+mSektorPosition).getVector3().normalize();
     printf("[SubPatchPlanetSektor::SubPatchPlanetSektor] vector to planet center: %f %f %f\n",
             mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
-    mRenderer = new RenderSubPatchPlanet(id, childPos, patchScaling, rotation, getSektorPathName());
+    mRenderer = new RenderSubPatchPlanet(id, childPos, patchScaling, rotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
 }
 
  SubPatchPlanetSektor::~SubPatchPlanetSektor()

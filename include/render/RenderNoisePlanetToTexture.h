@@ -3,12 +3,14 @@
 
 #include "RenderInStepsToTexture.h"
 #include "ShaderProgram.h"
+
 class DRGeometrieHeightfield;
+struct PlanetNoiseParameter;
 
 class RenderNoisePlanetToTexture : public RenderInStepsToTexture
 {
 public:
-    RenderNoisePlanetToTexture(const char* vertexShaderName, const char* fragmentShaderName);
+    RenderNoisePlanetToTexture(const char* vertexShaderName, const char* fragmentShaderName, const PlanetNoiseParameter* noiseParameter);
     ~RenderNoisePlanetToTexture();
     
     //__inline__ void update(float patchScaling) {mPatchScaling = patchScaling;}
@@ -24,6 +26,7 @@ protected:
 private:
     ShaderProgram* mShader;
     DRGeometrieHeightfield* mRenderSphere;
+    const PlanetNoiseParameter*      mNoiseParameter;
     float         mPatchScaling;
     DRVector3     mTranslate;
     DRMatrix      mRotation;

@@ -15,7 +15,7 @@
 class RenderPlanet : public RenderSektor
 {
 public:
-    RenderPlanet(SektorID seed, DRString texturePath);
+    RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
 
     virtual ~RenderPlanet();
     
@@ -23,9 +23,10 @@ public:
     void setTexturePath(DRString texturePath) {mTexturePath = texturePath;}
     
 protected:
-    RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath);
+    RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
     DRReturn init(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, 
-                  const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath);
+                  const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
+                  const PlanetNoiseParameter* planetNoiseParameter);
     
     DRReturn generateAndBindTexture();
     DRString getPathAndFilename();

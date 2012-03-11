@@ -4,27 +4,31 @@
 #include "DRTextureManager.h"
 
 
-RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath)
+RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
 : RenderSektor(), mTextureRenderer(NULL), mTexture(NULL),
   mPreviewTextur(NULL), mInitalized(0)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
-    init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", size, texturePath);
+    init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", 
+         size, texturePath, planetNoiseParameter);
 }
 
 RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
-                           float patchScaling, const DRMatrix& rotation, DRString texturePath)
+                           float patchScaling, const DRMatrix& rotation, DRString texturePath,
+                           const PlanetNoiseParameter* planetNoiseParameter)
 : RenderSektor(), mTextureRenderer(NULL), mTexture(NULL), 
   mPreviewTextur(NULL), mInitalized(0)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
-    init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", size, texturePath);
+    init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", 
+         size, texturePath, planetNoiseParameter);
 }
 
 DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
               float patchScaling, const DRMatrix& rotation, 
-              const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath)
+              const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
+              const PlanetNoiseParameter* planetNoiseParameter)
 {
 	GlobalRenderer& gb = GlobalRenderer::Instance();
 	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
@@ -43,7 +47,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 	mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
         mTexturePath = texturePath;
 
-	mTextureRenderer = new RenderNoisePlanetToTexture(vertexShader, fragmentShader);
+	mTextureRenderer = new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter);
 	mTextureRenderer->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
 	GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
 		

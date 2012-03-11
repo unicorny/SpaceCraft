@@ -4,6 +4,7 @@
 #include "noise/noise.h"
 #include "SubPlanetSektor.h"
 
+
 SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1),SektorID(1,0,0),SektorID(0,0, 1),// front, right, back
                                         SektorID(-1,0,0),SektorID(0,1,0),SektorID(0,-1,0)};// left, top, bottom
 
@@ -18,8 +19,94 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     if(id.count) p.SetSeed(id.count);
     DRVector3 idVector(id.x, id.y, id.z);
     idVector /= SHRT_MAX;
+    setSektorSeed();
     
-    mRenderer = new RenderPlanet(id, getSektorPathName());
+    const double lacunarityMax = 2.4;
+    const double lacunarityMin = 1.6;
+    
+    // init values for planet perlin noise
+    // Frequency of the planet's continents.  Higher frequency produces smaller,
+    // more numerous continents.  This value is measured in radians.
+	mPlanetNoiseParameters.continentFrequenzy = DRRandom::rDouble(PI, PI/4.0);
+    
+    // Lacunarity of the planet's continents.  Changing this value produces
+    // slightly different continents.  For the best results, this value should
+    // be random, but close to 2.0.
+    mPlanetNoiseParameters.continentLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    
+    // Lacunarity of the planet's mountains.  Changing this value produces
+    // slightly different mountains.  For the best results, this value should
+    // be random, but close to 2.0.
+    mPlanetNoiseParameters.mountainLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    
+    // Lacunarity of the planet's hills.  Changing this value produces slightly
+    // different hills.  For the best results, this value should be random, but
+    // close to 2.0.
+    mPlanetNoiseParameters.hillsLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    
+    
+    // Lacunarity of the planet's plains.  Changing this value produces slightly
+    // different plains.  For the best results, this value should be random, but
+    // close to 2.0.
+    mPlanetNoiseParameters.plainsLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    
+    // Lacunarity of the planet's badlands.  Changing this value produces
+    // slightly different badlands.  For the best results, this value should be
+    // random, but close to 2.0.
+    mPlanetNoiseParameters.badlandsLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    
+    
+    // Specifies the amount of "glaciation" on the mountains.  This value
+    // should be close to 1.0 and greater than 1.0. (1.375)
+    mPlanetNoiseParameters.mountainGlaciation = DRRandom::rDouble(2.0, 1.01);
+ 
+    // Specifies the planet's sea level.  This value must be between -1.0
+    // (minimum planet elevation) and +1.0 (maximum planet elevation.)
+    const float SEA_LEVEL = DRRandom::rDouble(0.8, -0.8);
+    mPlanetNoiseParameters.seaLevel = SEA_LEVEL;
+    
+    // Specifies the level on the planet in which continental shelves appear.
+    // This value must be between -1.0 (minimum planet elevation) and +1.0
+    // (maximum planet elevation), and must be less than SEA_LEVEL. (-0.375)
+    mPlanetNoiseParameters.shelfLevel = DRRandom::rDouble(SEA_LEVEL-0.01, -0.8);
+    
+    // Determines the amount of mountainous terrain that appears on the
+    // planet.  Values range from 0.0 (no mountains) to 1.0 (all terrain is
+    // covered in mountains).  Mountainous terrain will overlap hilly terrain.
+    // Because the badlands terrain may overlap parts of the mountainous
+    // terrain, setting MOUNTAINS_AMOUNT to 1.0 may not completely cover the
+    // terrain in mountains.
+    const float MOUNTAINS_AMOUNT = DRRandom::rDouble(0.9, 0.1);
+    mPlanetNoiseParameters.mountainAmount = MOUNTAINS_AMOUNT;
+  
+    // Determines the amount of hilly terrain that appears on the planet.
+    // Values range from 0.0 (no hills) to 1.0 (all terrain is covered in
+    // hills).  This value must be less than MOUNTAINS_AMOUNT.  Because the
+    // mountainous terrain will overlap parts of the hilly terrain, and
+    // the badlands terrain may overlap parts of the hilly terrain, setting
+    // HILLS_AMOUNT to 1.0 may not completely cover the terrain in hills.
+    mPlanetNoiseParameters.hillsAmount = (1.0f + MOUNTAINS_AMOUNT) / 2.0f;
+    
+    // Determines the amount of badlands terrain that covers the planet.
+    // Values range from 0.0 (no badlands) to 1.0 (all terrain is covered in
+    // badlands.)  Badlands terrain will overlap any other type of terrain. (0.03125)
+    mPlanetNoiseParameters.badlandsAmount = DRRandom::rDouble(0.75, 0.1);
+    
+    // Maximum depth of the rivers, in planetary elevation units. (0.0234375f)
+    mPlanetNoiseParameters.riverDeapth = DRRandom::rDouble(0.1, 0.0);
+    
+    // Scaling to apply to the base continent elevations, in planetary elevation
+    // units.
+    mPlanetNoiseParameters.continentHeightScale = (1.0f - SEA_LEVEL) / 4.0f;
+    
+    // Calculate the sea level, in meters.
+    float MAX_ELEV = 1.0f; float MIN_ELEV = -1.0f;
+    float seaLevelInMeters = (((SEA_LEVEL + 1.0f) / 2.0f)
+    * (MAX_ELEV - MIN_ELEV)) + MIN_ELEV;
+    mPlanetNoiseParameters.seaLevelInMetres = seaLevelInMeters;
+    mPlanetNoiseParameters.print(true);
+    
+    mRenderer = new RenderPlanet(id, getSektorPathName(), &mPlanetNoiseParameters);
 }
 
 PlanetSektor::~PlanetSektor()
@@ -225,4 +312,54 @@ bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
     //return Vector3Unit(positionInParentSektor.convertTo(AE) - mSektorPosition).lengthSq() <= radiusSquare;    
     return positionInSektor.convertTo(AE).lengthSq() <= radiusSquare;    
      * */
+}
+
+//*************************************************************************************************
+// PlanetNoiseParameter
+//*************************************************************************************************
+void PlanetNoiseParameter::print(bool toLog /*= false*/)
+{
+    if(toLog)
+    {
+        DRLog.writeToLog("----- PlanetNoiseParameter Begin ----");
+        for(int i = 0; i < 15; i++)
+        {
+            DRLog.writeToLog("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
+        }
+        DRLog.writeToLog("----- PlanetNoiseParameter Ende ----");
+    }
+    else
+    {
+        printf("----- PlanetNoiseParameter Begin ----");
+        for(int i = 0; i < 15; i++)
+        {
+            printf("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
+        }
+        printf("----- PlanetNoiseParameter Ende ----");
+    }
+}
+
+const char* PlanetNoiseParameter::getFieldName(PlanetNoiseParameterNames feldName)
+{
+    switch(feldName)
+    {
+        case CONTINENT_FREQUENCY: return "CONTINENT_FREQUENCY";
+        case CONTINENT_LACUNARITY: return "CONTINENT_LACUNARITY";
+        case MOUNTAIN_LACUNARITY: return "MOUNTAIN_LACUNARITY";
+        case HILLS_LACUNARITY: return "HILLS_LACUNARITY";
+        case PLAINS_LACUNARITY: return "PLAINS_LACUNARITY";
+        case BADLANDS_LACUNARITY: return "BADLANDS_LACUNARITY";
+        case MOUNTAIN_GLACIATION: return "MOUNTAIN_GLACIATION";
+        case SEA_LEVEL: return "SEA_LEVEL";
+        case SHELF_LEVEL: return "SHELF_LEVEL";
+        case MOUNTAINS_AMOUNT: return "MOUNTAINS_AMOUNT";
+        case HILLS_AMOUNT: return "HILLS_AMOUNT";
+        case BADLANDS_AMOUNT: return "BADLANDS_AMOUNT";
+        case RIVER_DEPTH: return "RIVER_DEPTH";
+        case CONTINENT_HEIGHT_SCALE: return "CONTINENT_HEIGHT_SCALE";
+        case SEA_LEVEL_IN_METRES: return "SEA_LEVEL_IN_METRES";
+        default: return "-- invalid --";
+    }
+    
+    return "-- error --";      
 }

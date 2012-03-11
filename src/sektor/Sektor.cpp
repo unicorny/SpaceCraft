@@ -19,6 +19,15 @@ Sektor::~Sektor()
     mChilds.clear();
     DR_SAVE_DELETE(mRenderer);
 }
+
+void Sektor::setSektorSeed()
+{
+    u64 seed = mID;
+    if(mParent)
+        seed += mParent->getID();
+    DRRandom::seed(seed);
+    printf("[Sektor::setSektorSeed] randomSeed: %d\n", seed);
+}
 /*
 DRReturn Sektor::move(float fTime, Camera* cam)
 {

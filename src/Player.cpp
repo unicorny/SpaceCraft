@@ -7,6 +7,7 @@
 
 #include "Player.h"
 #include "SolarSystemSektor.h"
+#include "time.h"
 
 Player::Player()
 : mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
@@ -25,7 +26,7 @@ Player::~Player() {
 DRReturn Player::init()
 {
     bool newPlayer = false;
-    mSeed = SDL_GetTicks();
+    mSeed = time(NULL);//SDL_GetTicks();
     if(loadFromFile())
     {
         DRRandom::seed(mSeed / SDL_GetTicks());

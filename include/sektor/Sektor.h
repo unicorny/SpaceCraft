@@ -118,6 +118,7 @@ public:
     virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
     
     __inline__ SektorType getType() const {return mType;} 
+    __inline__ SektorID getID() const {return mID;}
     
     // is the position inside the current sektor
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
@@ -141,6 +142,8 @@ protected:
     void updateCameraSektor(Camera* cam);
     
     DRReturn callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data);
+    
+    void setSektorSeed();
     
     //! id des sektors, gleichzeitig der seed
     SektorID            mID;

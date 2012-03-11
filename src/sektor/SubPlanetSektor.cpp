@@ -30,7 +30,7 @@ SubPlanetSektor::SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id,
     
     if(subLevel > 6) return;
     
-    mRenderer = new RenderSubPlanet(id, DRVector3(0.0f), patchScaling, mRotation, getSektorPathName());
+    mRenderer = new RenderSubPlanet(id, DRVector3(0.0f), patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
 }
 
 SubPlanetSektor::~SubPlanetSektor()

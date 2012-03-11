@@ -7,7 +7,7 @@ class RenderSubPlanet : public RenderPlanet
 {
 public:
     //! \param boxSide 
-    RenderSubPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath);
+    RenderSubPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
 
     virtual ~RenderSubPlanet();
     

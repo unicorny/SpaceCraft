@@ -3,6 +3,55 @@
 
 #include "RenderPlanet.h"
 
+enum PlanetNoiseParameterNames
+{
+    CONTINENT_FREQUENCY = 0,
+    CONTINENT_LACUNARITY = 1,
+    MOUNTAIN_LACUNARITY = 2,
+    HILLS_LACUNARITY = 3,
+    PLAINS_LACUNARITY = 4,
+    BADLANDS_LACUNARITY = 5,
+    MOUNTAIN_GLACIATION = 6,
+    SEA_LEVEL = 7,
+    SHELF_LEVEL = 8,
+    MOUNTAINS_AMOUNT = 9,
+    HILLS_AMOUNT = 10,
+    BADLANDS_AMOUNT = 11,
+    RIVER_DEPTH = 12,
+    CONTINENT_HEIGHT_SCALE = 13,
+    SEA_LEVEL_IN_METRES = 14
+};
+
+struct PlanetNoiseParameter
+{
+    PlanetNoiseParameter()
+    {memset(values, 0, sizeof(float)*15); }
+    void print(bool toLog = false);
+    const char* getFieldName(PlanetNoiseParameterNames feldName);
+    union
+    {
+        struct 
+        {
+            float continentFrequenzy;
+            float continentLacunarity;
+            float mountainLacunarity;
+            float hillsLacunarity;
+            float plainsLacunarity;
+            float badlandsLacunarity;
+            float mountainGlaciation;
+            float seaLevel;
+            float shelfLevel;
+            float mountainAmount;
+            float hillsAmount;
+            float badlandsAmount;
+            float riverDeapth;
+            float continentHeightScale;
+            float seaLevelInMetres;
+        };
+        float values[15];
+    };
+};
+
 class PlanetSektor : public Sektor
 {
 public:
@@ -28,10 +77,12 @@ public:
     virtual Sektor* getChild(SektorID childID);
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     __inline__ double getTheta() {return mTheta;}
+    __inline__ const PlanetNoiseParameter* getPlanetNoiseParameters() const {return &mPlanetNoiseParameters;}
     
 protected:
     ShaderProgram*              mSphericalShaderForSubPlanet;
     double                      mTheta;
+    PlanetNoiseParameter        mPlanetNoiseParameters;
         
 private:
     static SektorID mSubPlanets[];

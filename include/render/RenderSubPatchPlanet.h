@@ -6,7 +6,7 @@
 class RenderSubPatchPlanet : public RenderSubPlanet
 {
 public:
-    RenderSubPatchPlanet(SektorID seed, DRVector3 translate, float cameraDistance, const DRMatrix& rotation, DRString texturePath);
+    RenderSubPatchPlanet(SektorID seed, DRVector3 translate, float cameraDistance, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
 
     virtual ~RenderSubPatchPlanet() {};
 };
