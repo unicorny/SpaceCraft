@@ -104,8 +104,8 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     // Calculate the sea level, in meters.
 	mShader->setUniform1f("SEA_LEVEL_IN_METRES", mNoiseParameter->seaLevelInMetres);
     //printf("seaLevelInMeters: %f\n", seaLevelInMeters);
-
-	mShader->setUniformMatrix("projection", mProjectionMatrix);
+    
+    mShader->setUniformMatrix("projection", mProjectionMatrix);
 	mShader->setUniformMatrix("texture", mRotation);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

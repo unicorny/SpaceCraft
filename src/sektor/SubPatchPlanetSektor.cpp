@@ -80,7 +80,10 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     //if(mPlanet->getHorizontAngle() > 50.0)
     {
         //shader->setUniform1f("theta", mTheta);
+        const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();
         shader->setUniform1f("patchScaling", mPatchScaling);
+        shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
+        shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
         mRenderer->render(fTime, cam);
         shader->unbind();
         //GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();

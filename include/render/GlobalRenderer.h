@@ -32,6 +32,8 @@ public:
     //Config Details
     __inline__ GLuint getTextureRenderStepSize() {return mTextureRenderStepSize;}
     __inline__ GLuint getTextureRenderMaxResolution() {return mTextureRenderMaxResolution;}
+    __inline__ float  getTimeForInactiveChilds() {return mTimeForInactiveChilds;}
+    __inline__ void   setTimeForInactiveChild(float time) {mTimeForInactiveChilds = time;}
     
     //! put task onto stack, call it if it is on top, until it is finished, than remove task from stack
     //! memory will not be touched!!
@@ -63,6 +65,9 @@ private:
     // Config
     GLuint                               mTextureRenderStepSize;
     GLuint                               mTextureRenderMaxResolution;
+    
+    //dynamic config
+    float                               mTimeForInactiveChilds;
 };
 
 

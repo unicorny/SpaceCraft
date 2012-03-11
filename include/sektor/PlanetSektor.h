@@ -19,7 +19,9 @@ enum PlanetNoiseParameterNames
     BADLANDS_AMOUNT = 11,
     RIVER_DEPTH = 12,
     CONTINENT_HEIGHT_SCALE = 13,
-    SEA_LEVEL_IN_METRES = 14
+    SEA_LEVEL_IN_METRES = 14,
+    MAX_HEIGHT_IN_PERCENT = 15,
+    MIN_HEIGHT_IN_PERCENT = 16
 };
 
 struct PlanetNoiseParameter
@@ -47,8 +49,10 @@ struct PlanetNoiseParameter
             float riverDeapth;
             float continentHeightScale;
             float seaLevelInMetres;
+            float maxHeightInPercent;
+            float minHeightInPercent;
         };
-        float values[15];
+        float values[17];
     };
 };
 

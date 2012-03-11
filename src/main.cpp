@@ -15,9 +15,10 @@
 struct ControlMode
 {
     ControlMode() {}
-    ControlMode(Unit value) : mValue(value) {}
-    ControlMode(double value, UnitTypes type) : mValue(value, type) {}
+    ControlMode(Unit value, float time) : mValue(value), mTime(time) {}
+    ControlMode(double value, UnitTypes type, float time) : mValue(value, type), mTime(time) {}
     Unit mValue;
+    float mTime;
 };
 
 // Globale Variablen
@@ -196,15 +197,15 @@ DRReturn load()
     
     //Steuerung
   
-    gControlModes[0].mValue = Unit(20, M);
-    gControlModes[1].mValue = Unit(0.100, KM);
-    gControlModes[2].mValue = Unit(10, KM);
-    gControlModes[3].mValue = Unit(1000, KM);
-    gControlModes[4].mValue = Unit(20000, KM);
-    gControlModes[5].mValue = Unit(400000, KM);
-    gControlModes[6].mValue = Unit(0.1, AE);
-    gControlModes[7].mValue = Unit(10, AE);
-    gControlModes[8].mValue = Unit(500, AE);
+    gControlModes[0] = ControlMode(Unit(20, M), 120.0f);
+    gControlModes[1] = ControlMode(Unit(0.100, KM), 100.0f);
+    gControlModes[2] = ControlMode(Unit(10, KM), 80.0f);
+    gControlModes[3] = ControlMode(Unit(1000, KM), 30.0f);
+    gControlModes[4] = ControlMode(Unit(20000, KM), 10.0f);
+    gControlModes[5] = ControlMode(Unit(400000, KM), 4.0f);
+    gControlModes[6] = ControlMode(Unit(0.1, AE), 1.0f);
+    gControlModes[7] = ControlMode(Unit(10, AE), 1.0f);
+    gControlModes[8] = ControlMode(Unit(500, AE), 1.0f);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
@@ -340,6 +341,8 @@ DRReturn move(float fTime)
     else if(EnIsButtonPressed(SDLK_7)) gCurrentControlMode = 6;
     else if(EnIsButtonPressed(SDLK_8)) gCurrentControlMode = 7;
     else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
+    
+    GlobalRenderer::Instance().setTimeForInactiveChild(gControlModes[gCurrentControlMode].mTime);
      
     // R-Taste
     if(EnIsButtonPressed(SDLK_r)) wireframe = !wireframe;

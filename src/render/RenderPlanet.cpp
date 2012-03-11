@@ -21,7 +21,7 @@ RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
-    init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "subPlanetNoise.frag", 
+    init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "noise.frag", 
          size, texturePath, planetNoiseParameter);
 }
 

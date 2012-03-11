@@ -72,7 +72,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
             mIdleSeconds = 0.0f;
     }
     
-    if(mPlanet->getTheta() <= 50.0*GRADTORAD && mHorizontCulling < 112.0f)
+    if(mPlanet->getTheta() <= 50.0*GRADTORAD && mHorizontCulling < 120.0f)
     {
         short value = 309;
         value = 500;
@@ -94,7 +94,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     }
     else
     {
-        removeInactiveChilds(60.0f);
+        removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
     }
 
     return DR_OK;
@@ -112,15 +112,18 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     
     mMatrix = mRotation * mParent->getMatrix();
        
-    if(mIdleSeconds <= 0.0f && mHorizontCulling > 112.0f || mPlanet->getTheta() > 50.0*GRADTORAD)
+    if(mIdleSeconds <= 0.0f && mHorizontCulling > 120.0f || mPlanet->getTheta() > 50.0*GRADTORAD)
     {
         ShaderProgram* shader = mRenderer->getShaderProgram();
+        const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();
         if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
         shader->bind();
         shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix());
         shader->setUniformMatrix("modelview", mMatrix);
         shader->setUniform3fv("translate", DRVector3(0.0f));
         shader->setUniform1f("patchScaling", mPatchScaling);
+        shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
+        shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
         mRenderer->render(fTime, cam);
         shader->unbind();
         //GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();

@@ -58,11 +58,11 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     
     // Specifies the amount of "glaciation" on the mountains.  This value
     // should be close to 1.0 and greater than 1.0. (1.375)
-    mPlanetNoiseParameters.mountainGlaciation = DRRandom::rDouble(2.0, 1.01);
+    mPlanetNoiseParameters.mountainGlaciation = DRRandom::rDouble(1.6, 1.01);
  
     // Specifies the planet's sea level.  This value must be between -1.0
     // (minimum planet elevation) and +1.0 (maximum planet elevation.)
-    const float SEA_LEVEL = DRRandom::rDouble(0.8, -0.8);
+    const float SEA_LEVEL = DRRandom::rDouble(0.1, -0.8);
     mPlanetNoiseParameters.seaLevel = SEA_LEVEL;
     
     // Specifies the level on the planet in which continental shelves appear.
@@ -93,7 +93,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     mPlanetNoiseParameters.badlandsAmount = DRRandom::rDouble(0.75, 0.1);
     
     // Maximum depth of the rivers, in planetary elevation units. (0.0234375f)
-    mPlanetNoiseParameters.riverDeapth = DRRandom::rDouble(0.1, 0.0);
+    mPlanetNoiseParameters.riverDeapth = DRRandom::rDouble(0.02, 0.0);
     
     // Scaling to apply to the base continent elevations, in planetary elevation
     // units.
@@ -104,6 +104,9 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     float seaLevelInMeters = (((SEA_LEVEL + 1.0f) / 2.0f)
     * (MAX_ELEV - MIN_ELEV)) + MIN_ELEV;
     mPlanetNoiseParameters.seaLevelInMetres = seaLevelInMeters;
+    
+    mPlanetNoiseParameters.maxHeightInPercent = DRRandom::rDouble(0.005, 0.0005);
+    mPlanetNoiseParameters.minHeightInPercent = DRRandom::rDouble(0.003, 0.001);
     mPlanetNoiseParameters.print(true);
     
     mRenderer = new RenderPlanet(id, getSektorPathName(), &mPlanetNoiseParameters);
@@ -132,7 +135,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     DRVector3 v = mLastRelativeCameraPosition.getVector3();
     
     
-    //printf("\rx: %f, y: %f, z: %f, length: %f, distance: %f", v.x, v.y, v.z, v.length(), (double)mLastRelativeCameraPosition.length()-mRadius);
+    printf("\rdistance: %f", static_cast<double>(distance));
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
@@ -153,7 +156,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     {
         //removeInactiveChilds(1.0f);
     }
-    removeInactiveChilds(60.0f);
+    removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
     return DR_OK;
 }
 
@@ -322,7 +325,7 @@ void PlanetNoiseParameter::print(bool toLog /*= false*/)
     if(toLog)
     {
         DRLog.writeToLog("----- PlanetNoiseParameter Begin ----");
-        for(int i = 0; i < 15; i++)
+        for(int i = 0; i < 17; i++)
         {
             DRLog.writeToLog("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
         }
@@ -331,7 +334,7 @@ void PlanetNoiseParameter::print(bool toLog /*= false*/)
     else
     {
         printf("----- PlanetNoiseParameter Begin ----");
-        for(int i = 0; i < 15; i++)
+        for(int i = 0; i < 17; i++)
         {
             printf("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
         }
@@ -358,6 +361,8 @@ const char* PlanetNoiseParameter::getFieldName(PlanetNoiseParameterNames feldNam
         case RIVER_DEPTH: return "RIVER_DEPTH";
         case CONTINENT_HEIGHT_SCALE: return "CONTINENT_HEIGHT_SCALE";
         case SEA_LEVEL_IN_METRES: return "SEA_LEVEL_IN_METRES";
+        case MAX_HEIGHT_IN_PERCENT: return "MAX_HEIGHT_IN_PERCENT";
+        case MIN_HEIGHT_IN_PERCENT: return "MIN_HEIGHT_IN_PERCENT";
         default: return "-- invalid --";
     }
     
