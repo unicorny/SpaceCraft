@@ -1,7 +1,7 @@
 #ifndef __DR_TEXTURE_MANAGER__
 #define __DR_TEXTURE_MANAGER__
 
-#include "Sdl/SDL_thread.h"
+#include "SDL/SDL_thread.h"
 #include "Texture.h"
 
 class DRTextureManager
@@ -27,8 +27,8 @@ public:
     //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
     void      freeTexture(GLuint textureID);
 
-	void	  addAsynchronTextureLoadTask(Texture* texture);
-	void	  addAsynchronTextureSaveTask(Texture* texture);
+    void      addAsynchronTextureLoadTask(TexturePtr texture);
+    void      addAsynchronTextureSaveTask(TexturePtr texture);
     
     // update timeout, release lange nicht verwendete Texturen
     DRReturn move(float fTime);     
@@ -70,10 +70,11 @@ private:
     typedef std::pair<DHASH, TextureMemoryEntry> DR_TEXTURE_MEMORY_ENTRY;
     bool mInitalized;
 
-	std::queue<Texture*> mAsynchronLoadTextures;
-	std::queue<Texture*> mLoadedAsynchronLoadTextures;
-	std::queue<Texture*> mAsynchronSaveTextures;
-	std::queue<Texture*> mAsynchronReadyToSaveTextures;
+	std::queue<TexturePtr> mAsynchronLoadTextures;
+	std::queue<TexturePtr> mLoadedAsynchronLoadTextures;
+	std::queue<TexturePtr> mAsynchronSaveTextures;
+	std::queue<TexturePtr> mAsynchronReadyToSaveTextures;
+	std::queue<TexturePtr> mEmpty;
 	SDL_mutex*			mTextureLoadMutex;
 	SDL_Thread*		    mTextureLoadThread;
 	SDL_cond*			mTextureLoadCondition;

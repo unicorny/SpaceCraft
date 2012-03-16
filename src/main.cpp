@@ -284,12 +284,12 @@ void ende()
     g_Player.exit();
     DR_SAVE_DELETE(g_Font);
     DR_SAVE_DELETE(g_terrain);
-    GlobalRenderer::getSingleton().exit();
     DRTextureManager::getSingleton().exit();
     ShaderManager::getSingleton().exit();
     DRGeometrieManager::getSingleton().exit();
     g_RenderBlockLoader.exit();
     Server::freeAllServer();
+	GlobalRenderer::getSingleton().exit();
     EnExit();
 }
 
@@ -554,18 +554,23 @@ DRReturn render(float fTime)
     text.drawText();
     
     text.setText("Steuerung: %d - %s/s", gCurrentControlMode+1, gControlModes[gCurrentControlMode].mValue.print().data());
-    /*switch(controlMode)
-    {
-        case 0: text.setText("Steuerung: (NONE)"); break;
-        case 1: text.setText("Steuerung: 1 - 20 m/s"); break;
-        case 2: text.setText("Steuerung: 3 - 20.000 km/s"); break;
-        case 3: text.setText("Steuerung: 4 - 0.005 AE/s"); break;
-        case 4: text.setText("Steuerung: 2 - 100 km/s"); break;
-        default: text.setText("Steuerung: (default)");
-    }
-     */
     text.setPosition(DRVector2(0.0f, 0.08f));
     text.drawText();
+
+	GlobalRenderer& gb = GlobalRenderer::Instance();
+    text.setColor12(DRColor(1.0f, 1.0f, 1.0f));
+    text.setScaling(DRVector2(0.8f));
+	text.setText("Grafik Memory: %.0f MByte", static_cast<double>(gb.getGrafikMemory())/(1024.0f*1024.0));
+	text.setPosition(DRVector2(0.8f, 0.0f));
+	text.drawText();
+    
+	text.setText("Texture: %.0f MByte", static_cast<double>(gb.getGrafikMemoryTexture())/(1024.0f*1024.0));
+	text.setPosition(DRVector2(0.8f, 0.04f));
+	text.drawText();
+
+	text.setText("Geometrie: %.0f MByte",static_cast<double>(gb.getGrafikMemoryGeometrie())/(1024.0f*1024.0));
+	text.setPosition(DRVector2(0.8f, 0.08f));
+	text.drawText();
     
     g_Font->end();
    

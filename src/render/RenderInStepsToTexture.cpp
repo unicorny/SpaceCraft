@@ -1,7 +1,7 @@
 #include "RenderInStepsToTexture.h"
 
 RenderInStepsToTexture::RenderInStepsToTexture()
-: mTexture(NULL), mStepSize(0), mIndexStepMode(0), mFinished(false)
+: mTexture(), mStepSize(0), mIndexStepMode(0), mFinished(false)
 {
     
 }
@@ -11,9 +11,9 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
     
 }
 
-DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], Texture* texture)
+DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], TexturePtr texture)
 {
-	if(!texture) return DR_ZERO_POINTER;
+	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
 	Eigen::Vector2i texSize = texture->getResolution();
 	if(texSize(0) <= 0 || texSize(1) <= 0)
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
@@ -32,9 +32,9 @@ DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], T
     return DR_OK;
 }
 
-DRReturn RenderInStepsToTexture::reinit(Texture* texture)
+DRReturn RenderInStepsToTexture::reinit(TexturePtr texture)
 {
-	if(!texture) return DR_ZERO_POINTER;
+	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
 	Eigen::Vector2i texSize = texture->getResolution();
 	if(texSize(0) <= 0 || texSize(1) <= 0)
 		LOG_ERROR("textureSize is invalid", DR_ERROR);

@@ -31,9 +31,9 @@ protected:
     DRReturn generateAndBindTexture();
     DRString getPathAndFilename();
         
-    RenderNoisePlanetToTexture* mTextureRenderer;
-    Texture*			mTexture;
-    Texture*			mPreviewTextur;
+    RenderInStepsToTexturePtr   mTextureRenderer;
+    TexturePtr		mTexture;
+    TexturePtr		mPreviewTextur;
     short                       mInitalized;
     DRString                    mTexturePath;
     

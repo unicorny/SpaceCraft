@@ -24,13 +24,13 @@ SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../incl
 
 SET(PA ../import/bin ../import/lib)
 find_library(SDL_LIB SDL PATHS ${PA})
-find_library(DR_ENGINE2_LIB Engine2 PATHS ${PA} REQUIRED)
-find_library(DR_CORE2_LIB Core2 PATHS ${PA} REQUIRED)
+find_library(DR_ENGINE2_LIB DREngine2 PATHS ${PA} REQUIRED)
+find_library(DR_CORE2_LIB DRCore2 PATHS ${PA} REQUIRED)
 find_library(LIB_NOISE_DLL libnoise PATHS ${PA} REQUIRED)
 if(WIN32)
 SET(SpaceCraftLibs ${SDL_LIB} ${DR_ENGINE2_LIB} ${DR_CORE2_LIB} glu32 opengl32 ${LIB_NOISE_DLL})
 else()
-SET(SpaceCraftLibs ${SDL_LIB} Engine2 Core2 glut ${LIB_NOISE_DLL})
+SET(SpaceCraftLibs ${SDL_LIB} DREngine2 DRCore2 glut ${LIB_NOISE_DLL})
 endif()
 
 if (MSVC)

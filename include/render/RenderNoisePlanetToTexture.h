@@ -14,7 +14,7 @@ public:
     ~RenderNoisePlanetToTexture();
     
     //__inline__ void update(float patchScaling) {mPatchScaling = patchScaling;}
-    DRReturn init(float stepSize, DRVector3 translate, float patchScaling, Texture* texture, const DRMatrix& rotation = DRMatrix::identity());
+    DRReturn init(float stepSize, DRVector3 translate, float patchScaling, TexturePtr texture, const DRMatrix& rotation = DRMatrix::identity());
     
     virtual DRReturn renderStuff();
     

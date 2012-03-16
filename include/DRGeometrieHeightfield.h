@@ -42,6 +42,7 @@ public:
 protected:
     DRHeightValueStorage*       mHeightValues;
     DRVector3                   mSphericalCenter;
+	GLuint						mMemorySize;
 };
 
 #endif //__DR_GEOMETRIE_HEIGHTFIELD__

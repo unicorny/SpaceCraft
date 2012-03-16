@@ -2,7 +2,8 @@
 
 GlobalRenderer::GlobalRenderer()
 : m_bInitialized(false), mQuadratic(NULL), mFrameBufferID(0),
-  mTextureRenderStepSize(0), mTextureRenderMaxResolution(0)
+  mTextureRenderStepSize(0), mTextureRenderMaxResolution(0),
+  mGrafikMemTexture(0.0), mGrafikMemGeometrie(0.0)
 {
     
 }
@@ -31,34 +32,34 @@ DRReturn GlobalRenderer::init(const char* configFilename)
     return DR_OK;
 }
 
-void GlobalRenderer::addRenderTask(RenderInStepsToTexture* newRenderTask, bool preview/* = false*/)
+void GlobalRenderer::addRenderTask(RenderInStepsToTexturePtr newRenderTask, bool preview/* = false*/)
 {
     if(preview)
         mPreviewRenderTasks.push(newRenderTask);
     else
         mRenderTasks.push(newRenderTask);
 }
-void GlobalRenderer::removeRenderTask(RenderInStepsToTexture* renderTaskToDelete)
+void GlobalRenderer::removeRenderTask(RenderInStepsToTexturePtr renderTaskToDelete)
 {
-    mDeleted.addByHash(reinterpret_cast<DHASH>(renderTaskToDelete), reinterpret_cast<void*>(1));
+    mDeleted.addByHash(reinterpret_cast<DHASH>(renderTaskToDelete.getResourcePtrHolder()->mResource), reinterpret_cast<void*>(1));
 }
 
-DRReturn GlobalRenderer::renderTaskFromQueue(std::queue<RenderInStepsToTexture*>* list)
+DRReturn GlobalRenderer::renderTaskFromQueue(std::queue<RenderInStepsToTexturePtr>* list)
 {
     //remove already deleted objects (which can be find in mDeleted List)
     while(!list->empty() && 
            mDeleted.getNItems() > 0 &&  
-           mDeleted.findByHash(reinterpret_cast<DHASH>(list->front())))
+           mDeleted.findByHash(reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource)))
     {
-        mDeleted.removeByHash(reinterpret_cast<DHASH>(list->front()));
+        mDeleted.removeByHash(reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource));
         list->pop();
     }
-    RenderInStepsToTexture* current = NULL;
+    RenderInStepsToTexturePtr current;
     //procceed list
     if(!list->empty())
     {
         current = list->front();
-		DHASH hash = reinterpret_cast<DHASH>(list->front());
+		DHASH hash = reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource);
         
         if(setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
             LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
@@ -73,8 +74,6 @@ DRReturn GlobalRenderer::renderTaskFromQueue(std::queue<RenderInStepsToTexture*>
 DRReturn GlobalRenderer::renderTasks()
 {
     Uint32 start = SDL_GetTicks();
-    RenderInStepsToTexture* current = NULL;
-     
     
     // proceed mPreviewRenderTasks
     if(renderTaskFromQueue(&mPreviewRenderTasks)) 
@@ -92,7 +91,7 @@ DRReturn GlobalRenderer::renderTasks()
     return DR_OK;
 }
 
-DRReturn GlobalRenderer::setupFrameBuffer(Texture* texture)
+DRReturn GlobalRenderer::setupFrameBuffer(TexturePtr texture)
 {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
     //create texture
@@ -119,6 +118,12 @@ void GlobalRenderer::exit()
         glDeleteFramebuffersEXT(1, &mFrameBufferID);
     mFrameBufferID = 0;
     gluDeleteQuadric(mQuadratic); 
+	if(m_bInitialized)
+	{
+		DRLog.writeToLog("[GlobalRenderer::exit] geo memory by exit: %f MByte, texture memory by exit: %f MByte",
+			static_cast<double>(mGrafikMemGeometrie)/(1024.0*1024.0),
+			static_cast<double>(mGrafikMemTexture)/(1024.0*1024.0));
+	}
     m_bInitialized = false;    
 }
 

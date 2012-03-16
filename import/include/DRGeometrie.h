@@ -1,3 +1,24 @@
+/*/*************************************************************************
+ *                                                                         *
+ * EngineDLL, Engine for my programs, using SDL and OpenGL		   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski.			   *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.							   *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
+
 /* 
  * File:   DRGeometrie.j
  * Author: dario
@@ -5,19 +26,10 @@
  * Created on 25. August 2011, 12:01
  */
 
-#ifndef _DR_ENGINE_GEOMETRIE_h
-#define	_DR_ENGINE_GEOMETRIE_h
+#ifndef __DR_ENGINE2_GEOMETRIE__
+#define	__DR_ENGINE2_GEOMETRIE__
 
-
-class ENGINE_API DRHeightValueStorage
-{
-public:
-    virtual float getHeightValue(DRVector3& position) = 0;
-    virtual DRColor getColorValue(const float height) = 0;
-};
-
-
-class ENGINE_API DRGeometrie
+class ENGINE2_API DRGeometrie
 {
 public:
     DRGeometrie();
@@ -78,5 +90,5 @@ private:
 };
 
 
-#endif	/* _DR_ENGINE_GEOMETRIE_h */
+#endif	/* __DR_ENGINE2_GEOMETRIE__ */
 

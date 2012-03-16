@@ -62,7 +62,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
  
     // Specifies the planet's sea level.  This value must be between -1.0
     // (minimum planet elevation) and +1.0 (maximum planet elevation.)
-    const float SEA_LEVEL = DRRandom::rDouble(0.1, -0.8);
+    const float SEA_LEVEL = DRRandom::rDouble(0.0, -0.6);
     mPlanetNoiseParameters.seaLevel = SEA_LEVEL;
     
     // Specifies the level on the planet in which continental shelves appear.

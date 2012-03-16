@@ -198,9 +198,13 @@ DRReturn DRTextureManager::move(float fTime)
 	}
 	if(!mAsynchronSaveTextures.empty())
 	{
-		Texture* cur = mAsynchronSaveTextures.front();
-		cur->putPixelsToImage();
-		if(cur->isTextureReadyToSave())
+		TexturePtr cur = mAsynchronSaveTextures.front();
+        
+		if(cur->putPixelsToImage())
+        {
+            mAsynchronSaveTextures.pop();
+        }
+        else if(cur->isTextureReadyToSave())
 		{
 			mAsynchronReadyToSaveTextures.push(cur);
 			mAsynchronSaveTextures.pop();
@@ -212,11 +216,12 @@ DRReturn DRTextureManager::move(float fTime)
 			}
 		}
 	}
+    if(!mEmpty.empty()) mEmpty.pop();
 	SDL_UnlockMutex(mTextureLoadMutex);
     return DR_OK;
 }
 
-void DRTextureManager::addAsynchronTextureLoadTask(Texture* texture)
+void DRTextureManager::addAsynchronTextureLoadTask(TexturePtr texture)
 {
 	SDL_LockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
 	mAsynchronLoadTextures.push(texture);
@@ -231,7 +236,7 @@ void DRTextureManager::addAsynchronTextureLoadTask(Texture* texture)
 	SDL_UnlockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
 }
 
-void DRTextureManager::addAsynchronTextureSaveTask(Texture* texture)
+void DRTextureManager::addAsynchronTextureSaveTask(TexturePtr texture)
 {
 	SDL_LockMutex(mTextureLoadMutex); LOG_WARNING_SDL();
 	mAsynchronSaveTextures.push(texture);
@@ -249,7 +254,7 @@ void DRTextureManager::addAsynchronTextureSaveTask(Texture* texture)
 
 int DRTextureManager::asynchronTextureLoadThread(void* data)
 {
-	printf("asynchronTextureLoadThread start\n");
+	DRLog.writeToLog("asynchronTextureLoadThread start");
 	DRTextureManager& t = DRTextureManager::Instance();
 	while(SDL_SemTryWait(t.mTextureLoadSemaphore)==SDL_MUTEX_TIMEDOUT)
 	{
@@ -261,7 +266,7 @@ int DRTextureManager::asynchronTextureLoadThread(void* data)
 			while(!t.mAsynchronLoadTextures.empty())
 			{
 				// get top textur
-				Texture* cur = t.mAsynchronLoadTextures.front();
+				TexturePtr cur = t.mAsynchronLoadTextures.front();
 				t.mAsynchronLoadTextures.pop();
 				SDL_UnlockMutex(t.mTextureLoadMutex);
 				// call load
@@ -281,11 +286,15 @@ int DRTextureManager::asynchronTextureLoadThread(void* data)
 			if(!t.mAsynchronReadyToSaveTextures.empty())
 			{
 				// get top textur
-				Texture* cur = t.mAsynchronReadyToSaveTextures.front();
+				TexturePtr cur = t.mAsynchronReadyToSaveTextures.front();
 				t.mAsynchronReadyToSaveTextures.pop();
 				SDL_UnlockMutex(t.mTextureLoadMutex);
-				// call load
+				// call save
 				cur->saveImage();
+                // if texture hasn't other references, we mustn't delete it in
+                // this threat, becuase of OpenGL
+                if(cur.getResourcePtrHolder()->getRefCount() <= 1)
+                    t.mEmpty.push(cur);
 			}
 			else
 				SDL_UnlockMutex(t.mTextureLoadMutex); LOG_ERROR_SDL(-1);

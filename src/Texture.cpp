@@ -3,9 +3,9 @@
 
 
 Texture::Texture(const char* filename, GLint glMinFilter /* = GL_LINEAR */, GLint glMagFilter /* = GL_LINEAR */)
-: mTexturID(0), mPboID(0), mFilename(filename), mLoadingState(0), 
+: mTexturID(0), mPboID(0), mPboSaveID(0), mFilename(filename), mLoadingState(0), 
   mSavingState(0), mSavingCursor(0), mSavingBuffer(NULL), mImage(NULL),
-  mTextureWidth(0), mTextureHeight(0)
+  mTextureWidth(0), mTextureHeight(0), mMemorySize(0.0)
 {
 	glGenTextures(1, &mTexturID);
     //bind to the new texture ID
@@ -18,9 +18,9 @@ Texture::Texture(const char* filename, GLint glMinFilter /* = GL_LINEAR */, GLin
 }
 
 Texture::Texture(GLuint width, GLuint height, GLuint bpp, GLuint format, void* data, GLint dataSize)
-: mTexturID(0), mPboID(0), mFilename(""), mLoadingState(0),
+: mTexturID(0), mPboID(0), mPboSaveID(0), mFilename(""), mLoadingState(0),
   mSavingState(0), mSavingCursor(0), mSavingBuffer(NULL), mImage(NULL),
-  mTextureWidth(width), mTextureHeight(height)
+  mTextureWidth(width), mTextureHeight(height), mMemorySize(width*height*format)
 {
 	glGenTextures(1, &mTexturID);
 	glBindTexture(GL_TEXTURE_2D, mTexturID);
@@ -41,7 +41,8 @@ Texture::Texture(GLuint width, GLuint height, GLuint bpp, GLuint format, void* d
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
 		format2, bpp, NULL);
 	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-	mLoadingState = 3;
+	GlobalRenderer::Instance().addGrafikMemTexture(mMemorySize);
+	mLoadingState = 3;	
 }
 
 Texture::~Texture()
@@ -50,6 +51,8 @@ Texture::~Texture()
 	{
 		glDeleteTextures(1, &mTexturID);
 		mTexturID = 0;
+		GlobalRenderer::Instance().removeGrafikMemTexture(mMemorySize);
+		mMemorySize = 0.0;
 	}	
 	if(mPboID)
 	{
@@ -112,7 +115,9 @@ DRReturn Texture::pixelsCopyToRenderer()
 	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 	if(DRGrafikError("[Texture::pixelsCopyToRenderer] Error by copying pixels to OpenGL")) return DR_ERROR;
 
-	DRIImage::deleteImage(mImage); mImage = NULL;
+	mMemorySize = mImage->getWidth()*mImage->getHeight()*numComponents;
+	DRIImage::deleteImage(mImage); mImage = NULL;	
+	GlobalRenderer::Instance().addGrafikMemTexture(mMemorySize);
 	//printf("[Texture::pixelsCopyToRenderer] texture load\n");
 	
 	mLoadingState = 2;
@@ -151,6 +156,7 @@ DRReturn Texture::getPixelsToSave(const char* path)
 
 DRReturn Texture::putPixelsToImage()
 {
+	if(!mPboSaveID) return DR_ZERO_POINTER;
 	if(!mImage) mImage = DRIImage::newImage();
 	glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, mPboSaveID);
 	GLubyte* ptr = static_cast<GLubyte*>(glMapBufferARB(GL_PIXEL_PACK_BUFFER_ARB, GL_READ_ONLY_ARB));

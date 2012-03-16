@@ -1,36 +1,35 @@
 /*/*************************************************************************
- *                                                                       *
- * Core, Core-Lib for my programs, Core doesn't need any libraries		 *
- * Copyright (C) 2007, 2008, 2009 Dario Rekowski.						 *
- * Email: dariofrodo@gmx.de   Web: www.mathe-programme.de.tk             *
- *                                                                       *
- * This program is free software: you can redistribute it and/or modify  *
- * it under the terms of the GNU General Public License as published by  *
- * the Free Software Foundation, either version 3 of the License, or     *
- * any later version.													 *
- *																		 *
- * This program is distributed in the hope that it will be useful,		 *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 *
- * GNU General Public License for more details.							 *
- *																		 *
- * You should have received a copy of the GNU General Public License	 *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                       *
- *************************************************************************/
+ *                                                                         *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.                                                      *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
 
 /*
-Logging System �hnlich dem der TriBase-Engine von David Scherfgen
+Logging System &Auml;hnlich dem der TriBase-Engine von David Scherfgen
 Programmierer: Dario Rekowski
 */
 //Hier kommt alles rein, was mit Fehlerbehandlung zu tun hat
 
-//Eine Aufz�hlung f�r R�ckgabewerte f�r die meisten Funktionen
-//k�nnen wir je nach dem noch erweitern
-#ifndef __DR_LOGGER__
-#define __DR_LOGGER__
-
-//Vorw�rtsdeklaarionen f�r den Logger
+//Eine Aufz&auml;hlung f&uuml;r R&uuml;ckgabewerte f&uuml;r die meisten Funktionen
+//k&ouml;nnen wir je nach dem noch erweitern
+#ifndef __DR_CORE2_LOGGER__
+#define __DR_CORE2_LOGGER__
+//Vorw&auml;rtsdeklaarionen f&uuml;r den Logger
 class DRVector2;
 class DRVector3;
 class DRColor;
@@ -42,7 +41,7 @@ class DRMatrix;
 	#define DR_FUNCTION_ (__FUNCTION__)
 #endif
 
-//Klasse f�r LogDatei wo alle Fehler reingeschrieben werden k�nnen
+//Klasse f&uuml;r LogDatei wo alle Fehler reingeschrieben werden k&ouml;nnen
 class CORE2_API DRLogger
 {
 
@@ -52,7 +51,7 @@ private:
 	char  m_acFilename[256];//Dateinamen des Log-Files
 
 public:
-	//Und die �ffentlichen Funktionen
+	//Und die &ouml;ffentlichen Funktionen
 	DRLogger();
 	~DRLogger();
 
@@ -74,7 +73,7 @@ public:
 	//inline um Variablen abzufragen
 	inline DRFile* getFile() {return &m_File;};
 
-	//Funktionszeiger f�r SDL Mutex bei verwendung von SDL
+	//Funktionszeiger f&uuml;r SDL Mutex bei verwendung von SDL
 	void (*mLockMutex)(void);
 	void (*mUnlockMutex)(void);
 	void*	mMutex;
@@ -93,4 +92,4 @@ public:
 
 };
 
-#endif //__DR_LOGGER__
+#endif //__DR_CORE2_LOGGER__

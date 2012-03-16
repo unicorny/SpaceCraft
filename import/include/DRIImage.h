@@ -1,24 +1,24 @@
 /*/*************************************************************************
- *                                                                       *
- * Engine, Engine-Lib interface class for many things,                   *
- * implementierung in extern libs                               		 *
- * Copyright (C) 2009, 20010, 2011 Dario Rekowski.						 *
- * Email: dariofrodo@gmx.de   Web: www.einhornimmond.de                  *
- *                                                                       *
- * This program is free software: you can redistribute it and/or modify  *
- * it under the terms of the GNU General Public License as published by  *
- * the Free Software Foundation, either version 3 of the License, or     *
- * any later version.													 *
- *																		 *
- * This program is distributed in the hope that it will be useful,		 *
- * but WITHOUT ANY WARRAN TY; without even the implied warranty of		 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 *
- * GNU General Public License for more details.							 *
- *																		 *
- * You should have received a copy of the GNU General Public License	 *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                       *
- *************************************************************************/
+ *                                                                         *
+ * Engine, Engine-Lib interface class for many things,                     *
+ * implementierung in extern libs                               	   *
+ * Copyright (C) 2012, 20013, 2014 Dario Rekowski.			   *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.							   *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRAN TY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
 
 /*!
     Eine Klasse welche ein Bild repr�sentiert,
@@ -27,19 +27,19 @@
     @date 05.11.10
 */
 
-#ifndef __DR_IIMAGE__
-#define __DR_IIMAGE__
+#ifndef __DR_ENGINE2_IIMAGE__
+#define __DR_ENGINE2_IIMAGE__
 #ifdef _WIN32
 	#ifdef _MSC_VER
-		#define __IMAGE_DLL_NAME__ "Image.dll"
+		#define __IMAGE_DLL_NAME__ "DRImage.dll"
 	#else
-		#define __IMAGE_DLL_NAME__ "libImage.dll"
+		#define __IMAGE_DLL_NAME__ "libDRImage.dll"
 	#endif
 #else
-	#define __IMAGE_DLL_NAME__ "./libImage.so"
+	#define __IMAGE_DLL_NAME__ "./libDRImage.so"
 #endif
 
-class ENGINE_API DRIImage : public DRInterface
+class ENGINE2_API DRIImage : public DRInterface
 {
 public:
     DRIImage();
@@ -78,4 +78,4 @@ private:
 
 };
 
-#endif //__DR_IIMAGE__
+#endif //__DR_ENGINE2_IIMAGE__

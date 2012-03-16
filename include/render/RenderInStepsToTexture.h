@@ -3,7 +3,7 @@
 
 #include "Texture.h"
 
-class RenderInStepsToTexture
+class RenderInStepsToTexture: public DRIResource
 {
 public:
     // frame buffer, will be called in init and in step
@@ -11,9 +11,9 @@ public:
     ~RenderInStepsToTexture();
     
     // reset values, set step size
-    DRReturn init(float stepSize, float clippingBorder[4], Texture* texture);
+    DRReturn init(float stepSize, float clippingBorder[4], TexturePtr texture);
     //! erstellt eine neue Textur mit denselben Einstellungen, jedoch wird die texturgröße geändert
-    DRReturn reinit(Texture* texture);
+    DRReturn reinit(TexturePtr texture);
     // render with current step, add step
     DRReturn step();
     
@@ -23,13 +23,15 @@ public:
     virtual DRReturn renderStuff() = 0;        
     
     __inline__ bool isFinished() {return mFinished;}
-    __inline__ Texture* getTextur() {return mTexture;}
+    __inline__ TexturePtr getTextur() {return mTexture;}
+    
+    virtual const char* getResourceType() const {return "RenderInStepsToTexture";}
     
 protected:
     float       mClippingBorder[4]; //left, rigt, bottom, top
     DRVector2   mTextureSize;    
-    Texture*     mTexture;
-	DRMatrix	mProjectionMatrix;
+    TexturePtr     mTexture;
+    DRMatrix	mProjectionMatrix;
     
 private:
     DRVector2   mCursorIndex;
@@ -39,5 +41,7 @@ private:
     short       mCursorCurrentCount;
     bool        mFinished;
 };
+
+typedef DRResourcePtr<RenderInStepsToTexture> RenderInStepsToTexturePtr;
 
 #endif //__SC_RENDER_IN_STEPS_TO_TEXTURE__

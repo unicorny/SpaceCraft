@@ -5,7 +5,7 @@
 
 #include "main.h"
 
-class Texture
+class Texture : public DRIResource
 {
 public:
      Texture(const char* filename, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
@@ -40,6 +40,8 @@ public:
 	//Parameter
 	void setWrappingMode(GLint mode);
 	Eigen::Vector2i getResolution();
+        
+        virtual const char* getResourceType() const {return "Texture";}
 
 	//Debug
 	__inline__ GLuint getId() {return mTexturID;}
@@ -56,8 +58,11 @@ protected:
 	DRIImage*	mImage;
 	GLuint		mTextureWidth;
 	GLuint		mTextureHeight;
+	GLuint		mMemorySize;
 private:
-    
-    
+
 };
-#endif //__SC_TEXTURE__
+
+typedef DRResourcePtr<Texture> TexturePtr;
+
+#endif //__SC_TEXTURE__ 

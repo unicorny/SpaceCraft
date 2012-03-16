@@ -1,8 +1,9 @@
 #include "DRGeometrieHeightfield.h"
+#include "GlobalRenderer.h"
 
 
 DRGeometrieHeightfield::DRGeometrieHeightfield(DRVector3 sphericalCenter/* = DRVector3(0.0f)*/)
-: mHeightValues(NULL), mSphericalCenter(sphericalCenter)
+: mHeightValues(NULL), mSphericalCenter(sphericalCenter), mMemorySize(0.0)
 {
     
 }
@@ -10,6 +11,9 @@ DRGeometrieHeightfield::DRGeometrieHeightfield(DRVector3 sphericalCenter/* = DRV
 DRGeometrieHeightfield::~DRGeometrieHeightfield()
 {
     mHeightValues = NULL;
+	if(mMemorySize >= 0.0)
+		GlobalRenderer::Instance().removeGrafikMemGeometrie(mMemorySize);
+	mMemorySize = 0.0;
 }
 
 DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4], 
@@ -26,6 +30,8 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     //if(init(vertexCount, indexCount, textureCount, color, normals))
     if(DRGeometrie::init(vertexCount, indexCount, 0, color, false))
         LOG_ERROR("no memory allocated for geometrie!", DR_ERROR);
+	mMemorySize = (vertexCount*3+indexCount)*sizeof(DRVector3);
+	GlobalRenderer::Instance().addGrafikMemGeometrie(mMemorySize);
     
     DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/gridSize;
     DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/gridSize;
@@ -94,7 +100,10 @@ DRReturn DRGeometrieHeightfield::init(int gridSize, DRVector3 edgePoints[4], Geo
     //if(init(vertexCount, indexCount, textureCount, color, normals))
     if(DRGeometrie::init(vertexCount, indexCount, 0, false, false))
         LOG_ERROR("no memory allocated for geometrie!", DR_ERROR);
-    
+
+	mMemorySize = (vertexCount*3+indexCount)*sizeof(DRVector3);
+	GlobalRenderer::Instance().addGrafikMemGeometrie(mMemorySize);
+
     DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/gridSize;
     DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/gridSize;
     
