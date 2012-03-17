@@ -25,6 +25,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
 
  DRReturn SubPatchPlanetSektor::move(float fTime, Camera* cam)
  {
+    RenderSubPatchPlanet* render = dynamic_cast<RenderSubPatchPlanet*>(mRenderer);
     if(mSubLevel != 7) return DR_OK;
     //teilen bei Camera Distance von 1.5 radius
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this).convertTo(KM);
@@ -54,6 +55,12 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     else
     {
         removeInactiveChilds(60.0f);
+    }
+    if(mRenderer && render->getRenderNoisePlanetToTexture())
+    {
+        double distance = mLastRelativeCameraPosition.length().convertTo(M);
+        if(mIdleSeconds >= 0.0f) distance *= 1000.0;
+        render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
     }
     return DR_OK;
  }

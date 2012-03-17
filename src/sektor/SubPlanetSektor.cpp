@@ -55,6 +55,8 @@ SubPlanetSektor::~SubPlanetSektor()
 DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
 {
     mHorizontCulling = 75.0;
+    float inactiveTime = GlobalRenderer::Instance().getTimeForInactiveChilds();
+    RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);
     if(mSubLevel != 6) return DR_OK;
     //teilen bei Camera Distance von 1.5 radius
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this).convertTo(KM);
@@ -94,7 +96,15 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     }
     else
     {
-        removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
+        removeInactiveChilds(inactiveTime);
+    }
+    if(render && render->getRenderNoisePlanetToTexture())
+    {
+        double distance = mLastRelativeCameraPosition.length().convertTo(M);
+        if(mIdleSeconds > 0.0f) distance *= 1000.0;
+        dynamic_cast<RenderSubPlanet*>(mRenderer)->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
+        if(mNotRenderSeconds > inactiveTime)
+            DR_SAVE_DELETE(mRenderer);
     }
 
     return DR_OK;
@@ -103,17 +113,16 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
 DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
 {
     if(mIdleSeconds > 0.0f) return DR_NOT_ERROR;
-    //
-    //DRVector3 pos = mSektorPosition.getVector3().normalize();
-    
-    //glMultMatrixf(mRotation);
-    //glTranslatef(0.0f, 0.0f, 1.0f-mEbeneDistanceToCenter);
-    // Spherical Center
     
     mMatrix = mRotation * mParent->getMatrix();
        
     if(mIdleSeconds <= 0.0f && mHorizontCulling > 120.0f || mPlanet->getTheta() > 50.0*GRADTORAD)
     {
+        mNotRenderSeconds = 0.0f;
+        if(!mRenderer)
+            mRenderer = new RenderSubPlanet(mID, DRVector3(0.0f), mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+        if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
+        
         ShaderProgram* shader = mRenderer->getShaderProgram();
         const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();
         if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
@@ -129,6 +138,10 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         //GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
         // childs didn't need to render
         return DR_NOT_ERROR;
+    }
+    else
+    {
+        mNotRenderSeconds += fTime;
     }
     return DR_OK;
 }

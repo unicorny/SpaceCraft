@@ -35,24 +35,25 @@ DRReturn GlobalRenderer::init(const char* configFilename)
 void GlobalRenderer::addRenderTask(RenderInStepsToTexturePtr newRenderTask, bool preview/* = false*/)
 {
     if(preview)
-        mPreviewRenderTasks.push(newRenderTask);
+        mPreviewRenderTasks.push_back(newRenderTask);
     else
-        mRenderTasks.push(newRenderTask);
+        mRenderTasks.push_back(newRenderTask);
 }
 void GlobalRenderer::removeRenderTask(RenderInStepsToTexturePtr renderTaskToDelete)
 {
     mDeleted.addByHash(reinterpret_cast<DHASH>(renderTaskToDelete.getResourcePtrHolder()->mResource), reinterpret_cast<void*>(1));
 }
 
-DRReturn GlobalRenderer::renderTaskFromQueue(std::queue<RenderInStepsToTexturePtr>* list)
+DRReturn GlobalRenderer::renderTaskFromQueue(std::list<RenderInStepsToTexturePtr>* list)
 {
+    list->sort();
     //remove already deleted objects (which can be find in mDeleted List)
     while(!list->empty() && 
            mDeleted.getNItems() > 0 &&  
            mDeleted.findByHash(reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource)))
     {
         mDeleted.removeByHash(reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource));
-        list->pop();
+        list->pop_front();
     }
     RenderInStepsToTexturePtr current;
     //procceed list
@@ -66,7 +67,7 @@ DRReturn GlobalRenderer::renderTaskFromQueue(std::queue<RenderInStepsToTexturePt
         if(current->step()) LOG_ERROR("Fehler bei Step", DR_ERROR);
     
         if(current->isFinished())
-            list->pop(); //remove finished Task
+            list->pop_front(); //remove finished Task
     }
     return DR_OK;
 }

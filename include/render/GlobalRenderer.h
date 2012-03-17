@@ -58,7 +58,7 @@ private:
     GlobalRenderer();
     DRReturn setupFrameBuffer(TexturePtr texture);
     static const char* getFrameBufferEnumName(GLenum name);
-    DRReturn renderTaskFromQueue(std::queue<RenderInStepsToTexturePtr>* list);
+    DRReturn renderTaskFromQueue(std::list<RenderInStepsToTexturePtr>* list);
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
@@ -66,8 +66,8 @@ private:
     
     //Render To texture
     GLuint                              mFrameBufferID;
-    std::queue<RenderInStepsToTexturePtr> mRenderTasks;
-    std::queue<RenderInStepsToTexturePtr> mPreviewRenderTasks;
+    std::list<RenderInStepsToTexturePtr> mRenderTasks;
+    std::list<RenderInStepsToTexturePtr> mPreviewRenderTasks;
     DRHashList                          mDeleted;
     
     // Config

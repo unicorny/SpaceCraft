@@ -22,6 +22,8 @@ public:
     virtual DRReturn render(float fTime, Camera* cam);
     void setTexturePath(DRString texturePath) {mTexturePath = texturePath;}
     
+    RenderNoisePlanetToTexture* getRenderNoisePlanetToTexture();
+    
 protected:
     RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
     DRReturn init(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, 

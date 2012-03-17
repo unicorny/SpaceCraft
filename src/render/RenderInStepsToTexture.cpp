@@ -1,7 +1,7 @@
 #include "RenderInStepsToTexture.h"
 
 RenderInStepsToTexture::RenderInStepsToTexture()
-: mTexture(), mStepSize(0), mIndexStepMode(0), mFinished(false)
+: mTexture(), mStepSize(0), mIndexStepMode(0), mFinished(false), mDistance(-1.0f)
 {
     
 }

@@ -2,7 +2,7 @@
 
 Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent) 
 : mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
-  mIdleSeconds(0.0)
+  mIdleSeconds(0.0f), mNotRenderSeconds(0.0f)
 {
     getSektorPath(mSektorPath);
     DRFileManager::addFolderToFileSystem(getSektorPathName().data());
@@ -129,7 +129,8 @@ void Sektor::updateCameraSektor(Camera* cam)
         {
             cam->setSektorPosition(cam->getSektorPositionAtSektor(mParent));
             cam->setCurrentSektor(mParent);
-            cam->updateSektorPath();            
+            cam->updateSektorPath();     
+            pos.convertTo(KM).print("new camera pos after switch higher");
         }
     }
 }

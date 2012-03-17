@@ -160,12 +160,14 @@ protected:
     //! renderer for this sektor
     RenderSektor*       mRenderer;
 
-	//! matrix for this sektor, contain rotation, translation and scaling of this sector
-	DRMatrix			mMatrix;
+    //! matrix for this sektor, contain rotation, translation and scaling of this sector
+    DRMatrix		mMatrix;
     
     
-    //! seconds since last use (visible for camera)
-    double              mIdleSeconds;
+    //! seconds since last use (visible for camera) 
+    float              mIdleSeconds;
+    //! seconds since last rendered, but visible
+    float              mNotRenderSeconds;              
     
     std::map<u64, Sektor*> mChilds;
     typedef std::pair<u64, Sektor*> SEKTOR_ENTRY;

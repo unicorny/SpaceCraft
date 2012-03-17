@@ -42,6 +42,10 @@ public:
 	Eigen::Vector2i getResolution();
         
         virtual const char* getResourceType() const {return "Texture";}
+        virtual bool less_than(DRIResource& tex) const
+        {
+            return mTexturID <  dynamic_cast<Texture&>(tex).mTexturID;
+        }
 
 	//Debug
 	__inline__ GLuint getId() {return mTexturID;}

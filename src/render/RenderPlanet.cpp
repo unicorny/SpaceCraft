@@ -8,6 +8,7 @@ RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNois
 : RenderSektor(), mTextureRenderer(), mTexture(),
   mPreviewTextur(), mInitalized(0)
 {
+    printf("[RenderPlanet::RenderPlanet]\n");
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
     init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", 
          size, texturePath, planetNoiseParameter);
@@ -48,7 +49,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
     mTexturePath = texturePath;
 
 	mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
-	dynamic_cast<RenderNoisePlanetToTexture*>(mTextureRenderer.getResourcePtrHolder()->mResource)->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
+	getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
 	GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
 		
     if(DRIsFileExist(getPathAndFilename().data()))
@@ -81,6 +82,7 @@ DRString RenderPlanet::getPathAndFilename()
 
 RenderPlanet::~RenderPlanet()
 {
+    printf("[RenderPlanet::~RenderPlanet]\n");
 	ShaderManager::Instance().releaseShader(mShader);
     if(mTextureRenderer.getResourcePtrHolder() && !mTextureRenderer->isFinished())
         GlobalRenderer::Instance().removeRenderTask(mTextureRenderer);
@@ -135,13 +137,20 @@ DRReturn RenderPlanet::generateAndBindTexture()
     if(DRGrafikError("[RenderPlanet::generateAndBindTexture]")) return DR_ERROR;
     return DR_OK;
 }
+
+RenderNoisePlanetToTexture* RenderPlanet::getRenderNoisePlanetToTexture()
+{
+	if(!mTextureRenderer.getResourcePtrHolder()) return NULL;
+    return dynamic_cast<RenderNoisePlanetToTexture*>(mTextureRenderer.getResourcePtrHolder()->mResource);
+}
+
 DRReturn RenderPlanet::render(float fTime, Camera* cam)
 {    
     uint quadricDetails = 32;
     if(mDetailLevel > 9) quadricDetails = 256; // 10
     else if(mDetailLevel > 6) quadricDetails = 128; //7
     else if(mDetailLevel > 2) quadricDetails = 64; // 3
-    else if(mDetailLevel > 0.0f)  quadricDetails = 32; // 1
+    else if(mDetailLevel > 0) quadricDetails = 32; // 1
     else quadricDetails = 8;
     
     generateAndBindTexture();

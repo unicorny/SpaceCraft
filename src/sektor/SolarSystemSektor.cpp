@@ -49,6 +49,6 @@ DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
 
 DRReturn SolarSystemSektor::render(float fTime, Camera* cam)
 {
-    mMatrix = cam->getKameraMatrixRotation();
+    //mMatrix = cam->getKameraMatrixRotation();
     return DR_OK;
 }

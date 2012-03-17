@@ -62,7 +62,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
  
     // Specifies the planet's sea level.  This value must be between -1.0
     // (minimum planet elevation) and +1.0 (maximum planet elevation.)
-    const float SEA_LEVEL = DRRandom::rDouble(0.0, -0.6);
+    const float SEA_LEVEL = DRRandom::rDouble(0.2, -0.2);
     mPlanetNoiseParameters.seaLevel = SEA_LEVEL;
     
     // Specifies the level on the planet in which continental shelves appear.
@@ -105,7 +105,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     * (MAX_ELEV - MIN_ELEV)) + MIN_ELEV;
     mPlanetNoiseParameters.seaLevelInMetres = seaLevelInMeters;
     
-    mPlanetNoiseParameters.maxHeightInPercent = DRRandom::rDouble(0.005, 0.0005);
+    mPlanetNoiseParameters.maxHeightInPercent = DRRandom::rDouble(0.005, 0.001);
     mPlanetNoiseParameters.minHeightInPercent = DRRandom::rDouble(0.003, 0.001);
     mPlanetNoiseParameters.print(true);
     
@@ -121,6 +121,7 @@ PlanetSektor::~PlanetSektor()
 
 DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
+    RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     mTheta = acos(mRadius/mLastRelativeCameraPosition.length());
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
@@ -135,7 +136,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     DRVector3 v = mLastRelativeCameraPosition.getVector3();
     
     
-    printf("\rdistance: %f", static_cast<double>(distance));
+    printf("\rdistance: %f, theta: %f", static_cast<double>(distance), mTheta);
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
@@ -157,6 +158,13 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
         //removeInactiveChilds(1.0f);
     }
     removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
+    if(mRenderer)
+    {
+        if(render->getRenderNoisePlanetToTexture())
+            render->getRenderNoisePlanetToTexture()->setCurrentDistance(mLastRelativeCameraPosition.length().convertTo(M));
+        if(mNotRenderSeconds >= GlobalRenderer::Instance().getTimeForInactiveChilds())
+            DR_SAVE_DELETE(mRenderer);
+    }
     return DR_OK;
 }
 
@@ -179,17 +187,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     Unit radius1 = mRadius;
     double radius2 = ((radius1 * distance2) / distance1);
 
-    if(radius2 > 160.0f) mRenderer->setCurrentDetail(10);
-    else if(radius2 > 140.0f) mRenderer->setCurrentDetail(9);
-    else if(radius2 > 120.0f) mRenderer->setCurrentDetail(8);
-    else if(radius2 > 90.0f) mRenderer->setCurrentDetail(7);
-    else if(radius2 > 70.0f) mRenderer->setCurrentDetail(6);
-    else if(radius2 > 30.0f) mRenderer->setCurrentDetail(5);
-    else if(radius2 > 25.0f) mRenderer->setCurrentDetail(4);
-    else if(radius2 > 15.0f) mRenderer->setCurrentDetail(3);
-    else if(radius2 > 5.0f) mRenderer->setCurrentDetail(2);
-    else if(radius2 > 1.0f) mRenderer->setCurrentDetail(1);
-    else mRenderer->setCurrentDetail(0);
+    
 
 	//DRVector3 pos = (mSektorPosition - cam->getSektorPosition()).getVector3().normalize();
     //DRVector3 pos = (mSektorPosition - mLastRelativeCameraPosition).getVector3().normalize();
@@ -203,13 +201,30 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     //glTranslatef(pos.x, pos.y, pos.z);
     //glScaled(radius2, radius2, radius2);
 	
-    mMatrix = DRMatrix::scaling(DRVector3(radius2)) * DRMatrix::translation(pos) * mParent->getMatrix() ;
+    mMatrix = DRMatrix::scaling(DRVector3(radius2)) * DRMatrix::translation(pos) * cam->getKameraMatrixRotation();
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
-    if(mRenderer && !isObjectInSektor(mLastRelativeCameraPosition))
+    if(!isObjectInSektor(mLastRelativeCameraPosition) && mTheta <= 1.569718)
     {
+        mNotRenderSeconds = 0.0f;
+        if(!mRenderer)
+            mRenderer = new RenderPlanet(mID, getSektorPathName(), &mPlanetNoiseParameters);
+        if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
+        
+        if(radius2 > 160.0f) mRenderer->setCurrentDetail(10);
+        else if(radius2 > 140.0f) mRenderer->setCurrentDetail(9);
+        else if(radius2 > 120.0f) mRenderer->setCurrentDetail(8);
+        else if(radius2 > 90.0f) mRenderer->setCurrentDetail(7);
+        else if(radius2 > 70.0f) mRenderer->setCurrentDetail(6);
+        else if(radius2 > 30.0f) mRenderer->setCurrentDetail(5);
+        else if(radius2 > 25.0f) mRenderer->setCurrentDetail(4);
+        else if(radius2 > 15.0f) mRenderer->setCurrentDetail(3);
+        else if(radius2 > 5.0f) mRenderer->setCurrentDetail(2);
+        else if(radius2 > 1.0f) mRenderer->setCurrentDetail(1);
+        else mRenderer->setCurrentDetail(0);
+    
       //GlobalRenderer::getSingleton().getPlanetShaderPtr()->bind();
         ShaderProgram* shader = mRenderer->getShaderProgram();
         if(!shader) LOG_ERROR("RenderPlanet hasn't valid shader", DR_ERROR);
@@ -227,6 +242,10 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
         return DR_NOT_ERROR;
         //return DR_OK;
     } 
+    else
+    {
+        mNotRenderSeconds += fTime;
+    }
     
     return DR_OK;
 }
@@ -240,8 +259,8 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         // Wurzel(3)       1
         //  ------    =  -----   => Wurzel(3) = 1/faktor => faktor = 1/Wurzel(3)
         //     1         faktor
-    //    double faktor = 1.0/sqrt(3.0);// sqrtf(3.0) = ca. 1.73205, faktor = ca. 0.577
-     //   double faktorH = sqrt(2.0/sqrt(3.0)-1.0/3.0);
+        //double faktor = 1.0/sqrt(3.0);// sqrtf(3.0) = ca. 1.73205, faktor = ca. 0.577
+        //double faktorH = sqrt(2.0/sqrt(3.0)-1.0/3.0);
 
         // Position des Quadratmittelpunktes
         //Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius*faktor;

@@ -20,8 +20,7 @@ public:
     
     __inline__ const DRMatrix& getRotationsMatrix() {return mRotation;}
     __inline__ float getPatchScaling() {return mPatchScaling;}
-
-    
+        
 protected:
 private:
     ShaderProgram* mShader;
@@ -30,6 +29,9 @@ private:
     float         mPatchScaling;
     DRVector3     mTranslate;
     DRMatrix      mRotation;
+    
+    
 };
+
 
 #endif //__SC_RENDER_NOISE_PLANET_TO_TEXTURE__

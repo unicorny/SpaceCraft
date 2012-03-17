@@ -27,6 +27,14 @@ public:
     
     virtual const char* getResourceType() const {return "RenderInStepsToTexture";}
     
+    __inline__ void setCurrentDistance(float distance) {mDistance = distance;}
+    
+    virtual bool less_than(DRIResource& b) const
+    {
+        //printf("[RenderInStepsToTexture::operator <]\n");
+        return this->mDistance < dynamic_cast<RenderInStepsToTexture&>(b).mDistance;
+    }
+    
 protected:
     float       mClippingBorder[4]; //left, rigt, bottom, top
     DRVector2   mTextureSize;    
@@ -40,6 +48,8 @@ private:
     short       mCursorMaxCount;
     short       mCursorCurrentCount;
     bool        mFinished;
+    
+    float       mDistance; //distance to viewer, for priority list
 };
 
 typedef DRResourcePtr<RenderInStepsToTexture> RenderInStepsToTexturePtr;
