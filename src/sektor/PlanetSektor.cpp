@@ -136,7 +136,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     DRVector3 v = mLastRelativeCameraPosition.getVector3();
     
     
-    printf("\rdistance: %f, theta: %f", static_cast<double>(distance), mTheta);
+    //printf("\rdistance: %f, theta: %f", static_cast<double>(distance), mTheta);
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
@@ -160,8 +160,10 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
     if(mRenderer)
     {
+        // set player distance to renderer for sort
         if(render->getRenderNoisePlanetToTexture())
             render->getRenderNoisePlanetToTexture()->setCurrentDistance(mLastRelativeCameraPosition.length().convertTo(M));
+        // remove renderer, if we didn't need him
         if(mNotRenderSeconds >= GlobalRenderer::Instance().getTimeForInactiveChilds())
             DR_SAVE_DELETE(mRenderer);
     }
@@ -275,7 +277,7 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         //SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, mRadius/mLastRelativeCameraPosition.length());
         //0.617940f theta bei 6 patches
         //0.85-0.83 theta bei 6*4 patches
-        SubPlanetSektor* temp = new SubPlanetSektor(position, mRadius, childID, this, this, 1.0f);
+        SubPlanetSektor* temp = new SubPlanetSektor(position, mRadius, childID, this, this, 1.0f, 1);
         
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 

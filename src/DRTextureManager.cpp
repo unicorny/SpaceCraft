@@ -1,7 +1,7 @@
 #include "DRTextureManager.h"
 
 DRTextureManager::DRTextureManager()
-: mInitalized(false), mTextureLoadMutex(NULL), mTextureLoadThread(NULL), mTextureLoadCondition(NULL),
+: mInitalized(false), mGrafikMemTexture(0), mTextureLoadMutex(NULL), mTextureLoadThread(NULL), mTextureLoadCondition(NULL),
   mTextureLoadSemaphore(NULL)
 {
 	mTextureLoadSemaphore = SDL_CreateSemaphore(1);
@@ -33,18 +33,10 @@ void DRTextureManager::exit()
     mInitalized = false;
     for(std::multimap<DHASH,TextureMemoryEntry>::iterator it = mTextureMemoryEntrys.begin(); it != mTextureMemoryEntrys.end(); it++)
     {
-        glDeleteTextures(1, &it->second.textureID);
+        it->second.clear();
     }
     mTextureMemoryEntrys.clear();
-    
-    for (uint i = 0; i < mTextureEntrys.getNItems(); i++)
-	{
-		TextureEntry* texture = static_cast<TextureEntry*>(mTextureEntrys.findByIndex(i));
-        DR_SAVE_DELETE(texture->texture);
-        DR_SAVE_DELETE(texture);
-		DRGrafikError("Fehler beim Texturen löschen in: DRTextureManager::Exit");
-	}
-	mTextureEntrys.clear(true);    
+    mTextureEntrys.clear();    
 
 	if(mTextureLoadThread)
 	{
@@ -72,75 +64,61 @@ DHASH DRTextureManager::makeTextureHash(const char* filename, GLint glMinFilter/
 }
 DHASH DRTextureManager::makeTextureHash(const TextureMemoryEntry &entry)
 {
-    return entry.width | entry.height<<4 | entry.bpp << 8 | entry.format << 16;    
+    return entry.size.x | entry.size.y<<4 | entry.format << 16;    
 }
 
 //! lädt oder return instance auf Textur
-DRTextur* DRTextureManager::getTexture(const char* filename, GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
+TexturePtr DRTextureManager::getTexture(const char* filename, bool loadAsynchron /*= false*/, GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
 {
 	if(!mInitalized) return 0;
 
     DHASH id = makeTextureHash(filename, glMinFilter, glMagFilter);
 	//Schauen ob schon vorhanden
-	TextureEntry* entry = static_cast<TextureEntry*>(mTextureEntrys.findByHash(id));
-	
-	if(entry && entry->texture != NULL)
-	{
-		entry->referenzCounter++;
-		return entry->texture;
-	}
-
-	entry = new TextureEntry;
-	entry->referenzCounter = 0;
-	
-    entry->texture = new DRTextur(filename, glMinFilter, glMagFilter);
-	if(!entry->texture)
-	{
-		DR_SAVE_DELETE(entry);
+    if(mTextureEntrys.find(id) != mTextureEntrys.end())
+    {
+        return mTextureEntrys[id];
+    }
+	TexturePtr tex(new Texture(filename));
+   
+	if(!tex.getResourcePtrHolder()->mResource)
         LOG_ERROR("No Memory for new Texture left", 0);
-	}
     
-    if(!mTextureEntrys.addByHash(id, entry))
-	{
-        DR_SAVE_DELETE(entry->texture);
-		DR_SAVE_DELETE(entry);
+    if(loadAsynchron)
+    {
+        addAsynchronTextureLoadTask(tex);
+    }
+    else
+    {
+        if(tex->loadFromFile()) LOG_ERROR("Fehler by calling loadFromFile", tex);
+        if(tex->pixelsCopyToRenderer()) LOG_ERROR("Fehler by calling pixelsCopyToRenderer", tex);
+        tex->setFilter(glMinFilter, glMagFilter);
+    }
+    
+    if(!mTextureEntrys.insert(DR_TEXTURE_ENTRY(id, tex)).second)
 		LOG_ERROR("Unerwarteter Fehler in DRTextureManager::getTexture aufgetreten", 0);
-	}
-	entry->referenzCounter = 1;
 
-	return entry->texture;
+	return tex;
 }
-//! reduziert reference, bei null wird Textur gelöscht und OpenGL Texture in liste eingetragen
-void DRTextureManager::releaseTexture(const char* filename, GLint glMinFilter/* = GL_LINEAR*/, GLint glMagFilter/* = GL_LINEAR*/)
-{
-    if(!mInitalized) return;
-    
-    //suchen
-    DHASH id = makeTextureHash(filename, glMinFilter, glMagFilter);
-	TextureEntry* entry = static_cast<TextureEntry*>(mTextureEntrys.findByHash(id));
-	if(!entry) return;
 
-	entry->referenzCounter--;
-	if(entry->referenzCounter <= 0)
-	{
-        freeTexture(entry->texture->removeTexturID());
-        DR_SAVE_DELETE(entry->texture);
-		
-		mTextureEntrys.removeByHash(id);
-		DR_SAVE_DELETE(entry);
-	}
-}
 //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
-GLuint DRTextureManager::getGLTextureMemory(GLuint width, GLuint height, GLuint bpp, GLuint format)
+TexturePtr DRTextureManager::getTexture(DRVector2i size, GLuint format, GLubyte* data /*= NULL*/, GLint dataSize/* = 0*/)
 {
     if(!mInitalized) return 0;
     
-    TextureMemoryEntry entry(width, height, bpp, format);
+    GLuint texID = _getTexture(size, format);
+    if(texID)
+        return TexturePtr(new Texture(texID, data, dataSize));
+    return TexturePtr();
+}
+GLuint DRTextureManager::_getTexture(DRVector2i size, GLuint format)
+{
+    TextureMemoryEntry entry(size, format);
     DHASH id = makeTextureHash(entry);
     if(mTextureMemoryEntrys.find(id) != mTextureMemoryEntrys.end())
     {
         entry = mTextureMemoryEntrys.find(id)->second;
         mTextureMemoryEntrys.erase(id);
+        
         return entry.textureID;
     }
     GLuint textureID = 0;
@@ -151,8 +129,13 @@ GLuint DRTextureManager::getGLTextureMemory(GLuint width, GLuint height, GLuint 
             
     GLuint format2 = GL_RGB;
     if(format == 4) format2 = GL_RGBA;
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
-		format2, bpp, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, size.x, size.y, 0,
+		format2, GL_UNSIGNED_BYTE, 0);
+    
+    if(DRGrafikError("[DRTextureManager::_getTexture]"))
+        LOG_ERROR("Fehler beim Textur erstellen", 0);
+    
+    addGrafikMemTexture(size.x*size.y*format);
     
     return textureID;
 }
@@ -162,14 +145,15 @@ void DRTextureManager::freeTexture(GLuint textureID)
     if(!mInitalized) return;
     
     TextureMemoryEntry entry;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &entry.width);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &entry.height);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_DEPTH, &entry.bpp);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &entry.size.x);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &entry.size.y);
+    //glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_DEPTH, &entry.type);
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &entry.format);
     //printf("Infos ueber eine zu befreiende Texture: ");
     //entry.print(); printf("\n");
     entry.textureID = textureID;
-    entry.timeout = 600.0f;
+    entry.timeout = 4.0f;
     DHASH id = makeTextureHash(entry);
     mTextureMemoryEntrys.insert(DR_TEXTURE_MEMORY_ENTRY(id, entry));       
 }
@@ -178,16 +162,27 @@ void DRTextureManager::freeTexture(GLuint textureID)
 DRReturn DRTextureManager::move(float fTime)
 {
     if(!mInitalized) return DR_ERROR;
-        
+    
+    //timeout TextureMemoryEntry, and removed
     for(std::multimap<DHASH, TextureMemoryEntry>::iterator it = mTextureMemoryEntrys.begin(); it != mTextureMemoryEntrys.end(); it++)
     {
         it->second.timeout -= fTime;
         if(it->second.timeout < 0.0f)
         {
-            printf("DRTextureManager::move, timeout texture will be deleted\n");
-            glDeleteTextures(1, &it->second.textureID);
+            //printf("DRTextureManager::move, timeout texture will be deleted\n");
+            it->second.clear();
             mTextureMemoryEntrys.erase(it);
+            break;
         }
+    }
+    // remove texure with referenz == 1, no other refernz left
+    for(DR_TEXTURE_ENTRY_ITERATOR it = mTextureEntrys.begin(); it != mTextureEntrys.end(); it++)
+    {
+        if(it->second.getResourcePtrHolder()->getRefCount() == 1)
+        {
+            mTextureEntrys.erase(it);
+            break;
+        }            
     }
 	SDL_LockMutex(mTextureLoadMutex);
 	if(!mLoadedAsynchronLoadTextures.empty())
@@ -313,14 +308,21 @@ int DRTextureManager::asynchronTextureLoadThread(void* data)
 void DRTextureManager::test()
 {
     printf("\n------ DRTextureManager::test ------\n");
-    TextureMemoryEntry first(800, 600, 32, 4);
-    TextureMemoryEntry second(800, 600, 32, 3);
-    TextureMemoryEntry third(1280, 1024, 32, 3);
-    TextureMemoryEntry four(1280, 1024, 32, 4);
+    TextureMemoryEntry first(DRVector2i(800, 600), 4);
+    TextureMemoryEntry second(DRVector2i(800, 600), 3);
+    TextureMemoryEntry third(DRVector2i(1280, 1024), 3);
+    TextureMemoryEntry four(DRVector2i(1280, 1024), 4);
     printf("first: "); first.print(); printf(" HASH: %d\n", makeTextureHash(first));
     printf("second: "); second.print(); printf(" HASH: %d\n", makeTextureHash(second));
     printf("third: "); third.print(); printf(" HASH: %d\n", makeTextureHash(third));
     printf("four: "); four.print(); printf(" HASH: %d\n", makeTextureHash(four));
         
     printf("\n--- DRTextureManager::test ende ----\n");
+}
+
+void DRTextureManager::TextureMemoryEntry::clear()
+{
+    glDeleteTextures(1, &textureID);
+	//printf("[DRTextureManager::TextureMemoryEntry::clear] remove %f MB\n", (size.x*size.y*format)/(1024.0f*1024.0f));
+    DRTextureManager::Instance().removeGrafikMemTexture(size.x*size.y*format);
 }

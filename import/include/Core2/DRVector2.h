@@ -26,6 +26,7 @@
 Vector2D Klasse, �bernommen aus der TriBase-Engine von David Scherfgen
 */
 class DRMatrix;
+
 class CORE2_API DRVector2
 {
 public:
@@ -54,7 +55,7 @@ public:
 	DRVector2(const DRReal _x, const DRReal _y) : x(_x), y(_y)					{}
 	DRVector2(const DRReal* pfComponent) : x(pfComponent[0]), y(pfComponent[1])	{}
         DRVector2(const int _x, const int _y): x(static_cast<float>(_x)), y(static_cast<float>(_y)) {}
-
+        DRVector2(const DRVector2i& v): x(static_cast<float>(v.x)), y(static_cast<float>(v.y)) {}
 	//Operatoren
 	//Casting
 	operator DRReal* () {return (DRReal*)(c);}

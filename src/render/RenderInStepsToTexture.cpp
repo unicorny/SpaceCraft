@@ -14,10 +14,10 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
 DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], TexturePtr texture)
 {
 	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-	Eigen::Vector2i texSize = texture->getResolution();
-	if(texSize(0) <= 0 || texSize(1) <= 0)
+	DRVector2i texSize = texture->getResolution();
+	if(texSize.x <= 0 || texSize.y <= 0)
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
-	mTextureSize = DRVector2(texSize(0), texSize(1));
+	mTextureSize = texSize;
         
     mStepSize = stepSize;
     //mTextureSize = textureSize;
@@ -35,10 +35,10 @@ DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], T
 DRReturn RenderInStepsToTexture::reinit(TexturePtr texture)
 {
 	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-	Eigen::Vector2i texSize = texture->getResolution();
-	if(texSize(0) <= 0 || texSize(1) <= 0)
+	DRVector2i texSize = texture->getResolution();
+	if(texSize.x <= 0 || texSize.y <= 0)
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
-	mTextureSize = DRVector2(texSize(0), texSize(1));
+	mTextureSize = texSize;
     
    // mTextureSize *= textureSizeScalar;
  //   mTextureSize = textureSize;
@@ -131,7 +131,7 @@ DRReturn RenderInStepsToTexture::saveImageToFile(const char* path)
     //glBindTexture(GL_TEXTURE_2D, mTextureID);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
     if(DRGrafikError("RenderInStepsToTexture::saveImageToFile")) LOG_ERROR("Fehler bei getting texture Data!", DR_ERROR);
-    image->setSize(mTextureSize);
+    image->setSize(DRVector2i(mTextureSize.x, mTextureSize.y));
     image->setImageFormat(-1);
     image->setPixel(buffer);
     if(image->saveIntoFile(path))

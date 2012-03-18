@@ -1,3 +1,5 @@
+#version 110
+
 // simple vertex shader
 uniform mat4 projection;
 uniform mat4 modelview;

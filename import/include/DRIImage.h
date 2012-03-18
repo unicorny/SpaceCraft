@@ -54,8 +54,8 @@ public:
     virtual void setWidth(u32 width);
     virtual u32 getHeight() const;
     virtual void setHeight(u32 height);
-    virtual void setSize(DRVector2 size);
-    virtual DRVector2 getSize() const;
+    virtual void setSize(DRVector2i size);
+    virtual DRVector2i getSize() const;
     virtual u8* getPixel();
     virtual void getPixel(DRColor* buffer);
     //! \brief setzt neue Pixel f&uuml;r das Bild

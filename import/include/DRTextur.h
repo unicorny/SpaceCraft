@@ -32,6 +32,7 @@ public:
 
     DRReturn load(const char* filename, bool keepImage = false, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
     DRReturn loadFromMemory(DRColor* colors, DRVector2 size, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
+    //! delete texture by openGL, if full set to true, also delete mParent if exist
     void unload(bool full = true);
     
     bool isLoaded() {return mSucessfullLoaded;}

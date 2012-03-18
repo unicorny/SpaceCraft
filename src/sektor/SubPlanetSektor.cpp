@@ -28,7 +28,7 @@ SubPlanetSektor::SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id,
     printf("[SubPlanetSektor::SubPlanetSektor] center: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z);
     position.print("[SubPlanetSektor::SubPlanetSektor] position");
     
-    if(subLevel > 6) return;
+    if(subLevel > 1) return;
     
     mRenderer = new RenderSubPlanet(id, DRVector3(0.0f), patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
 }
@@ -57,7 +57,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     mHorizontCulling = 75.0;
     float inactiveTime = GlobalRenderer::Instance().getTimeForInactiveChilds();
     RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);
-    if(mSubLevel != 6) return DR_OK;
+    if(mSubLevel != 1) return DR_OK;
     //teilen bei Camera Distance von 1.5 radius
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this).convertTo(KM);
     DRVector3 patchPosition = mSektorPosition.getVector3().normalize();
@@ -148,6 +148,10 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
 
 bool SubPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
 {    
+    //if(mPlanet->getTheta() >= 1.2218) return false;
+    double theta = (mRadius/positionInSektor.length());
+	if(theta <= 0.3060) return false;
+    
     DRVector3 posInSektorNorm = positionInSektor.getVector3().normalize();
     DRVector3 sektorPosNorm = mSektorPosition.getVector3().normalize();
     float d = posInSektorNorm.dot(sektorPosNorm);

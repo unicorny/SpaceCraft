@@ -26,7 +26,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
  DRReturn SubPatchPlanetSektor::move(float fTime, Camera* cam)
  {
     RenderSubPatchPlanet* render = dynamic_cast<RenderSubPatchPlanet*>(mRenderer);
-    if(mSubLevel != 7) return DR_OK;
+    if(mSubLevel != 2) return DR_OK;
     //teilen bei Camera Distance von 1.5 radius
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this).convertTo(KM);
   //  mLastRelativeCameraPosition.convertTo(KM).print("[SubPatchPlanetSektor::move] camera Position");
@@ -102,6 +102,8 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
  
  bool SubPatchPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
 {    
+    double theta = (mRadius/positionInSektor.length());
+    if(theta <= 0.51029) return false;
     //double angle = acos(positionInSektor.normalize().dot(mSektorPosition.getVector3().normalize()));   
     DRVector3 posInSektorNorm = positionInSektor.getVector3().normalize();
     DRVector3 sektorPosNorm = mSektorPosition.getVector3().normalize();

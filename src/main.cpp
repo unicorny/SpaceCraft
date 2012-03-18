@@ -28,7 +28,7 @@ Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTextur* g_tex = NULL;
 DRTextur* g_terrain = NULL;
-int blockCount = 100;
+int blockCount = 0;
 #define MAX_CONTROL_MODES 9
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
@@ -458,26 +458,27 @@ DRReturn render(float fTime)
     glTranslatef(0.0f, 10.0f, 0.0f);
     translate.y += 10.0f;
     RenderBlock* rb =  g_RenderBlockLoader.getRenderBlock("dirt");
-    rb->render();
+    //rb->render();
     
     glTranslatef(0.0f, -5.0f, 0.0f);
     translate.y -= 5.0f;
     rb = g_RenderBlockLoader.getRenderBlock("dirG");
-    rb->render();
+    //rb->render();
     glTranslatef(1.0f, 0.0f, 0.0f);
     translate.x += 1.0f;
-    rb->render();
+    //rb->render();
     glTranslatef(0.0f, 2.0f, 0.0f);
     translate.y += 2.0f;
     
 	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate));
-        if(res != OUTSIDE)    
-                g_RenderBlockLoader.getRenderBlock("benc")->render();
+    //if(res != OUTSIDE)    
+    //    g_RenderBlockLoader.getRenderBlock("benc")->render();
     
     glDisable(GL_TEXTURE_2D);
     //glDisable(GL_LIGHTING);
     
     //*/
+    
     static u32 start = 0;
     float dir[] = {1.0f, 1.0f};
     int y = 0;
@@ -558,13 +559,14 @@ DRReturn render(float fTime)
     text.drawText();
 
 	GlobalRenderer& gb = GlobalRenderer::Instance();
+    DRTextureManager& tx = DRTextureManager::Instance();
     text.setColor12(DRColor(1.0f, 1.0f, 1.0f));
     text.setScaling(DRVector2(0.8f));
-	text.setText("Grafik Memory: %.0f MByte", static_cast<double>(gb.getGrafikMemory())/(1024.0f*1024.0));
+	text.setText("Grafik Memory: %.0f MByte", static_cast<double>(tx.getGrafikMemoryTexture()+gb.getGrafikMemoryGeometrie())/(1024.0f*1024.0));
 	text.setPosition(DRVector2(0.8f, 0.0f));
 	text.drawText();
     
-	text.setText("Texture: %.0f MByte", static_cast<double>(gb.getGrafikMemoryTexture())/(1024.0f*1024.0));
+	text.setText("Texture: %.0f MByte", static_cast<double>(tx.getGrafikMemoryTexture())/(1024.0f*1024.0));
 	text.setPosition(DRVector2(0.8f, 0.04f));
 	text.drawText();
 
