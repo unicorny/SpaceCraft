@@ -21,6 +21,7 @@ public:
     static void unbind();
 	void setUniform3fv(const char* name, const DRVector3& data);
 	void setUniform1f(const char* name, GLfloat data);
+        void setUniform1i(const char* name, GLint data);
 	//! \param transpose Specifies whether to transpose the matrix as the values are loaded into the uniform variable
 	void setUniformMatrix(const char* name, const DRMatrix& matrix, bool transpose = false);
 

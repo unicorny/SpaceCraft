@@ -92,7 +92,7 @@ DRReturn GlobalRenderer::renderTasks()
     return DR_OK;
 }
 
-DRReturn GlobalRenderer::setupFrameBuffer(TexturePtr texture)
+DRReturn GlobalRenderer::setupFrameBuffer(DRTexturePtr texture)
 {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
     //create texture

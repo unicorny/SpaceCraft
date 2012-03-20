@@ -11,7 +11,7 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
     
 }
 
-DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], TexturePtr texture)
+DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], DRTexturePtr texture)
 {
 	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
 	DRVector2i texSize = texture->getResolution();
@@ -32,7 +32,7 @@ DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], T
     return DR_OK;
 }
 
-DRReturn RenderInStepsToTexture::reinit(TexturePtr texture)
+DRReturn RenderInStepsToTexture::reinit(DRTexturePtr texture)
 {
 	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
 	DRVector2i texSize = texture->getResolution();

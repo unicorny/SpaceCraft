@@ -42,7 +42,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 	GLubyte* buffer = new GLubyte[bufferSize];
 	memset(buffer, 0, bufferSize);
 
-	mPreviewTextur = tx.getTexture(DRVector2i(stepSizei), 4, buffer, bufferSize);
+	mPreviewTextur = tx.getTexture(DRVector2i(stepSizei), 4);
     //    TexturePtr(new Texture(stepSizei, stepSizei, GL_UNSIGNED_BYTE, 4, buffer, bufferSize));
     
 	DR_SAVE_DELETE_ARRAY(buffer);
@@ -101,6 +101,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
         if(!mInitalized)
         {
 			mTextureRenderer->reinit(mTexture);
+            mPreviewTextur->setFinishRender();
 			GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
 			//printf("[RenderPlanet::generateAndBindTexture]  reinint\n");
 			mInitalized++;
@@ -113,8 +114,9 @@ DRReturn RenderPlanet::generateAndBindTexture()
 			{
 				//DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
-				mTexture->getPixelsToSave(getPathAndFilename().data());
-				DRTextureManager::Instance().addAsynchronTextureSaveTask(mTexture);
+                DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
+                    GlobalRenderer::Instance().getTextureRenderStepSize()*
+                    GlobalRenderer::Instance().getTextureRenderStepSize());
 			}
 			mTextureRenderer.release();
 		}
@@ -135,10 +137,19 @@ DRReturn RenderPlanet::generateAndBindTexture()
 		mInitalized = 0;
 	}
     glEnable(GL_TEXTURE_2D);
+    GLint textureLoaded = 0; //render not
     if(mPreviewTextur.getResourcePtrHolder())
+    {
         mPreviewTextur->bind();
+        if(mPreviewTextur->isLoadingFinished()) 
+            textureLoaded = 1;
+    }
     else
+    {
         mTexture->bind();
+        textureLoaded = 1;
+    }
+    mShader->setUniform1i("textureLoaded", textureLoaded);
     
     if(DRGrafikError("[RenderPlanet::generateAndBindTexture]")) return DR_ERROR;
     return DR_OK;

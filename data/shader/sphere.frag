@@ -4,6 +4,7 @@
 
 uniform sampler2D texture;
 uniform sampler2D texture2;
+uniform int      textureLoaded;
 
 void main()
 {
@@ -15,6 +16,9 @@ void main()
 					   texture2D(texture, gl_TexCoord[0].xy),
 					   alpha);
 */
-	gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
+	if(textureLoaded == 0)
+		gl_FragColor = gl_Color;
+	else
+		gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
 	
 }

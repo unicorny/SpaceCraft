@@ -69,6 +69,7 @@ const float PI = 3.1415926535f;
 //----------------------------------------------------------------------------------------------------------------------
 //Externe Header
 //Standard Bibliotheken
+#include <queue>
 
 //Engines
 //einbinden der Simple Direct Layer Bibliothek
@@ -123,7 +124,9 @@ const float PI = 3.1415926535f;
 #include "DRIvlc.h"
 #include "DRIImage.h"
 #include "DRVideoConfig.h"
-#include "DRTextur.h"
+#include "DRTexture.h"
+#include "DRSaveTexture.h"
+#include "DRTextureManager.h"
 #include "DRGeometrie.h"
 #include "DRGeometrieSphere.h"
 #include "DRGeometrieIcoSphere.h"

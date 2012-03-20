@@ -56,7 +56,7 @@ public:
     
 private:
     GlobalRenderer();
-    DRReturn setupFrameBuffer(TexturePtr texture);
+    DRReturn setupFrameBuffer(DRTexturePtr texture);
     static const char* getFrameBufferEnumName(GLenum name);
     DRReturn renderTaskFromQueue(std::list<RenderInStepsToTexturePtr>* list);
     

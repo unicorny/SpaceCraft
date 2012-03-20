@@ -143,6 +143,12 @@ void ShaderProgram::setUniform1f(const char* name, GLfloat data)
 	glUniform1f(loc, data);
 	DRGrafikError("ShaderProgram::setUniform1f");
 }
+void ShaderProgram::setUniform1i(const char* name, GLint data)
+{
+    int loc = glGetUniformLocation(mProgram, name);
+	glUniform1i(loc, data);
+	DRGrafikError("ShaderProgram::setUniform1i");    
+}
 void ShaderProgram::setUniform3fv(const char* name, const DRVector3& data)
 {
 	int loc = glGetUniformLocation(mProgram, name);

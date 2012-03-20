@@ -100,13 +100,13 @@ public:
 		float		fHeight;			//H�he "
 		float		fTextureWidth;		//Breite der Textur
 		float		fTextureHeight;		//H�he - " -
-		DRVector2		avTopLeft[256];		//Linke obere Koordinate jedes Zeichens
-		DRVector2		avBottomRight[256];	//Rechte untere		-	"	-
+		DRVector2	avTopLeft[256];		//Linke obere Koordinate jedes Zeichens
+		DRVector2	avBottomRight[256];	//Rechte untere		-	"	-
 		float		afCharWidth[256];	//Breite jedes Zeichens in Pixeln
 	};
 
 	SFontInfo	m_FInfo;				//Info
-	DRTextur*	mTexture;			//TextureID
+	DRTexturePtr	mTexture;			//TextureID
 	DRVector2	m_vScreenSize;
 	DRObjekt*	m_pCamera;
 };

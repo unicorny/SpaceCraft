@@ -8,10 +8,9 @@
 #include "RenderBlockLoader.h"
 
 RenderBlockLoader::RenderBlockLoader() 
-: mTextures(NULL), mRenderBlocks(NULL), mCfg(NULL)
+: mRenderBlocks(NULL), mCfg(NULL)
 {
     mRenderBlocks = new DRHashList;
-    mTextures = new DRHashList;
 }
 
 RenderBlockLoader::RenderBlockLoader(const RenderBlockLoader& orig) 
@@ -25,10 +24,6 @@ RenderBlockLoader::~RenderBlockLoader()
         printf("RenderBlockLoader::~RenderBlockLoader mRenderBlocks isn't empty\n");
     mRenderBlocks->clear(true);
     DR_SAVE_DELETE(mRenderBlocks);
-    if(mTextures->getNItems() > 0)
-        printf("RenderBlockLoader::~RenderBlockLoader mTextures isn't empty\n");
-    mTextures->clear(true);
-    DR_SAVE_DELETE(mTextures);
 }
 
 RenderBlock* RenderBlockLoader::getRenderBlock(BlockName name)
@@ -47,25 +42,11 @@ RenderBlock* RenderBlockLoader::getRenderBlock(BlockName name)
     if(*strFilter == DRString("nearest"))
         filter = GL_NEAREST;
         
-    DRTextur* tex = getTexture(mCfg->getStr(buffer, "texture")->data(), filter);
+    DRTexturePtr tex = DRTextureManager::Instance().getTexture(mCfg->getStr(buffer, "texture")->data(), false, filter, filter);
   //  DRLog.writeToLog("TexturPointer: %d", (unsigned int)tex);
     rb = new RenderBlock(tex, name, mCfg);
     mRenderBlocks->addByHash(name, rb);    
     return rb;
-}
-
-DRTextur* RenderBlockLoader::getTexture(const char* filename, GLint filter)
-{
-    DRTextur* tex = NULL;
-    if(tex = (DRTextur*)mTextures->findByHash(DRMakeStringHash(filename)|filter))
-    {
-        return tex;
-    }
- //   DRLog.writeToLog("try to load texture: %s/%s", DRFileManager::Instance().getWholePfad(filename), filename);
-    
-    tex = new DRTextur(filename, true, filter, filter);
-    mTextures->addByHash(DRMakeStringHash(filename)|filter, tex);
-    return tex;
 }
 
 DRReturn RenderBlockLoader::init()
@@ -82,12 +63,6 @@ void RenderBlockLoader::exit()
         DR_SAVE_DELETE(rb);
     }
     mRenderBlocks->clear(false);
-    for(u32 i = 0; i < mTextures->getNItems(); i++)
-    {
-        DRTextur* tex = (DRTextur*)mTextures->findByIndex(i);
-        DR_SAVE_DELETE(tex);
-    }
-    mTextures->clear(false);
-    
+       
 }
 

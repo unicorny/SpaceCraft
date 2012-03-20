@@ -34,8 +34,8 @@ protected:
     DRString getPathAndFilename();
         
     RenderInStepsToTexturePtr   mTextureRenderer;
-    TexturePtr		mTexture;
-    TexturePtr		mPreviewTextur;
+    DRTexturePtr		mTexture;
+    DRTexturePtr		mPreviewTextur;
     short                       mInitalized;
     DRString                    mTexturePath;
     

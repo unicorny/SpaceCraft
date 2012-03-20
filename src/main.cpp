@@ -26,9 +26,9 @@ Player g_Player;
 RenderBlockLoader g_RenderBlockLoader;
 Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
-DRTextur* g_tex = NULL;
-DRTextur* g_terrain = NULL;
-int blockCount = 0;
+DRTexturePtr g_tex;
+DRTexturePtr g_terrain;
+int blockCount = 100;
 #define MAX_CONTROL_MODES 9
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
@@ -166,11 +166,14 @@ void test()
 void sizeOfClasses()
 {
     DRLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
-	DRLog.writeToLog("Textur: %d", sizeof(Texture));
+	
+    
     DRLog.writeToLog("Camera: %d", sizeof(Camera));
     DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
     DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
 	DRLog.writeToLog("DRMatrix: %d", sizeof(DRMatrix));
+    DRLog.writeToLog("DRSaveTexture: %d", sizeof(DRSaveTexture));
+    DRLog.writeToLog("DRTexture: %d", sizeof(DRTexture));
 	DRLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
     DRLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
     DRLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
@@ -257,8 +260,6 @@ DRReturn load()
 	if(GlobalRenderer::getSingleton().init("data/config.ini"))
 		LOG_ERROR("error by init GlobalRenderer", DR_ERROR);
     
-    if(DRTextureManager::getSingleton().init())
-        LOG_ERROR("error by init DRTextureManager", DR_ERROR);
     if(ShaderManager::getSingleton().init())
         LOG_ERROR("error by init ShaderManager", DR_ERROR);
     if(DRGeometrieManager::getSingleton().init())
@@ -280,11 +281,10 @@ DRReturn load()
 
 void ende()
 {
-    DR_SAVE_DELETE(g_tex);
+    g_tex.release();
     g_Player.exit();
     DR_SAVE_DELETE(g_Font);
-    DR_SAVE_DELETE(g_terrain);
-    DRTextureManager::getSingleton().exit();
+    g_terrain.release();
     ShaderManager::getSingleton().exit();
     DRGeometrieManager::getSingleton().exit();
     g_RenderBlockLoader.exit();
@@ -352,7 +352,6 @@ DRReturn move(float fTime)
     
     if(fTime == 0.0f) fTime = 0.00166f;
 
-	DRTextureManager::Instance().move(fTime);
     //if(g_Player.getSektor()->moveAll(fTime, g_cam))
     if(g_Player.getSektor()->moveAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei move sektor", DR_ERROR);
@@ -367,7 +366,7 @@ DRReturn render(float fTime)
     
     glClearColor(0.1, 0.2, 0.0, 0);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3f(1.0f, 1.0f, 1.0f);    
+    glColor3f(0.0f, 0.0f, 0.0f);
     
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
@@ -386,7 +385,8 @@ DRReturn render(float fTime)
     glDisable(GL_LIGHTING);
     glEnable(GL_CULL_FACE);
     
-    glClear (GL_DEPTH_BUFFER_BIT);     
+    glClear (GL_DEPTH_BUFFER_BIT);    
+    glColor3f(1.0f, 1.0f, 1.0f);    
     
     //Reseten der Matrixen
     glMatrixMode(GL_TEXTURE);
@@ -425,7 +425,7 @@ DRReturn render(float fTime)
     glLightfv(GL_LIGHT1, GL_POSITION, lightPos1);
     glEnable(GL_LIGHT1);       
     
-    if(g_tex)
+    if(g_tex.getResourcePtrHolder())
         g_tex->bind();
       
     //glColor3f(0.2f, 0.5f, 0.1f);
@@ -458,21 +458,21 @@ DRReturn render(float fTime)
     glTranslatef(0.0f, 10.0f, 0.0f);
     translate.y += 10.0f;
     RenderBlock* rb =  g_RenderBlockLoader.getRenderBlock("dirt");
-    //rb->render();
+    rb->render();
     
     glTranslatef(0.0f, -5.0f, 0.0f);
     translate.y -= 5.0f;
     rb = g_RenderBlockLoader.getRenderBlock("dirG");
-    //rb->render();
+    rb->render();
     glTranslatef(1.0f, 0.0f, 0.0f);
     translate.x += 1.0f;
-    //rb->render();
+    rb->render();
     glTranslatef(0.0f, 2.0f, 0.0f);
     translate.y += 2.0f;
     
 	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate));
-    //if(res != OUTSIDE)    
-    //    g_RenderBlockLoader.getRenderBlock("benc")->render();
+    if(res != OUTSIDE)    
+        g_RenderBlockLoader.getRenderBlock("benc")->render();
     
     glDisable(GL_TEXTURE_2D);
     //glDisable(GL_LIGHTING);
