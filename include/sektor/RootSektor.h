@@ -12,7 +12,7 @@ public:
     virtual DRReturn move(float fTime, Camera* cam);
     virtual DRReturn render(float fTime, Camera* cam);
     
-    void addSektor(Sektor* sektor, SektorID id);
+    void addSektor(SektorPtr sektor, SektorID id);
     
     // is the position inside the current sektor
     virtual bool isObjectInSektor(Vector3Unit positionInSektor) {return true;}

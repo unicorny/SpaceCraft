@@ -3,7 +3,7 @@
 
 
 DRGeometrieHeightfield::DRGeometrieHeightfield(DRVector3 sphericalCenter/* = DRVector3(0.0f)*/)
-: mHeightValues(NULL), mSphericalCenter(sphericalCenter), mMemorySize(0.0)
+: mHeightValues(NULL), mSphericalCenter(sphericalCenter), mMemorySize(0)
 {
     
 }
@@ -11,9 +11,9 @@ DRGeometrieHeightfield::DRGeometrieHeightfield(DRVector3 sphericalCenter/* = DRV
 DRGeometrieHeightfield::~DRGeometrieHeightfield()
 {
     mHeightValues = NULL;
-	if(mMemorySize >= 0.0)
+	if(mMemorySize >= 0)
 		GlobalRenderer::Instance().removeGrafikMemGeometrie(mMemorySize);
-	mMemorySize = 0.0;
+	mMemorySize = 0;
 }
 
 DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4], 
@@ -33,19 +33,19 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
 	mMemorySize = (vertexCount*3+indexCount)*sizeof(DRVector3);
 	GlobalRenderer::Instance().addGrafikMemGeometrie(mMemorySize);
     
-    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/gridSize;
-    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/gridSize;
+    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/static_cast<float>(gridSize);
+    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/static_cast<float>(gridSize);
     
     for(u32 j = 1; j < gridSize+1; j++)
     {
         for(u32 i = 0; i < gridSize+1; i++)
         {
             mIndices[mIndexCount++] = mVertexCount;
-            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*i + yVectorPart*j;
+            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i) + yVectorPart*static_cast<float>(j);
             if(j == 1)
             {
                 mIndices[mIndexCount++] = mVertexCount;
-                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*i;
+                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i);
             }
             else if(j == 2)
                 mIndices[mIndexCount++] = i*2;
@@ -89,7 +89,7 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     return DR_OK;
 }
 
-DRReturn DRGeometrieHeightfield::init(int gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format)
+DRReturn DRGeometrieHeightfield::init(uint gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format)
 {
     //! memory allocation
     // size = gridSize
@@ -104,19 +104,19 @@ DRReturn DRGeometrieHeightfield::init(int gridSize, DRVector3 edgePoints[4], Geo
 	mMemorySize = (vertexCount*3+indexCount)*sizeof(DRVector3);
 	GlobalRenderer::Instance().addGrafikMemGeometrie(mMemorySize);
 
-    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/gridSize;
-    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/gridSize;
+    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/static_cast<float>(gridSize);
+    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/static_cast<float>(gridSize);
     
     for(u32 j = 1; j < gridSize+1; j++)
     {
         for(u32 i = 0; i < gridSize+1; i++)
         {
             mIndices[mIndexCount++] = mVertexCount;
-            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*i + yVectorPart*j;
+            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i) + yVectorPart*static_cast<float>(j);
             if(j == 1)
             {
                 mIndices[mIndexCount++] = mVertexCount;
-                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*i;
+                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i);
             }
             else if(j == 2)
                 mIndices[mIndexCount++] = i*2;

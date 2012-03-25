@@ -2,7 +2,7 @@
 #include "GlobalRenderer.h"
 
 SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius, 
-                                           SektorID id, Sektor* parent, PlanetSektor* planet,
+                                           SektorID id, SektorPtr parent, SektorPtr planet,
                                            float patchScaling/* = 1.0f*/, int subLevel/* = 7*/)
 : SubPlanetSektor(position, radius, id, parent, planet, patchScaling, subLevel), mVectorToPlanetCenter(DRVector3(0.0f, 0.0f, -1.0f))
 {
@@ -10,12 +10,12 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     DRVector3 childPos(mID.x, mID.y, mID.z);
     childPos /= 1000.0f;
              
-    DRMatrix rotation = dynamic_cast<SubPlanetSektor*>(mParent)->getRotation();
+    DRMatrix rotation = dynamic_cast<SubPlanetSektor*>(&(*mParent))->getRotation();
     //mRotation = mRotation * rotation;
     mVectorToPlanetCenter = (mParent->getPosition()+mSektorPosition).getVector3().normalize();
     printf("[SubPatchPlanetSektor::SubPatchPlanetSektor] vector to planet center: %f %f %f\n",
             mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
-    mRenderer = new RenderSubPatchPlanet(id, childPos, patchScaling, rotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+    mRenderer = new RenderSubPatchPlanet(id, childPos, patchScaling, rotation, getSektorPathName(), getPlanet()->getPlanetNoiseParameters());
 }
 
  SubPatchPlanetSektor::~SubPatchPlanetSektor()
@@ -28,14 +28,14 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     RenderSubPatchPlanet* render = dynamic_cast<RenderSubPatchPlanet*>(mRenderer);
     if(mSubLevel != 2) return DR_OK;
     //teilen bei Camera Distance von 1.5 radius
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this).convertTo(KM);
+    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(mThis).convertTo(KM);
   //  mLastRelativeCameraPosition.convertTo(KM).print("[SubPatchPlanetSektor::move] camera Position");
     DRVector3 patchPosition = mSektorPosition.getVector3().normalize();
     DRVector3 cameraPosition = mLastRelativeCameraPosition.getVector3().normalize();
     if(EnIsButtonPressed(SDLK_y))
         cam->setSektorPosition(DRVector3(0.0f));
     mHorizontCulling = acos(cameraPosition.dot(patchPosition))*RADTOGRAD;  
-    if(mParent)
+    if(mParent.getResourcePtrHolder())
     {
         if(!isObjectInSektor(mLastRelativeCameraPosition))    
             mIdleSeconds += fTime;
@@ -59,8 +59,8 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     if(mRenderer && render->getRenderNoisePlanetToTexture())
     {
         double distance = mLastRelativeCameraPosition.length().convertTo(M);
-        if(mIdleSeconds >= 0.0f) distance *= 1000.0;
-        render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
+        if(mIdleSeconds >= 0.0) distance *= 1000.0;
+        render->getRenderNoisePlanetToTexture()->setCurrentDistance(static_cast<float>(distance));
     }
     return DR_OK;
  }
@@ -87,7 +87,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     //if(mPlanet->getHorizontAngle() > 50.0)
     {
         //shader->setUniform1f("theta", mTheta);
-        const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();
+        const PlanetNoiseParameter* p = getPlanet()->getPlanetNoiseParameters();
         shader->setUniform1f("patchScaling", mPatchScaling);
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);

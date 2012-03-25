@@ -2,7 +2,7 @@
 #include "GlobalRenderer.h"
 
 RootSektor::RootSektor(SektorID id)
-: Sektor(Vector3Unit(0.0), Unit(0.0, M), id, NULL)
+: Sektor(Vector3Unit(0.0), Unit(0.0, M), id, SektorPtr())
 {
     mType = SEKTOR_ROOT;
 }
@@ -12,14 +12,14 @@ RootSektor::~RootSektor()
     
 }
 
-void RootSektor::addSektor(Sektor* sektor, SektorID id)
+void RootSektor::addSektor(SektorPtr sektor, SektorID id)
 {
     mChilds.insert(SEKTOR_ENTRY(id, sektor));
 }
 
 DRReturn RootSektor::move(float fTime, Camera* cam)
 {
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(mThis);
     return DR_OK;
 }
 

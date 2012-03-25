@@ -22,7 +22,7 @@ DRReturn DRGeometrieManager::init()
 void DRGeometrieManager::exit()
 {
     mInitalized = false;    
-    for (int i = 0; i < mGeometrieEntrys.getNItems(); i++)
+    for (uint i = 0; i < mGeometrieEntrys.getNItems(); i++)
 	{
 		GeometrieEntry* geometrie = static_cast<GeometrieEntry*>(mGeometrieEntrys.findByIndex(i));
         DR_SAVE_DELETE(geometrie->geometrie);

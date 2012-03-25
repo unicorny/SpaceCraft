@@ -8,7 +8,9 @@
 #ifndef CAMERA_H
 #define	CAMERA_H
 
+#include "main.h"
 class Sektor;
+typedef DRResourcePtr<Sektor> SektorPtr;
 struct SektorID;
 
 //#include "main.h"
@@ -20,7 +22,7 @@ class Camera : public DRObjekt
 {
 public:
     Camera();
-    Camera(const DRVector3& position, Sektor* sektor = NULL);
+    Camera(const DRVector3& position, SektorPtr sektor = NULL);
     virtual ~Camera();
     
     //void rotateAbs(const DRVector3& rotation);
@@ -38,7 +40,7 @@ public:
     
     __inline__ Vector3Unit getSektorPosition() const {return mSektorPosition;}
     //! \brief calculate camera sektor position relative to targetSektor
-    Vector3Unit getSektorPositionAtSektor(const Sektor* targetSektor);
+    Vector3Unit getSektorPositionAtSektor(const SektorPtr targetSektor);
     __inline__ void setSektorPosition(Vector3Unit absPosition) {mSektorPosition = absPosition;}
     
     //! in Verh&auml;ltniss zum Objekteigenem Koordinatensystem
@@ -48,8 +50,8 @@ public:
     
     void translateRel(const DRVector3& translate);
     
-    __inline__ void setCurrentSektor(Sektor* current) {mCurrentSektor = current;}
-    __inline__ const Sektor* getCurrentSektor() const {return mCurrentSektor;}
+    __inline__ void setCurrentSektor(SektorPtr current) {mCurrentSektor = current;}
+    __inline__ const SektorPtr getCurrentSektor() const {return mCurrentSektor;}
     __inline__ int getSektorPathSize() const {return mSektorPath.size();}
     
     void updateSektorPath();
@@ -61,7 +63,7 @@ private:
     //! absolute position of camera in the current sector in sector coordinates (example: AE)
     //! the position of camera is the distance from the abs position, abs position is local zero-point
     Vector3Unit mSektorPosition;
-    Sektor*     mCurrentSektor;
+    SektorPtr     mCurrentSektor;
     std::vector<SektorID> mSektorPath;
 };
 

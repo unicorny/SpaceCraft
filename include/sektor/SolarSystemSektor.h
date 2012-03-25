@@ -6,7 +6,7 @@
 class SolarSystemSektor : public Sektor
 {
 public:
-    SolarSystemSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent);
+    SolarSystemSektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent);
     virtual ~SolarSystemSektor();
     
     /*! \brief render sektor and childs
@@ -21,6 +21,8 @@ public:
      * generate all sektors, which are now visible
      */
     virtual DRReturn move(float fTime, Camera* cam);
+    
+    virtual bool less_than(DRIResource& b) const {return Sektor::less_than(b);}
     
 protected:
     

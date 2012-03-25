@@ -81,12 +81,9 @@ public:
 
 	// rechenfunktionen:
 	// Funktionen deklarieren
-    inline int		length()                                               const {return sqrtf(x*x + y*y);}
     inline int		lengthSq()	                                           const {return x*x + y*y;}
-    inline DRVector2i   normalize()                                            const {return (*this / this->length());}
     inline int		dot(const DRVector2i& v2)                               const {return x * v2.x + y * v2.y;}
     inline DRVector2i	interpolateCoords(const DRVector2i& v2, const int p) const {return *this + DRVector2i((v2 - (*this) * p));}
-    inline DRVector2i	interpolateNormal(const DRVector2i& v2, const int p) const {return this->interpolateCoords(v2, p).normalize();}
 //    inline DRVector2	min(const DRVector2& v2)							   const {return DRVector2(DR_MIN(x, v2.x), DR_MIN(y, v2.y));}
  //   inline DRVector2	max(const DRVector2& v2)							   const {return DRVector2(DR_MAX(x, v2.x), DR_MAX(y, v2.y));}
     //DRVector2	transformNormal_TranspInv(const DRMatrix& m)					const; // 2D-Normalenvektor mit Matrix multiplizieren

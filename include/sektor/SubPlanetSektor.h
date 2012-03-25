@@ -12,8 +12,8 @@
 class SubPlanetSektor : public Sektor
 {
 public:
-    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
-                    float patchScaling = 1.0f, int subLevel = 6);
+    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent, SektorPtr planet,
+                    float patchScaling = 1.0f, int subLevel = 1);
     virtual ~SubPlanetSektor();
     
     /*! \brief move sektor
@@ -35,16 +35,20 @@ public:
     
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
-    virtual Sektor* getChild(SektorID childID);
+    virtual SektorPtr getChild(SektorID childID);
     
     const DRMatrix& getRotation() {return mRotation;}
+    __inline__ PlanetSektor* getPlanet() {return dynamic_cast<PlanetSektor*>(mPlanet.getResourcePtrHolder() ? mPlanet.getResourcePtrHolder()->mResource : NULL);}
+    
+    virtual bool less_than(SubPlanetSektor& b) const {return Sektor::less_than(b);}
     
 protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
-    PlanetSektor*       mPlanet;
+    SektorPtr           mPlanet;
     float               mPatchScaling;
     DRMatrix            mRotation;
+    DRVector3           mVectorToPlanetCenter; 
     
     // temporäre variablen      
     double              mHorizontCulling;

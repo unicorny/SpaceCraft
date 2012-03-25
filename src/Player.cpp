@@ -10,7 +10,7 @@
 #include "time.h"
 
 Player::Player()
-: mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
+: mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor()
 {
 }
 
@@ -41,10 +41,12 @@ DRReturn Player::init()
     // position, radius, id, parent
     RootSektor* root = Server::getServer(mServerID)->getRootSektor();
     DRRandom::seed(mSeed);
-    mCurrentSektor = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, root);
+    
+    SolarSystemSektor* p = new SolarSystemSektor(Vector3Unit(0.0), Unit(100, AE), mSeed, root->getThis());
+    mCurrentSektor = p->getThis();
     root->addSektor(mCurrentSektor, mSeed);
     
-    if(!mCurrentSektor) LOG_ERROR("no memory for sektor", DR_ERROR);
+    if(!p) LOG_ERROR("no memory for sektor", DR_ERROR);
     Vector3Unit position(DRRandom::rVector3(1.0f), AE);
     position = position.normalize();
     position = position * Unit(0.2f, AE);
@@ -55,8 +57,8 @@ DRReturn Player::init()
         mCurrentSektor->moveAll(0.0f, &mCamera);
         mCameraFOV = 45.0f;
     }
-    Sektor* camSektor = root->getSektorByPath(mCameraSektorPath);
-    if(camSektor)
+    SektorPtr camSektor = root->getSektorByPath(mCameraSektorPath);
+    if(camSektor.getResourcePtrHolder())
         mCamera.setCurrentSektor(camSektor);
     else
         mCamera.setCurrentSektor(mCurrentSektor);

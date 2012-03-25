@@ -36,7 +36,7 @@ public:
      */
     DRReturn initHeightfield(DRVector3 edgePoints[4], u32 gridSize, DRHeightValueStorage* heightValues, bool normals = true, bool color = true, u8 textureCount = 0);
     
-    DRReturn init(int gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format);    
+    DRReturn init(uint gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format);    
     
     
 protected:

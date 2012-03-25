@@ -59,7 +59,7 @@ struct PlanetNoiseParameter
 class PlanetSektor : public Sektor
 {
 public:
-    PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent);
+    PlanetSektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent);
     virtual ~PlanetSektor();
     
     /*! \brief render sektor and childs
@@ -78,7 +78,7 @@ public:
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
     // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet
-    virtual Sektor* getChild(SektorID childID);
+    virtual SektorPtr getChild(SektorID childID);
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     __inline__ double getTheta() {return mTheta;}
     __inline__ const PlanetNoiseParameter* getPlanetNoiseParameters() const {return &mPlanetNoiseParameters;}
