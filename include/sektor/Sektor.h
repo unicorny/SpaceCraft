@@ -96,7 +96,7 @@ public:
      * generate all sektors, which are now visible,
      * 
      */
-    virtual DRReturn move(float fTime, Camera* cam) = 0;
+    virtual DRReturn move(float fTime, Camera* cam);
     
     /*! \brief call move for all parents and childs
      *

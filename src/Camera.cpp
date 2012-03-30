@@ -80,7 +80,7 @@ void Camera::updateSektorPath()
     else
         return;
     std::cout << "Camera Sektor Path" << std::endl;
-    for (int i=0; i<mSektorPath.size(); i++) std::cout << " " << mSektorPath[i];
+    for (uint i=0; i<mSektorPath.size(); i++) std::cout << " " << mSektorPath[i];
     std::cout << std::endl;
 }
 
@@ -100,17 +100,17 @@ Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
     // 1
     {
         index = mSektorPath.size()-1;
-        while(index >= sektorPath.size() || sektorPath[index] != mSektorPath[index])
+        while(index >= static_cast<int>(sektorPath.size()) || sektorPath[index] != mSektorPath[index])
         {
             newPos += cur->getPosition();
-            cur = cur->getParent();
+            cur = cur->getParent(); 
             index--;
             if(index < 0) LOG_ERROR("haven't the same root", Vector3Unit(0.0, M));
         }
     }
     // 2
     {
-        while(index < sektorPath.size()-1)
+        while(index < static_cast<int>(sektorPath.size())-1)
         {
             index++;
             SektorID i = sektorPath[index];

@@ -11,23 +11,22 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
     
 }
 
-DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], DRTexturePtr texture)
+DRReturn RenderInStepsToTexture::init(int stepSize, DRReal clippingBorder[4], DRTexturePtr texture)
 {
 	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-	DRVector2i texSize = texture->getResolution();
-	if(texSize.x <= 0 || texSize.y <= 0)
+    mTextureSize = texture->getResolution();
+	if(mTextureSize.x <= 0 || mTextureSize.y <= 0)
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
-	mTextureSize = texSize;
         
     mStepSize = stepSize;
     //mTextureSize = textureSize;
-    mCursorIndex = mTextureSize/2.0f - stepSize/2.0f;
+    mCursorIndex = mTextureSize/2 - DRVector2i(static_cast<int>(stepSize)/2);
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
     mCursorCurrentCount = 0;
     mTexture = texture;
     mFinished = false;
-    memcpy(mClippingBorder, clippingBorder, sizeof(float)*4);
+    memcpy(mClippingBorder, clippingBorder, sizeof(DRReal)*4);
     
     return DR_OK;
 }
@@ -35,15 +34,14 @@ DRReturn RenderInStepsToTexture::init(float stepSize, float clippingBorder[4], D
 DRReturn RenderInStepsToTexture::reinit(DRTexturePtr texture)
 {
 	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-	DRVector2i texSize = texture->getResolution();
-	if(texSize.x <= 0 || texSize.y <= 0)
+	mTextureSize = texture->getResolution();;
+    if(mTextureSize.x <= 0 || mTextureSize.y <= 0)
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
-	mTextureSize = texSize;
     
    // mTextureSize *= textureSizeScalar;
  //   mTextureSize = textureSize;
     mTexture = texture;
-    mCursorIndex = mTextureSize/2.0f - mStepSize/2.0f;
+    mCursorIndex = mTextureSize/2 - DRVector2i(static_cast<int>(mStepSize)/2);
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
     mCursorCurrentCount = 0;
@@ -54,7 +52,7 @@ DRReturn RenderInStepsToTexture::reinit(DRTexturePtr texture)
 
 DRReturn RenderInStepsToTexture::step()
 {
-     if(mCursorIndex > mTextureSize || mCursorIndex < DRVector2(0.0f))
+     if(mCursorIndex > mTextureSize || mCursorIndex < DRVector2i(0))
      {
         mFinished = true;
         return DR_OK;
@@ -63,7 +61,7 @@ DRReturn RenderInStepsToTexture::step()
     //mFrameBuffer->bindToRender();
     
     //render stuff
-    if(mCursorIndex == mTextureSize/2.0f - mStepSize/2.0f)
+    if(mCursorIndex == mTextureSize/2 - DRVector2i(static_cast<int>(mStepSize)/2))
     {
         glClearColor(0.0, 0.0, 0.0, 0);
         glClear (GL_COLOR_BUFFER_BIT);   
@@ -78,11 +76,11 @@ DRReturn RenderInStepsToTexture::step()
     //mCursorIndex / mTextureSize
     DRVector2 clippingSize = DRVector2(mClippingBorder[1]-mClippingBorder[0],
                                        mClippingBorder[3]-mClippingBorder[2]);
-    DRVector2 cursor = mCursorIndex / mTextureSize * clippingSize + DRVector2(mClippingBorder[0], mClippingBorder[2]);
-    DRVector2 halfStepSize = (DRVector2(mStepSize) / mTextureSize * clippingSize) * 0.5f;
+    DRVector2 cursor = DRVector2(mCursorIndex) / DRVector2(mTextureSize) * clippingSize + DRVector2(mClippingBorder[0], mClippingBorder[2]);
+    DRVector2 halfStepSize = (DRVector2(static_cast<DRReal>(mStepSize)) / DRVector2(mTextureSize) * clippingSize) * 0.5f;
     
     //Reseten der Matrixen
-    glViewport(mCursorIndex.x-mStepSize/2.0f, mCursorIndex.y-mStepSize/2.0f, mStepSize, mStepSize);
+    glViewport(mCursorIndex.x-mStepSize/2, mCursorIndex.y-mStepSize/2, mStepSize, mStepSize);
     
     //glMatrixMode(GL_PROJECTION);
     //glLoadIdentity();

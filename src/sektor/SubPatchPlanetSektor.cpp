@@ -34,7 +34,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     DRVector3 cameraPosition = mLastRelativeCameraPosition.getVector3().normalize();
     if(EnIsButtonPressed(SDLK_y))
         cam->setSektorPosition(DRVector3(0.0f));
-    mHorizontCulling = acos(cameraPosition.dot(patchPosition))*RADTOGRAD;  
+    //mHorizontCulling = acos(cameraPosition.dot(patchPosition))*RADTOGRAD;  
     if(mParent)
     {
         if(!isObjectInSektor(mLastRelativeCameraPosition))    
@@ -43,7 +43,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
             mIdleSeconds = 0.0f;
     }
     
-    if(mHorizontCulling <= 50.0)
+    if(true)//mHorizontCulling <= 50.0)
     {
         /*///sub sektoren erstellen
         getChild(SektorID(-500, -500, 0)); // rechts unten
@@ -58,7 +58,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     }
     if(mRenderer && render->getRenderNoisePlanetToTexture())
     {
-        double distance = mLastRelativeCameraPosition.length().convertTo(M);
+		float distance = static_cast<float>(mLastRelativeCameraPosition.length().convertTo(M));
         if(mIdleSeconds >= 0.0f) distance *= 1000.0;
         render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
     }

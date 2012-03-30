@@ -50,7 +50,7 @@ public:
     
     __inline__ void setCurrentSektor(Sektor* current) {mCurrentSektor = current;}
     __inline__ const Sektor* getCurrentSektor() const {return mCurrentSektor;}
-    __inline__ int getSektorPathSize() const {return mSektorPath.size();}
+    __inline__ uint getSektorPathSize() const {return mSektorPath.size();}
     
     void updateSektorPath();
     

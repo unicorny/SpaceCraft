@@ -115,7 +115,7 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     return DR_OK;
 }
 
-DRReturn RenderNoisePlanetToTexture::init(float stepSize, DRVector3 translate, float patchScaling, DRTexturePtr texture, const DRMatrix& rotation /*= DRMatrix::Identity()*/)
+DRReturn RenderNoisePlanetToTexture::init(int stepSize, DRVector3 translate, float patchScaling, DRTexturePtr texture, const DRMatrix& rotation /*= DRMatrix::Identity()*/)
 {
     mPatchScaling = patchScaling;
     mTranslate = translate;

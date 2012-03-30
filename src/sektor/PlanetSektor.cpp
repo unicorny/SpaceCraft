@@ -21,54 +21,54 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     idVector /= SHRT_MAX;
     setSektorSeed();
     
-    const double lacunarityMax = 2.4;
-    const double lacunarityMin = 1.6;
+    const DRReal lacunarityMax = 2.4f;
+    const DRReal lacunarityMin = 1.6f;
     
     // init values for planet perlin noise
     // Frequency of the planet's continents.  Higher frequency produces smaller,
     // more numerous continents.  This value is measured in radians.
-	mPlanetNoiseParameters.continentFrequenzy = DRRandom::rDouble(PI, PI/4.0);
+	mPlanetNoiseParameters.continentFrequenzy = DRRandom::rReal(PI, PI/4.0f);
     
     // Lacunarity of the planet's continents.  Changing this value produces
     // slightly different continents.  For the best results, this value should
     // be random, but close to 2.0.
-    mPlanetNoiseParameters.continentLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    mPlanetNoiseParameters.continentLacunarity = DRRandom::rReal(lacunarityMax, lacunarityMin);
     
     // Lacunarity of the planet's mountains.  Changing this value produces
     // slightly different mountains.  For the best results, this value should
     // be random, but close to 2.0.
-    mPlanetNoiseParameters.mountainLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    mPlanetNoiseParameters.mountainLacunarity = DRRandom::rReal(lacunarityMax, lacunarityMin);
     
     // Lacunarity of the planet's hills.  Changing this value produces slightly
     // different hills.  For the best results, this value should be random, but
     // close to 2.0.
-    mPlanetNoiseParameters.hillsLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    mPlanetNoiseParameters.hillsLacunarity = DRRandom::rReal(lacunarityMax, lacunarityMin);
     
     
     // Lacunarity of the planet's plains.  Changing this value produces slightly
     // different plains.  For the best results, this value should be random, but
     // close to 2.0.
-    mPlanetNoiseParameters.plainsLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    mPlanetNoiseParameters.plainsLacunarity = DRRandom::rReal(lacunarityMax, lacunarityMin);
     
     // Lacunarity of the planet's badlands.  Changing this value produces
     // slightly different badlands.  For the best results, this value should be
     // random, but close to 2.0.
-    mPlanetNoiseParameters.badlandsLacunarity = DRRandom::rDouble(lacunarityMax, lacunarityMin);
+    mPlanetNoiseParameters.badlandsLacunarity = DRRandom::rReal(lacunarityMax, lacunarityMin);
     
     
     // Specifies the amount of "glaciation" on the mountains.  This value
     // should be close to 1.0 and greater than 1.0. (1.375)
-    mPlanetNoiseParameters.mountainGlaciation = DRRandom::rDouble(1.6, 1.01);
+    mPlanetNoiseParameters.mountainGlaciation = DRRandom::rReal(1.6f, 1.01f);
  
     // Specifies the planet's sea level.  This value must be between -1.0
     // (minimum planet elevation) and +1.0 (maximum planet elevation.)
-    const float SEA_LEVEL = DRRandom::rDouble(0.2, -0.2);
+    const DRReal SEA_LEVEL = DRRandom::rReal(0.2f, -0.2f);
     mPlanetNoiseParameters.seaLevel = SEA_LEVEL;
     
     // Specifies the level on the planet in which continental shelves appear.
     // This value must be between -1.0 (minimum planet elevation) and +1.0
     // (maximum planet elevation), and must be less than SEA_LEVEL. (-0.375)
-    mPlanetNoiseParameters.shelfLevel = DRRandom::rDouble(SEA_LEVEL-0.01, -0.8);
+    mPlanetNoiseParameters.shelfLevel = DRRandom::rReal(SEA_LEVEL-0.01f, -0.8f);
     
     // Determines the amount of mountainous terrain that appears on the
     // planet.  Values range from 0.0 (no mountains) to 1.0 (all terrain is
@@ -76,7 +76,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     // Because the badlands terrain may overlap parts of the mountainous
     // terrain, setting MOUNTAINS_AMOUNT to 1.0 may not completely cover the
     // terrain in mountains.
-    const float MOUNTAINS_AMOUNT = DRRandom::rDouble(0.9, 0.1);
+    const DRReal MOUNTAINS_AMOUNT = DRRandom::rReal(0.9f, 0.1f);
     mPlanetNoiseParameters.mountainAmount = MOUNTAINS_AMOUNT;
   
     // Determines the amount of hilly terrain that appears on the planet.
@@ -90,23 +90,23 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     // Determines the amount of badlands terrain that covers the planet.
     // Values range from 0.0 (no badlands) to 1.0 (all terrain is covered in
     // badlands.)  Badlands terrain will overlap any other type of terrain. (0.03125)
-    mPlanetNoiseParameters.badlandsAmount = DRRandom::rDouble(0.75, 0.1);
+    mPlanetNoiseParameters.badlandsAmount = DRRandom::rReal(0.75f, 0.1f);
     
     // Maximum depth of the rivers, in planetary elevation units. (0.0234375f)
-    mPlanetNoiseParameters.riverDeapth = DRRandom::rDouble(0.02, 0.0);
+    mPlanetNoiseParameters.riverDeapth = DRRandom::rReal(0.02f, 0.0f);
     
     // Scaling to apply to the base continent elevations, in planetary elevation
     // units.
     mPlanetNoiseParameters.continentHeightScale = (1.0f - SEA_LEVEL) / 4.0f;
     
     // Calculate the sea level, in meters.
-    float MAX_ELEV = 1.0f; float MIN_ELEV = -1.0f;
-    float seaLevelInMeters = (((SEA_LEVEL + 1.0f) / 2.0f)
+    DRReal MAX_ELEV = 1.0f; DRReal MIN_ELEV = -1.0f;
+    DRReal seaLevelInMeters = (((SEA_LEVEL + 1.0f) / 2.0f)
     * (MAX_ELEV - MIN_ELEV)) + MIN_ELEV;
     mPlanetNoiseParameters.seaLevelInMetres = seaLevelInMeters;
     
-    mPlanetNoiseParameters.maxHeightInPercent = DRRandom::rDouble(0.005, 0.001);
-    mPlanetNoiseParameters.minHeightInPercent = DRRandom::rDouble(0.003, 0.001);
+    mPlanetNoiseParameters.maxHeightInPercent = DRRandom::rReal(0.005f, 0.001f);
+    mPlanetNoiseParameters.minHeightInPercent = DRRandom::rReal(0.003f, 0.001f);
     mPlanetNoiseParameters.print(true);
     
     mRenderer = new RenderPlanet(id, getSektorPathName(), &mPlanetNoiseParameters);
@@ -123,20 +123,15 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
     RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    mTheta = acos(mRadius/mLastRelativeCameraPosition.length());
+    mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
     distance = distance.convertTo(KM);
     //printf("\rEntfernung zur Oberflaeche: %s", distance.print().data());
-    //Vector3Unit cameraPlanet = -mLastRelativeCameraPosition;
-    //Unit l = cameraPlanet.length();
-    //double theta = acos(mRadius/l); // if theta < 0.5 Grad, using ebene
-    //theta = cos(0.617940);
+   
     //printf("\rtheta: %f (%f Grad), distance: %f", theta, theta*RADTOGRAD,  (float)mRadius/mLastRelativeCameraPosition.length());
 //    mLastRelativeCameraPosition.print("cameraPos");
-    DRVector3 v = mLastRelativeCameraPosition.getVector3();
     
-    
-    //printf("\rdistance: %f, theta: %f", static_cast<double>(distance), mTheta);
+    //printf("\rdistance: %f, theta: %f (%f Grad)", static_cast<double>(distance), mTheta, mTheta*RADTOGRAD);
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
@@ -144,7 +139,8 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
         {
             //horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
-            double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))-PI/4.0;            
+            double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))*RADTOGRAD-45.0;            
+            //printf("\r %d, angle: %f (%f Grad) ", i, angle, angle*RADTOGRAD);
             if(angle < mTheta)
             {
                 getChild(mSubPlanets[i]*static_cast<short>(1000));            
@@ -162,7 +158,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     {
         // set player distance to renderer for sort
         if(render->getRenderNoisePlanetToTexture())
-            render->getRenderNoisePlanetToTexture()->setCurrentDistance(mLastRelativeCameraPosition.length().convertTo(M));
+            render->getRenderNoisePlanetToTexture()->setCurrentDistance(static_cast<DRReal>(mLastRelativeCameraPosition.length().convertTo(M)));
         // remove renderer, if we didn't need him
         if(mNotRenderSeconds >= GlobalRenderer::Instance().getTimeForInactiveChilds())
             DR_SAVE_DELETE(mRenderer);
@@ -190,12 +186,11 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     double radius2 = ((radius1 * distance2) / distance1);
 
     
-
 	//DRVector3 pos = (mSektorPosition - cam->getSektorPosition()).getVector3().normalize();
     //DRVector3 pos = (mSektorPosition - mLastRelativeCameraPosition).getVector3().normalize();
     DRVector3 pos = (-mLastRelativeCameraPosition).getVector3().normalize();
-    DRVector3 relCameraPos = -pos*distance1/mRadius;
-    pos *= distance2;
+//    DRVector3 relCameraPos = -pos*distance1/mRadius;
+     pos *= static_cast<DRReal>(distance2);
 /*   printf("\r %f %f %f, %.8f, %s  x:%s y:%s z:%s (%f %f %f)", pos.x, pos.y, pos.z, radius2, distance1.print().data(),
 									   absCameraPosition.x.print().data(), absCameraPosition.y.print().data(),
 									   absCameraPosition.z.print().data(), diff.x, diff.y, diff.z);
@@ -203,12 +198,12 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     //glTranslatef(pos.x, pos.y, pos.z);
     //glScaled(radius2, radius2, radius2);
 	
-    mMatrix = DRMatrix::scaling(DRVector3(radius2)) * DRMatrix::translation(pos) * cam->getKameraMatrixRotation();
+    mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(radius2))) * DRMatrix::translation(pos) * cam->getKameraMatrixRotation();
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
-    if(!isObjectInSektor(mLastRelativeCameraPosition) && mTheta <= 1.569718)
+    if(!isObjectInSektor(mLastRelativeCameraPosition))
     {
         mNotRenderSeconds = 0.0f;
         if(!mRenderer)
@@ -297,7 +292,7 @@ Sektor* PlanetSektor::getChild(SektorID childID)
             }
             else if(4 == i || 5 == i)//top, bottom
             {
-                for(u32 j = 0; j < 4; j++)
+                for(u8 j = 0; j < 4; j++)
                 {
                     if(mChilds.find(mSubPlanets[j]) != mChilds.end())
                     {
@@ -326,9 +321,9 @@ bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
 {    
     Unit l = positionInSektor.length();
 
-    double theta = acos(mRadius/l); // if theta < 0.5 Grad, using ebene
+    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.5 Grad, using ebene
     //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
-    return theta <=70.0f*GRADTORAD;
+    return theta <=70.0f;
     /*
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;
     radiusSquare *= radiusSquare;

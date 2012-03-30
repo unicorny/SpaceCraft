@@ -26,7 +26,7 @@ Player::~Player() {
 DRReturn Player::init()
 {
     bool newPlayer = false;
-    mSeed = time(NULL);//SDL_GetTicks();
+    mSeed = static_cast<int>(time(NULL));//SDL_GetTicks();
     if(loadFromFile())
     {
         DRRandom::seed(mSeed / SDL_GetTicks());

@@ -45,9 +45,10 @@ protected:
     PlanetSektor*       mPlanet;
     float               mPatchScaling;
     DRMatrix            mRotation;
+    DRVector3           mVectorToPlanetCenter;
     
     // temporäre variablen      
-    double              mHorizontCulling;
+    //double              mHorizontCulling;
 private:
     
     
