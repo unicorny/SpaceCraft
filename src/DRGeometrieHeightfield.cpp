@@ -33,19 +33,19 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
 	mMemorySize = (vertexCount*3+indexCount)*sizeof(DRVector3);
 	GlobalRenderer::Instance().addGrafikMemGeometrie(mMemorySize);
     
-    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/static_cast<float>(gridSize);
-    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/static_cast<float>(gridSize);
+    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/static_cast<DRReal>(gridSize);
+    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/static_cast<DRReal>(gridSize);
     
     for(u32 j = 1; j < gridSize+1; j++)
     {
         for(u32 i = 0; i < gridSize+1; i++)
         {
             mIndices[mIndexCount++] = mVertexCount;
-            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i) + yVectorPart*static_cast<float>(j);
+            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<DRReal>(i) + yVectorPart*static_cast<DRReal>(j);
             if(j == 1)
             {
                 mIndices[mIndexCount++] = mVertexCount;
-                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i);
+                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<DRReal>(i);
             }
             else if(j == 2)
                 mIndices[mIndexCount++] = i*2;
@@ -89,7 +89,7 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
     return DR_OK;
 }
 
-DRReturn DRGeometrieHeightfield::init(uint gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format)
+DRReturn DRGeometrieHeightfield::init(u32 gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format)
 {
     //! memory allocation
     // size = gridSize
@@ -104,19 +104,19 @@ DRReturn DRGeometrieHeightfield::init(uint gridSize, DRVector3 edgePoints[4], Ge
 	mMemorySize = (vertexCount*3+indexCount)*sizeof(DRVector3);
 	GlobalRenderer::Instance().addGrafikMemGeometrie(mMemorySize);
 
-    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/static_cast<float>(gridSize);
-    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/static_cast<float>(gridSize);
+    DRVector3 xVectorPart = (edgePoints[1]-edgePoints[0])/static_cast<DRReal>(gridSize);
+    DRVector3 yVectorPart = (edgePoints[2]-edgePoints[0])/static_cast<DRReal>(gridSize);
     
     for(u32 j = 1; j < gridSize+1; j++)
     {
         for(u32 i = 0; i < gridSize+1; i++)
         {
             mIndices[mIndexCount++] = mVertexCount;
-            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i) + yVectorPart*static_cast<float>(j);
+            mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<DRReal>(i) + yVectorPart*static_cast<DRReal>(j);
             if(j == 1)
             {
                 mIndices[mIndexCount++] = mVertexCount;
-                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<float>(i);
+                mVertices[mVertexCount++] = edgePoints[0] + xVectorPart*static_cast<DRReal>(i);
             }
             else if(j == 2)
                 mIndices[mIndexCount++] = i*2;

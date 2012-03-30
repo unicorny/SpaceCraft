@@ -22,6 +22,18 @@ void Sektor::setSektorSeed()
     DRRandom::seed(static_cast<long>(seed));
     printf("[Sektor::setSektorSeed] randomSeed: %d\n", seed);
 }
+DRReturn Sektor::move(float fTime, Camera* cam)
+{
+    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    if(mParent)
+    {
+        if(!isObjectInSektor(mLastRelativeCameraPosition))    
+            mIdleSeconds += fTime;
+        else
+            mIdleSeconds = 0.0f;
+    }
+    return DR_OK;
+}
 /*
 DRReturn Sektor::move(float fTime, Camera* cam)
 {

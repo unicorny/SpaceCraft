@@ -39,7 +39,7 @@ bool            wireframe = false;
 
 int rekursionTest(int zahl)
 {
-    int z[20];
+//    int z[20];
     if(zahl > 10000) return zahl;
     return rekursionTest(++zahl);
 }

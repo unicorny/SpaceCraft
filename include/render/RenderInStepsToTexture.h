@@ -11,7 +11,7 @@ public:
     ~RenderInStepsToTexture();
     
     // reset values, set step size
-    DRReturn init(float stepSize, float clippingBorder[4], DRTexturePtr texture);
+    DRReturn init(int stepSize, DRReal clippingBorder[4], DRTexturePtr texture);
     //! erstellt eine neue Textur mit denselben Einstellungen, jedoch wird die texturgröße geändert
     DRReturn reinit(DRTexturePtr texture);
     // render with current step, add step
@@ -27,7 +27,7 @@ public:
     
     virtual const char* getResourceType() const {return "RenderInStepsToTexture";}
     
-    __inline__ void setCurrentDistance(float distance) {mDistance = distance;}
+    __inline__ void setCurrentDistance(DRReal distance) {mDistance = distance;}
     
     virtual bool less_than(DRIResource& b) const
     {
@@ -37,19 +37,19 @@ public:
     
 protected:
     float       mClippingBorder[4]; //left, rigt, bottom, top
-    DRVector2   mTextureSize;    
+    DRVector2i  mTextureSize;    
     DRTexturePtr  mTexture;
     DRMatrix	mProjectionMatrix;
     
 private:
-    DRVector2   mCursorIndex;
-    float       mStepSize;
+    DRVector2i  mCursorIndex;
+    int         mStepSize;
     u8          mIndexStepMode; 
     short       mCursorMaxCount;
     short       mCursorCurrentCount;
     bool        mFinished;
     
-    float       mDistance; //distance to viewer, for priority list
+    DRReal       mDistance; //distance to viewer, for priority list
 };
 
 typedef DRResourcePtr<RenderInStepsToTexture> RenderInStepsToTexturePtr;

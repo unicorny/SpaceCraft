@@ -34,15 +34,15 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
     DRTextureManager& tx = DRTextureManager::Instance();
 	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
 
-	int stepSizei = gb.getTextureRenderStepSize();
-	float stepSize = static_cast<float>(stepSizei);
+	int stepSize = gb.getTextureRenderStepSize();
+	//float stepSize = static_cast<float>(stepSizei);
 
 	//clear texture
-	size_t bufferSize = stepSizei*stepSizei*4;
+	size_t bufferSize = stepSize*stepSize*4;
 	GLubyte* buffer = new GLubyte[bufferSize];
 	memset(buffer, 0, bufferSize);
 
-	mPreviewTextur = tx.getTexture(DRVector2i(stepSizei), 4);
+	mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
     //    TexturePtr(new Texture(stepSizei, stepSizei, GL_UNSIGNED_BYTE, 4, buffer, bufferSize));
     
 	DR_SAVE_DELETE_ARRAY(buffer);

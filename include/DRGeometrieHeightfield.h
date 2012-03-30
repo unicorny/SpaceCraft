@@ -36,13 +36,13 @@ public:
      */
     DRReturn initHeightfield(DRVector3 edgePoints[4], u32 gridSize, DRHeightValueStorage* heightValues, bool normals = true, bool color = true, u8 textureCount = 0);
     
-    DRReturn init(uint gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format);    
+    DRReturn init(u32 gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format);    
     
     
 protected:
     DRHeightValueStorage*       mHeightValues;
     DRVector3                   mSphericalCenter;
-	GLuint						mMemorySize;
+    GLuint			mMemorySize;
 };
 
 #endif //__DR_GEOMETRIE_HEIGHTFIELD__
