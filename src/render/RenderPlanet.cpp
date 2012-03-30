@@ -1,98 +1,185 @@
-#include "main.h"
+#include "RenderPlanet.h"
+#include "ShaderManager.h"
+#include "GlobalRenderer.h"
+#include "DRTextureManager.h"
 
-using namespace std;
 
-PlanetHeightValues::PlanetHeightValues(GenerateNoisePlanet* noisePlanet): mNoisePlanet(noisePlanet)
+RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
+: RenderSektor(), mTextureRenderer(), mTexture(),
+  mPreviewTextur(), mInitalized(0)
 {
+    int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
+    init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", 
+         size, texturePath, planetNoiseParameter);
+}
+
+RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
+                           float patchScaling, const DRMatrix& rotation, DRString texturePath,
+                           const PlanetNoiseParameter* planetNoiseParameter)
+: RenderSektor(), mTextureRenderer(), mTexture(), 
+  mPreviewTextur(), mInitalized(0)
+{
+    int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
+	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
+    init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "noise.frag", 
+         size, texturePath, planetNoiseParameter);
+}
+
+DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
+              float patchScaling, const DRMatrix& rotation, 
+              const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
+              const PlanetNoiseParameter* planetNoiseParameter)
+{
+	GlobalRenderer& gb = GlobalRenderer::Instance();
+    DRTextureManager& tx = DRTextureManager::Instance();
+	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
+
+	int stepSize = gb.getTextureRenderStepSize();
+	//float stepSize = static_cast<float>(stepSizei);
+
+	//clear texture
+	size_t bufferSize = stepSize*stepSize*4;
+	GLubyte* buffer = new GLubyte[bufferSize];
+	memset(buffer, 0, bufferSize);
+
+	mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
+    //    TexturePtr(new Texture(stepSizei, stepSizei, GL_UNSIGNED_BYTE, 4, buffer, bufferSize));
     
+	DR_SAVE_DELETE_ARRAY(buffer);
+	buffer = NULL;
+	mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+    mTexturePath = texturePath;
+
+	mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
+	getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
+	GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
+		
+    if(DRIsFileExist(getPathAndFilename().data()))
+    {
+        mTexture = tx.getTexture(getPathAndFilename().data(), true);
+            //TexturePtr(new Texture(getPathAndFilename().data()));
+		//mTexture->loadFromFile();
+		//mTexture->pixelsCopyToRenderer();
+//		DRTextureManager::Instance().addAsynchronTextureLoadTask(mTexture);
+		mInitalized = 3;
+    }
+    else
+    {     
+        //mTextureID = DRTextureManager::Instance().getGLTextureMemory(textureSize, textureSize,
+          //                                                           GL_UNSIGNED_BYTE, 4);    
+//        mPreviewTextureID = DRTextureManager::Instance().getGLTextureMemory(stepSizei, stepSizei,
+  //                                                                   GL_UNSIGNED_BYTE, 4);    		
+		mTexture = tx.getTexture(DRVector2i(textureSize), 4);
+        mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+            //TexturePtr(new Texture(textureSize, textureSize, GL_UNSIGNED_BYTE, 4));
+
+        //mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    
+    }
+    
+    return DR_OK;
 }
 
-PlanetHeightValues::~PlanetHeightValues()
+DRString RenderPlanet::getPathAndFilename()
 {
-	for(map<float, YMAP*>::iterator it = mXMap.begin(); it != mXMap.end(); it++)
-	{
-		YMAP* ymap = it->second;
-		for(map<float, ZMAP*>::iterator it2 = ymap->begin(); it2 != ymap->end(); it2++)
-		{
-			ZMAP* zmap = it2->second;
-			DR_SAVE_DELETE(zmap);
-		}
-		ymap->clear();
-		DR_SAVE_DELETE(ymap);
-	}
-	mXMap.clear();
+    return DRString(mTexturePath+DRString("planet.png"));
 }
 
-float PlanetHeightValues::getHeightValue(DRVector3& position)
-{
-	float temp = 0.0;
-	if(findValue(position, temp)) return temp;
-    else if(mNoisePlanet)
-	{
-		temp = mNoisePlanet->getValue(position)*0.00128441521;
-		addValue(position, temp);
-        return temp;
-	}
-    else 
-	{
-        return 0.0f;
-	}
-}
-
-DRColor PlanetHeightValues::getColorValue(const float height)
-{
-    noise::utils::Color c = mColor.GetColor(height/0.00128441521);
-    return DRColor(c.red, c.green, c.blue, c.alpha);
-}
-
-bool PlanetHeightValues::findValue(const DRVector3& position, float& value)
-{
-	map<float, YMAP*>::iterator it;
-    it = mXMap.find(position.x);
-	if(it == mXMap.end()) return false;
-
-	map<float, ZMAP*>::iterator it2;
-	it2 = it->second->find(position.y);
-	if(it2 == it->second->end()) return false;
-
-	map<float, float>::iterator it3;
-	it3 = it2->second->find(position.z);
-	if(it3 == it2->second->end()) return false;
-
-	value = it3->second;
-	return true;
-}
-
-void PlanetHeightValues::addValue(const DRVector3& position, float value)
-{
-	map<float, YMAP*>::iterator it;
-	it = mXMap.find(position.x);
-	if(it == mXMap.end())
-	{
-		ZMAP* zmap = new ZMAP;
-		zmap->insert(ZMAP_PAIR(position.z, value));
-		YMAP* ymap = new YMAP;
-		ymap->insert(YMAP_PAIR(position.y, zmap));
-		mXMap.insert(XMAP_PAIR(position.x, ymap));
-	}
-	else
-	{
-		map<float, ZMAP*>::iterator it2;
-		it2 = it->second->find(position.y);
-		if(it2 == it->second->end())
-		{
-			ZMAP* zmap = new ZMAP;
-			zmap->insert(ZMAP_PAIR(position.z, value));
-			it->second->insert(YMAP_PAIR(position.y, zmap));
-		}
-		else
-		{
-			it2->second->insert(ZMAP_PAIR(position.z, value));
-		}
-	}
-}
-// *******************************************************************************
 RenderPlanet::~RenderPlanet()
 {
-
+	ShaderManager::Instance().releaseShader(mShader);
+    if(mTextureRenderer.getResourcePtrHolder() && !mTextureRenderer->isFinished())
+        GlobalRenderer::Instance().removeRenderTask(mTextureRenderer);
+    //DR_SAVE_DELETE(mTextureRenderer);
+  	//DR_SAVE_DELETE(mTexture);
+	//DR_SAVE_DELETE(mPreviewTextur);
 }
+DRReturn RenderPlanet::generateAndBindTexture()
+{
+    if(mTextureRenderer.getResourcePtrHolder() && mTextureRenderer->isFinished())
+    {
+		//finish rendering preview texture
+        if(!mInitalized)
+        {
+			mTextureRenderer->reinit(mTexture);
+            mPreviewTextur->setFinishRender();
+			GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
+			//printf("[RenderPlanet::generateAndBindTexture]  reinint\n");
+			mInitalized++;
+		}
+		//finish rendering texture
+		else if(1 == mInitalized)
+		{
+			mPreviewTextur.release();
+			if(mTexturePath.size() > 0)
+			{
+				//DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
+				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
+                DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
+                    GlobalRenderer::Instance().getTextureRenderStepSize()*
+                    GlobalRenderer::Instance().getTextureRenderStepSize());
+			}
+			mTextureRenderer.release();
+		}
+	}
+	if(3 == mInitalized && mTexture->isLoadingFinished() && mTextureRenderer->isFinished())
+	{
+		mPreviewTextur.release();
+        mTextureRenderer.release();
+        mTexture->setFilter(GL_LINEAR, GL_LINEAR);
+        mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+		mInitalized++;
+    }    
+	if(mTexture->isLoadingError())
+	{
+		int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
+		mTexture = DRTextureManager::Instance().getTexture(DRVector2i(size), 4);
+            //TexturePtr(new Texture(size, size, GL_UNSIGNED_BYTE, 4));
+		mInitalized = 0;
+	}
+    glEnable(GL_TEXTURE_2D);
+    GLint textureLoaded = 0; //render not
+    if(mPreviewTextur.getResourcePtrHolder())
+    {
+        mPreviewTextur->bind();
+        if(mPreviewTextur->isLoadingFinished()) 
+            textureLoaded = 1;
+    }
+    else
+    {
+        mTexture->bind();
+        textureLoaded = 1;
+    }
+    mShader->setUniform1i("textureLoaded", textureLoaded);
+    
+    if(DRGrafikError("[RenderPlanet::generateAndBindTexture]")) return DR_ERROR;
+    return DR_OK;
+}
+
+RenderNoisePlanetToTexture* RenderPlanet::getRenderNoisePlanetToTexture()
+{
+	if(!mTextureRenderer.getResourcePtrHolder()) return NULL;
+    return dynamic_cast<RenderNoisePlanetToTexture*>(mTextureRenderer.getResourcePtrHolder()->mResource);
+}
+
+DRReturn RenderPlanet::render(float fTime, Camera* cam)
+{    
+    uint quadricDetails = 32;
+    if(mDetailLevel > 9) quadricDetails = 256; // 10
+    else if(mDetailLevel > 6) quadricDetails = 128; //7
+    else if(mDetailLevel > 2) quadricDetails = 64; // 3
+    else if(mDetailLevel > 0) quadricDetails = 32; // 1
+    else quadricDetails = 8;
+    
+    generateAndBindTexture();
+
+    //korrektur damit gluSphere textur die selbe ist wie bei childs, daher wird die Kugel gedreht
+    DRMatrix currentModelview = mShader->getUniformMatrix("modelview");
+    currentModelview = DRMatrix::rotationY(PI/2.0f) * DRMatrix::rotationZ(-PI/2.0f) * currentModelview;
+    mShader->setUniformMatrix("modelview", currentModelview);
+
+    gluSphere(GlobalRenderer::Instance().getQuadric(), 1.0f, quadricDetails*2, quadricDetails);
+        
+    if(DRGrafikError("[RenderPlanet::render]")) return DR_ERROR;
+    return DR_OK;
+}
+

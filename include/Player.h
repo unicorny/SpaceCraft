@@ -8,9 +8,9 @@
 #ifndef __SC_PLAYER_H
 #define	__SC_PLAYER_H
 
-#include "Sektor.h"
+#include "Server.h"
 
-#define PLAYER_SAVE_VERSION 5
+#define PLAYER_SAVE_VERSION 6
 
 
 class Player {
@@ -37,6 +37,8 @@ private:
     u64 mServerID;
     SektorID mSektorID;
     Camera mCamera;
+    
+    std::vector<SektorID> mCameraSektorPath;
     // current position of player in current sektor in sektor coordinates (for exapmle, in AE)
     Vector3Unit mPosition;
     
@@ -44,7 +46,6 @@ private:
     //! kamera winkel in Grad
     float mCameraFOV;
     int mSeed;
-    
     
     //runtime (not to save)
     Sektor* mCurrentSektor;

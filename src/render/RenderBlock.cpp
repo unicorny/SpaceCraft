@@ -5,19 +5,19 @@
  * Created on 20. August 2011, 23:50
  */
 
-#include "main.h"
+#include "RenderBlock.h"
 
-RenderBlock::RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg) 
+RenderBlock::RenderBlock(DRTexturePtr texture, BlockName name, DRIni* cfg) 
 : mTexture(texture)
 {
 
-    if(!texture || !cfg) LOG_ERROR_VOID("pointer zero");
+    if(!texture->isLoadingFinished() || !cfg) LOG_ERROR_VOID("pointer zero");
     char buffer[5];
     memcpy(buffer, name.zeichen, 4);
     buffer[4] = '\0';
     
     DRVector2 tileSize = cfg->getVector2(buffer, "tileSize");
-    DRVector2 textureSize((DRReal)texture->getWidth(), (DRReal)texture->getHeight());
+    DRVector2i textureSize(texture->getResolution() );
     //DRLog.writeVector2ToLog(tileSize, "tileSize");
     tileSize /= textureSize;
     //DRLog.writeVector2ToLog(tileSize, "tileSize");    
@@ -43,7 +43,7 @@ RenderBlock::RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg)
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
 
-    //glBindTexture(GL_TEXTURE_2D, mTerrainTexture);
+    //glBindTexture(GL_TEXTURE_2D, 2);
     mTexture->bind();
         
     glBegin(GL_QUADS);

@@ -8,45 +8,40 @@
 #ifndef __SC_RENDER_PLANET_H
 #define	__SC_RENDER_PLANET_H
 
-#include "noiseutils.h"
+#include "Sektor.h"
+#include "RenderNoisePlanetToTexture.h"
+//class RenderNoisePlanetToTexture;
 
-class PlanetHeightValues: public DRHeightValueStorage
+class RenderPlanet : public RenderSektor
 {
 public:
-   PlanetHeightValues(GenerateNoisePlanet* noisePlanet = NULL);
-   virtual ~PlanetHeightValues();
-   virtual float getHeightValue(DRVector3& position);
-   virtual DRColor getColorValue(const float height);
-   
-   __inline__ void setNoisePlanet(GenerateNoisePlanet* noisePlanet) {mNoisePlanet = noisePlanet;}
-   __inline__ void AddGradientPoint (double gradientPos, const noise::utils::Color& gradientColor) {mColor.AddGradientPoint(gradientPos, gradientColor);}
-   __inline__ void ClearGradientPoints() {mColor.Clear();}
-   
-private:
-	//! \return true if value could be found, else false
-    bool findValue(const DRVector3& position, float& value);
-	void addValue(const DRVector3& position, float value);
-    
-    noise::utils::GradientColor mColor;
-    GenerateNoisePlanet* mNoisePlanet;
-    
-    typedef std::pair<float, float> ZMAP_PAIR;
-	typedef std::map<float, float> ZMAP;
-    typedef std::pair<float, ZMAP*> YMAP_PAIR;
-	typedef std::map<float, ZMAP*> YMAP;
-    typedef std::pair<float, YMAP*> XMAP_PAIR;
-    std::map<float, YMAP*> mXMap;
-    
-};
+    RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
 
-class RenderPlanet : public RenderStellarBody
-{
-public:
-    RenderPlanet() : RenderStellarBody() {};
     virtual ~RenderPlanet();
+    
+    virtual DRReturn render(float fTime, Camera* cam);
+    void setTexturePath(DRString texturePath) {mTexturePath = texturePath;}
+    
+    RenderNoisePlanetToTexture* getRenderNoisePlanetToTexture();
+    
 protected:
+    RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
+    DRReturn init(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, 
+                  const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
+                  const PlanetNoiseParameter* planetNoiseParameter);
+    
+    DRReturn generateAndBindTexture();
+    DRString getPathAndFilename();
+        
+    RenderInStepsToTexturePtr   mTextureRenderer;
+    DRTexturePtr		mTexture;
+    DRTexturePtr		mPreviewTextur;
+    short                       mInitalized;
+    DRString                    mTexturePath;
     
 private:    
+    
+    
 };
 
 

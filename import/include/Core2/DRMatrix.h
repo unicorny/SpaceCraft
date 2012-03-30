@@ -1,26 +1,26 @@
-#ifndef __DR_CORE_MATRIX_
-#define __DR_CORE_MATRIX_
-
 /*/*************************************************************************
- *                                                                       *
- * Core, Core-Lib for my programs, Core doesn't need any libraries		 *
- * Copyright (C) 2007, 2008, 2009 Dario Rekowski.						 *
- * Email: dariofrodo@gmx.de   Web: www.mathe-programme.de.tk             *
- *                                                                       *
- * This program is free software: you can redistribute it and/or modify  *
- * it under the terms of the GNU General Public License as published by  *
- * the Free Software Foundation, either version 3 of the License, or     *
- * any later version.													 *
- *																		 *
- * This program is distributed in the hope that it will be useful,		 *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 *
- * GNU General Public License for more details.							 *
- *																		 *
- * You should have received a copy of the GNU General Public License	 *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                       *
- *************************************************************************/
+ *                                                                         *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.                                                      *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
+
+#ifndef __DR_CORE2_MATRIX__
+#define __DR_CORE2_MATRIX__
 
 
 #include "stdio.h"
@@ -217,19 +217,19 @@ public:
     //! \brief liefert die Translationsmatrix zu einem Vektor, static
     //! \param v translations Vektor
     //! \return eine neue Translationsmatrix <br>
-    //! <p align="center"> 1 0 0 v.x <br>
-    //!                    0 1 0 v.y <br>
-    //!                    0 0 1 v.z <br>
-    //!                    0 0 0 1 </p>
+    //! <p align="center"> 1   0   0   0 <br>
+    //!                    0   1   0   0 <br>
+    //!                    0   0   1   0 <br>
+    //!                    v.x v.y v.z 1 </p>
     static DRMatrix	translation(const DRVector3& v); 	// Translationsmatrix (Verschiebungsmatrix) berechnen
     //! \brief liefert die Achsen DRMatrix aus drei Achsen, static
     //! \param x_axis x Achse
     //! \param y_axis y Achse
     //! \param z_axis z Achse
     //! \return eine neue DRMatrix <br>
-    //! <p align="center"> x_axis.x x_axis.y x_axis.z 0 <br>
-    //!                    y_axis.x y_axis.y y_axis.z 0 <br>
-    //!                    z_axis.x z_axis.y z_axis.z 0 <br>
+    //! <p align="center"> x_axis.x y_axis.x z_axis.x 0 <br>
+    //!                    x_axis.y y_axis.y z_axis.y 0 <br>
+    //!                    x_axis.z y_axis.z z_axis.z 0 <br>
     //!                    0        0        0        1 </p>
     static DRMatrix   axis(const DRVector3& x_axis, const DRVector3& y_axis, const DRVector3& z_axis);
     //! \brief liefert die Rotationsmatrix um die x Achse, static
@@ -275,7 +275,9 @@ public:
     //!                    0   0   0   1 </p>
     static DRMatrix	scaling(const DRVector3& v);		// Skalierungsmatrix berechnen
 
-    static DRMatrix view_frustum(const float angle_of_view, const float aspect_ratio, const float z_near, const float z_far);
+    static DRMatrix perspective_projection(const float angle_of_view, const float aspect_ratio, const float z_near, const float z_far);
+    static DRMatrix ortho_projection(const float left, const float right, const float bottom, const float top,
+                                     const float zNear, const float zFar);
 
     //! \brief liefert eine transponierte DRMatrix zur&uuml;ck, const
     //! \return eine neue DRMatrix, diese transponiert
@@ -288,4 +290,4 @@ public:
     float det() const;
 };
 
-#endif //__DR_CORE_MATRIX_
+#endif //__DR_CORE2_MATRIX__

@@ -5,12 +5,15 @@
  * Created on 20. August 2011, 23:50
  */
 
-#ifndef RENDERBLOCK_H
-#define	RENDERBLOCK_H
+#ifndef __SC_RENDER_BLOCK__
+#define	__SC_RENDER_BLOCK__
+
+#include "main.h"
+#include "Block.h"
 
 class RenderBlock {
 public:
-    RenderBlock(DRTextur* texture, BlockName name, DRIni* cfg);
+    RenderBlock(DRTexturePtr texture, BlockName name, DRIni* cfg);
     RenderBlock(const RenderBlock& orig);
     virtual ~RenderBlock();
     
@@ -27,10 +30,10 @@ private:
      */
     static void setTextureCoords(DRVector2 tileStart, DRVector2 tileSize, int count);
     
-    DRTextur* mTexture;
+    DRTexturePtr mTexture;
     GLuint    mList;
 
 };
 
-#endif	/* RENDERBLOCK_H */
+#endif	/* __SC_RENDER_BLOCK__ */
 

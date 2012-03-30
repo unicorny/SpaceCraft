@@ -1,27 +1,34 @@
 /*/*************************************************************************
- *                                                                       *
- * Core, Core-Lib for my programs, Core doesn't need any libraries		 *
- * Copyright (C) 2007, 2008, 2009 Dario Rekowski.						 *
- * Email: dariofrodo@gmx.de   Web: www.mathe-programme.de.tt             *
- *                                                                       *
- * This program is free software: you can redistribute it and/or modify  *
- * it under the terms of the GNU General Public License as published by  *
- * the Free Software Foundation, either version 3 of the License, or     *
- * any later version.													 *
- *																		 *
- * This program is distributed in the hope that it will be useful,		 *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 *
- * GNU General Public License for more details.							 *
- *																		 *
- * You should have received a copy of the GNU General Public License	 *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                       *
- *************************************************************************/
+ *                                                                         *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.                                                      *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
 
 
-#ifndef __CORE_2_MAIN_H__
-#define __CORE_2_MAIN_H__
+#ifndef __DR_CORE2_MAIN__
+#define __DR_CORE2_MAIN__
+
+/*#ifndef _DEBUG
+#define _DEBUG
+#endif _DEBUG
+*/
+
+//#define _DEBUG
 
 #ifdef _WIN32
 #include <windows.h>
@@ -38,6 +45,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <cstdarg>
+#include <cstddef>
 #include <math.h>
 
 
@@ -49,13 +57,13 @@
 #ifdef _WIN32
 #pragma warning (disable : 4251) 
 #define _CRT_SECURE_NO_WARNINGS 1
-#ifdef BUILD_CORE_DLL
+#ifdef BUILD_CORE2_DLL
     #define CORE2_API __declspec(dllexport)
 #else
     #define CORE2_API __declspec(dllimport)
 #endif
 #else
-#ifdef BUILD_CORE_DLL
+#ifdef BUILD_CORE2_DLL
     #define CORE2_API
 #else
     #define CORE2_API
@@ -124,11 +132,13 @@ enum /*CORE_API*/ DRReturn
 //ß = \303\237
 
 // core includes (ohne log)
+ #include "DRVector2i.h"
 #include "DRVector2.h"
 #include "DRVector3.h"
 #include "DRColor.h"
 #include "DRPlane.h"
 #include "DRMatrix.h"
+#include "DRRandom.h"
 #include "DRObjekt.h"
 #include "DRFrustumCulling.h"
 #include "DRIni.h"
@@ -139,6 +149,9 @@ enum /*CORE_API*/ DRReturn
 #include "DRUtils.h"
 #include "DRFile.h"
 #include "DRLogger.h"
+#include "DRIResource.h"
+#include "DRResourcePtrHolder.h"
+#include "DRResourcePtr.h"
 
 //Globale Variablen
 CORE2_API extern DRLogger DRLog;
@@ -160,4 +173,4 @@ CORE2_API DRReturn Core2_init(const char* logFileName = "Logger.html");
 CORE2_API void      Core2_exit();
 
 
-#endif // __CORE_2_MAIN_H__
+#endif // __DR_CORE2_MAIN__

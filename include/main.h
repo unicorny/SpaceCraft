@@ -1,42 +1,22 @@
 #include "Engine2Main.h"
+//includes which will be later go into Engine
+//#include "DRGeometrieHeightfield.h"
+//#include "DRGeometrieManager.h"
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+#include <limits.h>
+#include <vector>
+#include <queue>
 
+#include "Eigen/Dense"
+#include "Eigen/Geometry"
 
-// Tools
-#include "ShaderProgram.h"
-#include "Unit.h"
-#include "Vector3Unit.h"
-#include "GenerateNoisePlanet.h"
+class RenderBlockLoader;
+class Player;
 
-// View
-#include "Block.h"
-#include "BlockLoader.h"
-#include "RenderBlock.h"
-#include "RenderBlockLoader.h"
-#include "SektorChunk.h"
-#include "RenderStellarBody.h"
-#include "RenderPlanet.h"
-
-// Modell
-#include "StellarBody.h"
-#include "Planet.h"
-
-#include "GlobalRenderer.h"
-
-#include "Camera.h"
-#include "Sektor.h"
-#include "Server.h"
-#include "Player.h"
-
-struct ControlMode
-{
-    ControlMode() {}
-    ControlMode(Unit value) : mValue(value) {}
-    ControlMode(double value, UnitTypes type) : mValue(value, type) {}
-    Unit mValue;
-};
+struct ControlMode;
 
 extern Player g_Player;
 extern RenderBlockLoader g_RenderBlockLoader;

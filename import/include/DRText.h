@@ -1,26 +1,26 @@
 /*/*************************************************************************
- *                                                                       *
- * EngineDLL, Engine for my programs, using SDL, OpenGL, OpenAL			 *
- * Copyright (C) 2007, 2008, 2009 Dario Rekowski.						 *
- * Email: dariofrodo@gmx.de   Web: www.mathe-programme.de.tk             *
- *                                                                       *
- * This program is free software: you can redistribute it and/or modify  *
- * it under the terms of the GNU General Public License as published by  *
- * the Free Software Foundation, either version 3 of the License, or     *
- * any later version.													 *
- *																		 *
- * This program is distributed in the hope that it will be useful,		 *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 *
- * GNU General Public License for more details.							 *
- *																		 *
- * You should have received a copy of the GNU General Public License	 *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                       *
- *************************************************************************/
+ *                                                                         *
+ * EngineDLL, Engine for my programs, using SDL and OpenGL		   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski.			   *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.							   *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
 
-#ifndef __DR_ENGINE_TEXT_
-#define __DR_ENGINE_TEXT_
+#ifndef __DR_ENGINE2_TEXT__
+#define __DR_ENGINE2_TEXT__
 
 #define DR_FONT_TEXTBUFFERSIZE 256
 
@@ -56,7 +56,7 @@ enum ENGINE_API DRTEXTFlags;
     \author Dario Rekowski
     \date 04.01.09
 */
-class ENGINE_API DRFont
+class ENGINE2_API DRFont
 {
 public:
 	//Konstruktoren
@@ -100,13 +100,13 @@ public:
 		float		fHeight;			//H�he "
 		float		fTextureWidth;		//Breite der Textur
 		float		fTextureHeight;		//H�he - " -
-		DRVector2		avTopLeft[256];		//Linke obere Koordinate jedes Zeichens
-		DRVector2		avBottomRight[256];	//Rechte untere		-	"	-
+		DRVector2	avTopLeft[256];		//Linke obere Koordinate jedes Zeichens
+		DRVector2	avBottomRight[256];	//Rechte untere		-	"	-
 		float		afCharWidth[256];	//Breite jedes Zeichens in Pixeln
 	};
 
 	SFontInfo	m_FInfo;				//Info
-	DRTextur*	mTexture;			//TextureID
+	DRTexturePtr	mTexture;			//TextureID
 	DRVector2	m_vScreenSize;
 	DRObjekt*	m_pCamera;
 };
@@ -125,7 +125,7 @@ public:
     \author Dario Rekowski
     \date 04.01.09
 */
-class ENGINE_API DRText
+class ENGINE2_API DRText
 {
 public:
     //! \brief Konstruktor welcher einen Zeiger auf ein FOnt Objekt erwartet
@@ -215,4 +215,4 @@ private:
 		DRVector2		vTexture;	// Texturkoordinaten
 	};
 };
-#endif //__DR_ENGINE_TEXT_
+#endif //__DR_ENGINE2_TEXT__

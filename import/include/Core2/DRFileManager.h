@@ -1,25 +1,25 @@
 /*/*************************************************************************
- *                                                                       *
- * Core, Core-Lib for my programs, Core doesn't need any libraries		 *
- * Copyright (C) 2007, 2008, 2009 Dario Rekowski.						 *
- * Email: dariofrodo@gmx.de   Web: www.mathe-programme.de.tk             *
- *                                                                       *
- * This program is free software: you can redistribute it and/or modify  *
- * it under the terms of the GNU General Public License as published by  *
- * the Free Software Foundation, either version 3 of the License, or     *
- * any later version.													 *
- *																		 *
- * This program is distributed in the hope that it will be useful,		 *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 *
- * GNU General Public License for more details.							 *
- *																		 *
- * You should have received a copy of the GNU General Public License	 *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                       *
- *************************************************************************/
+ *                                                                         *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.                                                      *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
 /*
-Klasse f�r vereinfachten Datei zugriff
+Klasse für vereinfachten Datei zugriff
 Autor: Dario Rekowski
 Datum: 16.12.06
 
@@ -44,41 +44,41 @@ Datum: 16.12.06
   const char = "DEnde";
 */
 
-#ifndef __DR_FILEMANAGER__
-#define __DR_FILEMANAGER__
+#ifndef __DR_CORE2_FILE_MANAGER__
+#define __DR_CORE2_FILE_MANAGER__
 
 struct CORE2_API DRSHauptHeader
 {
-	char  			acIdentifierCheck[8];
-	u32         	ulDateiGesLegth;
-	DRReal			fFileVersion;
-	u32         	ulNumBloecke;
+    char        acIdentifierCheck[8];
+    u32         ulDateiGesLegth;
+    DRReal	fFileVersion;
+    u32         ulNumBloecke;
 };
 //Header am Anfang eines Blockes
 struct CORE2_API DRSBlockHeaderF
 {
-    u16            u16HeaderLength;
-	u32            u32BlockLength;
-	DHASH		   ID;
-	int			   iStrLength;
-	char* 		   pcDateiname;
+    u16         u16HeaderLength;
+    u32         u32BlockLength;
+    DHASH	ID;
+    int		iStrLength;
+    char* 	pcDateiname;
 };
 
-//Header f�r einen Block (ein System)
+//Header für einen Block (ein System)
 struct CORE2_API DRSBlockHeader
 {
-	int		  iBlockSize;
-	char      acID[14];		//BlockType
+    int         iBlockSize;
+    char        acID[14];		//BlockType
 };
 
 //----------------------------------------------------------------------------------------------------------------------
 //Hauptheader
 struct CORE2_API DRSMasterHeader
 {
-	char  	acID[14];	//Identifer (Jetzt f�r alle eigenen Datenformate nehmen)
-	DRReal	fVersion;	//Datei Version
-	int		iHeaderSize;//Gr��e des Headers
-	int		iNumBlocks;	//Anzahl Bl�cke
+    char  	acID[14];	//Identifer (Jetzt für alle eigenen Datenformate nehmen)
+    DRReal	fVersion;	//Datei Version
+    int		iHeaderSize;//Größe des Headers
+    int		iNumBlocks;	//Anzahl Blöcke
 };
 
 
@@ -96,21 +96,21 @@ public:
 	inline static DRFileManager* getSingletonPtr() {return &Instance();};
 	static bool	isInitialized()	{return Instance().m_bInitialized;};
 
-	//Init, erstellen der IndexList (alle vorhandene Dateien pr�fen)
-	DRReturn init();	//"Fremd" Daten bekommen f�r Typ den HASH von "NULL"
+	//Init, erstellen der IndexList (alle vorhandene Dateien prüfen)
+	DRReturn init();	//"Fremd" Daten bekommen für Typ den HASH von "NULL"
 
-	//Zeiger auf ge�ffnetem File liefern, schlie�en und freigeben muss der User.
-	DRFile* getFileByHASH(DHASH ID);									//Nach beenden CloseFile aufrufen nicht vergessen
+	//Zeiger auf geöffnetem File liefern, schließen und freigeben muss der User.
+	DRFile* getFileByHASH(DHASH ID) const;									//Nach beenden CloseFile aufrufen nicht vergessen
 //	inline DRFile* GetFileByName(DRString* pstrTyp, DRString* pstrFilename);	//Nach beenden CloseFile aufrufen nicht vergessen
-	inline DRFile* getFileByName(char*    pcTyp,   char*    pcFilename);	//Nach beenden File.close() und File delete aufrufen nicht vergessen
+	DRFile* getFileByName(const char* pcTyp,   const char*  pcFilename) const;	//Nach beenden File.close() und File delete aufrufen nicht vergessen
 	void closeFile(DRFile* pFile);
 	void exit();												//Freigeben der IndexList
 
 	//Neue Datei aufnehmen
-	DRReturn addFile(char* pcFilename);
+	DRReturn addFile(const char* pcFilename);
 
 	//Laden, Speichern und kombinieren
-	DRFile* startWriting(char* pcPfadName, char* pcFilename, char* pcTyp, unsigned long ulBlockLength);
+	DRFile* startWriting(const char* pcPfadName, const char* pcFilename, const char* pcTyp, unsigned long ulBlockLength);
 	DRReturn endWriting(DRFile* pOpenFile);
 
 	//Andere Dinge
@@ -139,10 +139,10 @@ private:
 
 	//Unterfunktionen
 //	DRReturn FillIndexFromOrdner(DRString* pstrOrdner);
-	DRReturn checkFile(char* pcFile);
-	DRReturn newFile(char* pcFilename);
+	DRReturn checkFile(const char* pcFile) const;
+	DRReturn newFile(const char* pcFilename);
 	bool isFileOK(DRFile* pOpenFile, bool bPointerOnEnd = true);
 
 };
 
-#endif //__DR_FILEMANAGER__
+#endif //__DR_CORE2_FILE_MANAGER__

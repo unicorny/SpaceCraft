@@ -5,7 +5,7 @@
  * Created on 20. August 2011, 19:12
  */
 
-#include "main.h"
+#include "Server.h"
 
 std::map<u64, Server*> Server::mServerList;
 
@@ -59,14 +59,14 @@ u64 Server::createNewServer()
 {
     u64 newID = DRRandom::r64();
          
-    std::stringstream s(std::stringstream::in|std::stringstream::out);
-    s << "./data/_" << newID;
-    if(DRFileManager::addFolderToFileSystem(s.str().data()))
-        LOG_ERROR("neuer Server Ordner konnte nicht angelegt werden!", 0);
+   // std::stringstream s(std::stringstream::in|std::stringstream::out);
+    //s << "./data/_" << newID;
+    //if(DRFileManager::addFolderToFileSystem(s.str().data()))
+      //  LOG_ERROR("neuer Server Ordner konnte nicht angelegt werden!", 0);
     
     Server* serv = getServer(newID);
     DRRandom::seed((int)newID);
-    serv->mRootSektor = new Sektor(NULL, ROOT, 0, rand(), newID);
+    serv->mRootSektor = new RootSektor(newID);
     
     return newID;
 }
@@ -118,7 +118,7 @@ DRReturn Server::loadFromFile()
     }
     freeFileDescriptor(f);
     DRRandom::seed((int)mServerID);
-    mRootSektor = new Sektor(NULL, ROOT, 0, rand(), mServerID);
+    mRootSektor = new RootSektor(mServerID);
     
     if(mRootSektor)
     {

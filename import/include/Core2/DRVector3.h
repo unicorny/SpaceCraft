@@ -1,25 +1,26 @@
 /*/*************************************************************************
- *                                                                       *
- * Core, Core-Lib for my programs, Core doesn't need any libraries		 *
- * Copyright (C) 2007, 2008, 2009 Dario Rekowski.						 *
- * Email: dariofrodo@gmx.de   Web: www.mathe-programme.de.tk             *
- *                                                                       *
- * This program is free software: you can redistribute it and/or modify  *
- * it under the terms of the GNU General Public License as published by  *
- * the Free Software Foundation, either version 3 of the License, or     *
- * any later version.													 *
- *																		 *
- * This program is distributed in the hope that it will be useful,		 *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of		 *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the		 *
- * GNU General Public License for more details.							 *
- *																		 *
- * You should have received a copy of the GNU General Public License	 *
- * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
- *                                                                       *
- *************************************************************************/
-#ifndef __DR_CORE_VECTOR3_
-#define __DR_CORE_VECTOR3_
+ *                                                                         *
+ * Core, Core-Lib for my programs, Core doesn't need any libraries	   *
+ * Copyright (C) 2012, 2013, 2014 Dario Rekowski                           *
+ * Email: dario.rekowski@gmx.de   Web: www.einhornimmond.de                *
+ *                                                                         *
+ * This program is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU General Public License as published by    *
+ * the Free Software Foundation, either version 3 of the License, or       *
+ * any later version.                                                      *
+ *									   *
+ * This program is distributed in the hope that it will be useful,	   *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of	   *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the	   *
+ * GNU General Public License for more details.				   *
+ *									   *
+ * You should have received a copy of the GNU General Public License	   *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.   *
+ *                                                                         *
+ ***************************************************************************/
+
+#ifndef __DR_CORE2_VECTOR3__
+#define __DR_CORE2_VECTOR3__
 
 class DRMatrix;
 
@@ -81,6 +82,8 @@ public:
     //! \brief Casting operator
     //! \return einen Zeiger auf das Werte Array
     operator float* () {return c;}
+    
+    operator const float* () const {return c;}
 
     //!  addiert auf den aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors hinzu
     //! \brief additions operator
@@ -92,6 +95,11 @@ public:
     //! \param v der Vektor mit dem addiert wird
     //! \return einen neuen Vektor
     DRVector3 operator +  (const DRVector3& v) const {return DRVector3(x+v.x, y+v.y, z+v.z);}
+    //!  subtrahiert vom aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors
+    //! \brief subtraktions operator
+    //! \param v der Vektor der subtrahiert wird
+    //! \return referenz auf diesen Vektor
+    DRVector3 operator -= (const DRVector3& v) {x -= v.x; y -= v.y; z -= v.z; return *this;}
     //! subtrahiert den Vektor vom &uuml;bergebenden und liefert den neuen Vektor zur&uuml;ck
     //! \brief subtraktions operator
     //! \param v der Vektor der subtrahiert wird
@@ -112,6 +120,7 @@ public:
     //! \param f Skalar durch den geteilt wird
     //! \return einen neuen Vektor
     DRVector3 operator / (const float f)       const {return DRVector3(x/f, y/f, z/f);}
+    DRVector3 operator /= (const float f)            {*this = *this / f; return *this;}
     //!  multiplieziert diesen Vektor mit einem Skalar, const
     //! \brief * operator
     //! \param f Skalar mit dem multipliziert wird
@@ -123,11 +132,13 @@ public:
     //! \param die &uuml;bergebende Mtrix m
     //! \return einen neuen, transformierten Vektor
     DRVector3 transformNormal(const DRMatrix& m) const;
+    
+    DRVector3 transformCoords(const DRMatrix& m, float* const pfOutW = NULL) const;
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
     DRVector3 normalize()                      const  {return *this / length();}
     
-    DRVector3 normalzeEx()                     const  {return *this / (length()+0.00001f);}
+    DRVector3 normalizeEx()                     const  {return *this / (length()+0.00001f);}
     
     //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
     //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll
@@ -175,4 +186,4 @@ private:
 
 };
 
-#endif
+#endif //__DR_CORE2_VECTOR3__

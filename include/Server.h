@@ -8,6 +8,8 @@
 #ifndef __SC_SERVER_H
 #define	__SC_SERVER_H
 
+#include "RootSektor.h"
+
 class Server {
 public:    
     static Server* getServer(u64 ServerID);
@@ -24,7 +26,7 @@ public:
     DRReturn saveToFile();
     DRReturn loadFromFile();
     
-    Sektor* getRootSektor() {return mRootSektor;}
+    RootSektor* getRootSektor() {return mRootSektor;}
     
 private:
     Server(u64 serverID);
@@ -35,7 +37,7 @@ private:
     virtual ~Server();
     
     u64 mServerID;
-    Sektor* mRootSektor;
+    RootSektor* mRootSektor;
 };
 
 #endif	/* SERVER_H */

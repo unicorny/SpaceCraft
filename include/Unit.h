@@ -8,6 +8,8 @@
 #ifndef __SPACE_CRAFT_UNIT_H
 #define	__SPACE_CRAFT_UNIT_H
 
+#include "main.h"
+
 enum UnitTypes
 {
     NONE = 0,
@@ -18,6 +20,17 @@ enum UnitTypes
     PARSEC = 5,
     KILOPARSEC = 6    
 };
+
+
+/*typedef u8 UnitTypes;
+#define NONE 0
+#define M 1
+#define KM 2
+#define AE 3
+#define LIGHTYEAR 4
+#define PARSEC 5
+#define KILOPARSEC 6
+*/
 
 class Unit
 {
@@ -39,28 +52,40 @@ public:
     __inline__ Unit operator -() const {return Unit(-this->mValue, this->mUnitType);}
     __inline__ Unit operator -= (const Unit& b) {*this = *this - b; return *this;}
     
-    Unit operator *(const Unit& b) const;
+    Unit operator * (const Unit& b) const;
     __inline__ Unit operator *= (const Unit& b) {*this = *this * b; return *this;}
     
+    __inline__ Unit operator *  (const double b) const {return Unit(this->mValue*b, this->mUnitType);}
+    __inline__ Unit operator *= (const double b) {*this = Unit(this->mValue*b, this->mUnitType); return *this;}
+        
     Unit operator /(const Unit& b) const;
     __inline__ Unit operator /= (const Unit& b) {*this = *this / b; return *this;}
     
+    __inline__ Unit operator / (const double b) const {return Unit(this->mValue/b, this->mUnitType);}
+    __inline__ Unit operator /= (const double b) {*this = Unit(this->mValue/b, this->mUnitType); return *this;}
+    
     __inline__ bool operator == (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return true; return false;}
     __inline__ bool operator != (const Unit& b) const {if(this->mUnitType == b.mUnitType && this->mValue == b.mValue) return false; return true;}
+    
+    bool operator < (const Unit& b) const;
+    bool operator <= (const Unit& b) const;
     
     //__inline__ operator double() const {return this->mValue;}
     
     static const char* getUnitTypeName(UnitTypes unitType);
     __inline__ UnitTypes getType() const {return mUnitType;}
     
-    operator double() {return mValue;}
+    operator double() const {return mValue;}
 private:
     //!
+    static void makeSameType(Unit& a, Unit& b);
     static double getConversionFaktor(UnitTypes a, UnitTypes b);
     
     double mValue;
     UnitTypes mUnitType;
 };
+
+__inline__ Unit sqrt(Unit& a) {return Unit(sqrt(a), a.getType());}
 
 #endif	/* __SPACE_CRAFT_UNIT_H */
 

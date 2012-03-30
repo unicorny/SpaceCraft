@@ -1,23 +1,45 @@
 #include "main.h"
+#include "ShaderManager.h"
+#include "DRGeometrieManager.h"
+#include "DRTextureManager.h"
+#include "GlobalRenderer.h"
+#include "RenderBlockLoader.h"
+#include "Camera.h"
+#include "Player.h"
+
+// for test only
+#include "RenderNoisePlanetToTexture.h"
+#include "RenderSubPlanet.h"
+#include "SubPlanetSektor.h"
+
+struct ControlMode
+{
+    ControlMode() {}
+    ControlMode(Unit value, float time) : mValue(value), mTime(time) {}
+    ControlMode(double value, UnitTypes type, float time) : mValue(value, type), mTime(time) {}
+    Unit mValue;
+    float mTime;
+};
 
 // Globale Variablen
 Player g_Player;
 RenderBlockLoader g_RenderBlockLoader;
 Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
-DRTextur* g_tex = NULL;
-DRTextur* g_terrain = NULL;
+DRTexturePtr g_tex;
+DRTexturePtr g_terrain;
 int blockCount = 100;
-#define MAX_CONTROL_MODES 4
+#define MAX_CONTROL_MODES 9
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
-//DRGeometrieIcoSphere g_geo;
+// Debug
+bool            wireframe = false;
 
-GLint sphereList = 0;
+
 
 int rekursionTest(int zahl)
 {
-    int z[20];
+//    int z[20];
     if(zahl > 10000) return zahl;
     return rekursionTest(++zahl);
 }
@@ -100,6 +122,9 @@ void test()
     u2.print("u2");
     u3.print("u3");
     
+    u1 *= Unit(20, KM);
+    u1.print("u1* 20 km");
+    
     Vector3Unit(u1 + u2).print("u1+u2");
     Vector3Unit(u2+u3).print("u2+u3");
     Vector3Unit(u1*Unit(1, LIGHTYEAR)).print("u1*1 Lichtjahr");
@@ -131,29 +156,66 @@ void test()
     referenzHolder.remove(tests[7]);
     tests[9] = referenzHolder.getFree();
     DRLog.writeToLog("index10: (6): %d", tests[9]);
+    
+    DRTextureManager::Instance().test();
+    
+    // Random Test
+    
 }
-DRReturn generateSphere(DRReal radius);
+
+void sizeOfClasses()
+{
+    DRLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
+	
+    
+    DRLog.writeToLog("Camera: %d", sizeof(Camera));
+    DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
+    DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
+	DRLog.writeToLog("DRMatrix: %d", sizeof(DRMatrix));
+    DRLog.writeToLog("DRSaveTexture: %d", sizeof(DRSaveTexture));
+    DRLog.writeToLog("DRTexture: %d", sizeof(DRTexture));
+	DRLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
+    DRLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
+    DRLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
+    DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
+    DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
+    DRLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
+    DRLog.writeToLog("RenderInStepsToTexture: %d", sizeof(RenderInStepsToTexture));
+    DRLog.writeToLog("RenderNoisePlanetToTexture: %d", sizeof(RenderNoisePlanetToTexture));
+    DRLog.writeToLog("Sektor: %d", sizeof(Sektor));
+    DRLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
+    DRLog.writeToLog("Unit: %d", sizeof(Unit));
+    DRLog.writeToLog("Vector3Unit: %d", sizeof(Vector3Unit));
+    DRLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
+}
+
 DRReturn load()
 {
     if(EnInit_Simple())
         return DR_ERROR;
     DRFileManager::Instance().addOrdner("data/blockView");
+    DRFileManager::Instance().addOrdner("data/shader");
     test();
-        
-    DRRandom r;
-    srand(77111);
+    sizeOfClasses();
     
     //Steuerung
-    gControlModes[0].mValue = Unit(20, M);
-    gControlModes[1].mValue = Unit(1000, KM);
-    gControlModes[2].mValue = Unit(20000, KM);
-    gControlModes[3].mValue = Unit(0.1, AE);
+  
+    gControlModes[0] = ControlMode(Unit(20, M), 120.0f);
+    gControlModes[1] = ControlMode(Unit(0.100, KM), 100.0f);
+    gControlModes[2] = ControlMode(Unit(10, KM), 80.0f);
+    gControlModes[3] = ControlMode(Unit(1000, KM), 30.0f);
+    gControlModes[4] = ControlMode(Unit(20000, KM), 10.0f);
+    gControlModes[5] = ControlMode(Unit(400000, KM), 4.0f);
+    gControlModes[6] = ControlMode(Unit(0.1, AE), 1.0f);
+    gControlModes[7] = ControlMode(Unit(10, AE), 1.0f);
+    gControlModes[8] = ControlMode(Unit(500, AE), 1.0f);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
         LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
+	LOG_WARNING_SDL();
 
-    glClearColor(0.1, 0.2, 0.0, 0);
+    
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
 
@@ -195,8 +257,13 @@ DRReturn load()
     //glEnable(GL_LIGHTING);
     glDisable(GL_FOG);
     
-	if(GlobalRenderer::getSingleton().init())
+	if(GlobalRenderer::getSingleton().init("data/config.ini"))
 		LOG_ERROR("error by init GlobalRenderer", DR_ERROR);
+    
+    if(ShaderManager::getSingleton().init())
+        LOG_ERROR("error by init ShaderManager", DR_ERROR);
+    if(DRGeometrieManager::getSingleton().init())
+        LOG_ERROR("error by init DRGeometrieManager", DR_ERROR);
 
     if(g_Player.init())
         LOG_ERROR("Fehler bei Player::init", DR_ERROR);
@@ -206,8 +273,7 @@ DRReturn load()
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
     
     Uint32 start = SDL_GetTicks();
-    generateSphere(2.0f);
-    g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
+    //g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
     DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
 
     return DR_OK;
@@ -215,14 +281,15 @@ DRReturn load()
 
 void ende()
 {
-    DR_SAVE_DELETE(g_tex);
-    glDeleteLists(sphereList, 1);
+    g_tex.release();
     g_Player.exit();
     DR_SAVE_DELETE(g_Font);
-    DR_SAVE_DELETE(g_terrain);
-    GlobalRenderer::getSingleton().exit();
+    g_terrain.release();
+    ShaderManager::getSingleton().exit();
+    DRGeometrieManager::getSingleton().exit();
     g_RenderBlockLoader.exit();
     Server::freeAllServer();
+	GlobalRenderer::getSingleton().exit();
     EnExit();
 }
 
@@ -262,262 +329,82 @@ DRReturn move(float fTime)
     if(gControlModes[gCurrentControlMode].mValue.getType() == M)
         g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
     else
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
-    /*if(gCurrentControlMode == 1)
-    // kamera bewegung abhängig von den Tasten a, d (links/rechts), bild up, bild down (hoch/runter), Pfeil hoch und Pfeil runter (vorwärts/rückwärts)
-        g_cam->translateRel(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed);
-    else if(gCurrentControlMode == 2)
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*1000.0f, KM);
-    else if(gCurrentControlMode == 3)
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*0.005f, AE);
-    else if(gCurrentControlMode == 4)
-        g_cam->translateRel_AbsPosition(DRVector3(keystate[SDLK_a]-keystate[SDLK_d], keystate[SDLK_PAGEDOWN]-keystate[SDLK_PAGEUP], keystate[SDLK_UP]-keystate[SDLK_DOWN])*fTime*fSpeed*50.0f, KM);
-    */
+        g_cam->translateRel_SektorPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
+    
     //set control mode
     if(EnIsButtonPressed(SDLK_1)) gCurrentControlMode = 0;
     else if(EnIsButtonPressed(SDLK_2)) gCurrentControlMode = 1;
     else if(EnIsButtonPressed(SDLK_3)) gCurrentControlMode = 2;
     else if(EnIsButtonPressed(SDLK_4)) gCurrentControlMode = 3;
+    else if(EnIsButtonPressed(SDLK_5)) gCurrentControlMode = 4;
+    else if(EnIsButtonPressed(SDLK_6)) gCurrentControlMode = 5;
+    else if(EnIsButtonPressed(SDLK_7)) gCurrentControlMode = 6;
+    else if(EnIsButtonPressed(SDLK_8)) gCurrentControlMode = 7;
+    else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
+    
+    GlobalRenderer::Instance().setTimeForInactiveChild(gControlModes[gCurrentControlMode].mTime);
      
-        
+    // R-Taste
+    if(EnIsButtonPressed(SDLK_r)) wireframe = !wireframe;
+    
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
     if(keystate[SDLK_z]) blockCount++;
     
-    if(g_Player.getSektor()->move(fTime, g_cam))
+    if(fTime == 0.0f) fTime = 0.00166f;
+
+    //if(g_Player.getSektor()->moveAll(fTime, g_cam))
+    if(g_Player.getSektor()->moveAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei move sektor", DR_ERROR);
 
     return DR_OK;
 }
 
-#define TWOPI (PI*2.0f)
-#define PID2  (PI/2.0f)
-void CreateSphere(DRVector3 c,double r,int n)
-{
-	int i,j;
-	double theta1,theta2,theta3;
-	DRVector3 e,p;
-
-	if (r < 0)
-		r = -r;
-	if (n < 0)
-		n = -n;
-	if (n < 4 || r <= 0) {
-		glBegin(GL_POINTS);
-		glVertex3f(c.x,c.y,c.z);
-		glEnd();
-		return;
-	}
-
-	for (j=0;j<n/2;j++) {
-		theta1 = j * TWOPI / n - PID2;
-		theta2 = (j + 1) * TWOPI / n - PID2;
-
-		glBegin(GL_QUAD_STRIP);
-		for (i=0;i<=n;i++) {
-			theta3 = i * TWOPI / n;
-
-			e.x = cos(theta2) * cos(theta3);
-			e.y = sin(theta2);
-			e.z = cos(theta2) * sin(theta3);
-			p.x = c.x + r * e.x;
-			p.y = c.y + r * e.y;
-			p.z = c.z + r * e.z;
-
-			glNormal3f(e.x,e.y,e.z);
-			glTexCoord2f(i/(double)n,2*(j+1)/(double)n);
-			glVertex3f(p.x,p.y,p.z);
-
-			e.x = cos(theta1) * cos(theta3);
-			e.y = sin(theta1);
-			e.z = cos(theta1) * sin(theta3);
-			p.x = c.x + r * e.x;
-			p.y = c.y + r * e.y;
-			p.z = c.z + r * e.z;
-
-			glNormal3f(e.x,e.y,e.z);
-			glTexCoord2f(i/(double)n,2*j/(double)n);
-			glVertex3f(p.x,p.y,p.z);
-		}
-		glEnd();
-	}
-}
-
-const float tao = 1.61803399;
-DRReturn generateSphere(DRReal radius)
-{
-    float percent = 1.0f;
-    const int iterator = 100;
-    
-    int totalSegments = 400;
-    int currentSegments = (int)((float)totalSegments*percent);
-        
-    int vertexCount = currentSegments*currentSegments;
-    int indexCount =  2*currentSegments*currentSegments-2*currentSegments; //2*currentSegments*currentSegments;//2*currentSegments-1+2*currentSegments*currentSegments;
-//    const int iSegments = 200;
-//    const int segs = 200;
-    printf("vertexCount: %d, indexCount: %d, currentSegments: %d\n", vertexCount, indexCount, currentSegments);
-    
-    //DRGeometrieIcoSphere geo2;        
-   DRGeometrieIcoSphere geo;        
-   // DRGeometrieSphere geo;    
-    geo.initIcoSphere(5);
-    geo.changeGeometrieTo(5, true);
-    //geo.initSphere(totalSegments);
-    //geo.makeSphericalLandscape(iterator, 7157);
-    //geo.copyDataToVertexBuffer();
-    
-    
-    //if(geo.initSphere(totalSegments))
-      //  LOG_ERROR("Fehler bei SphereInit", DR_ERROR);
-    vertexCount = geo.getVertexCount();
-    currentSegments = sqrtf(vertexCount);
-    printf("currentSegments: %d ", currentSegments);
-    
-    DRVector3* points = geo.getVertexPointer();// new DRVector3[vertexCount];
-    DRColor* color = geo.getColorPointer();// new DRColor[vertexCount];
-    DRColor* heighMap = new DRColor[vertexCount];
-    GLuint*  indices = geo.getIndexPointer();        
-    
-    //*/
-   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //glDisable(GL_CULL_FACE);
-    
-    //glBegin(GL_LINE_LOOP);
-  
-    
-    const char* path = "data/planet.png";
-  
-    DRIImage* image = DRIImage::newImage();
-    DRReturn ret = image->loadFromFile(path);
-    float vektorLenght = 1.0f;
-    if(!ret && image->getWidth()*image->getHeight() == vertexCount)
-    {
-        image->getPixel(color);
-        int size = image->getWidth()*image->getHeight();
-        printf("size: %u\n", size);        
-    }
-    else
-    {
-        //geo.makeSphericalLandscape(iterator, 9312);
-        GenerateNoisePlanet* g = GlobalRenderer::Instance().getGenerateNoisePlanet();
-        g->setupGenerator(182172);
-        
-        float max = 0.0f, min = 1.0f;
-        for(int i = 0; i < vertexCount; i++)
-        {
-            points[i] *= 1.0f+g->getValue(points[i])*0.01f;
-            float l = vektorLenght - points[i].length();
-            if(l == vektorLenght) continue;
-           // printf("%d: length: %f\n",i, points[i].length());
-            if(l > max) max = l;
-            if(l < min) min = l;
-        }
-        //einfärben
-        DRLog.writeToLog("min: %f, max: %f", min, max);
-        for(int j = 0; j < vertexCount; j++)
-        {
-        //    DRLog.writeToLog("\n---------- j:%d -------------", j);
-            float d = vektorLenght - points[j].length();
-            //d = g->getValue(points[j]);
-            heighMap[j] = DRColor((DRReal)(fabs((d+min))/(max+fabs(min))));
-			color[j] = heighMap[j];
-			continue;
-
-    //        if(j < 10)
-      //          DRLog.writeToLog("heighMapValue: %f, d: %f", fabs((d+min))/(max+fabs(min)), d);
-            d *= -1.0f;
-            //if(j < 10)
-          //      DRLog.writeToLog("d: %f", d);
-            if(d < 0)
-            {
-                if(d == -1.0f)
-                    color[j] = color[(int)fabs((float)(vertexCount-currentSegments-j))].interpolate(color[j-currentSegments], 0.5f);
-                else
-                    color[j] = DRColor(0.0f, (1.0f-(d/min))/10.0f, 1.0f-(d/min));
-            }
-            else if(d > 0)
-            {
-                if(d > max/2)
-                    color[j] = DRColor((d/max), (d/max)/2.0f, 0.1f);
-                else if(d < max-max/10)
-                    color[j] = DRColor((d/max)/2.0f, (d/max), 0.1f);
-                else
-                    color[j] = DRColor(d/max);
-            }
-            //DRLog.writeVector3ToLog(points[j]);
-            //DRLog.writeColorToLog(color[j]);
-        }
-        //DRLog.writeToLog("\n-------- ende -------------");
-        printf("%d Pixel in ein %d großes Bild\n", vertexCount, currentSegments * (currentSegments+2));
-        image->setWidth(currentSegments);
-        image->setHeight(currentSegments);
-        image->setImageFormat(-1);
-        image->setPixel(color);
-        image->saveIntoFile(path);    
-        
-        image->setPixel(heighMap);
-        image->saveIntoFile("data/heighmap.png");
-		
-    } 
-    
-    g_tex = new DRTextur(image);
-   // */
-	geo.copyDataToVertexBuffer();
-    sphereList = glGenLists(1);
-    glNewList(sphereList, GL_COMPILE);     
-    
-    glPushMatrix();          
-    glScalef(radius, radius, radius);
-    glColor3f(1.0f, 0.0f, 0.0f);
-    geo.render();
-    
-    glPopMatrix();
-    
-    glEndList();
-        
- //   DR_SAVE_DELETE_ARRAY(points);
-//    DR_SAVE_DELETE_ARRAY(color);
-//    DR_SAVE_DELETE_ARRAY(indices);
-    DR_SAVE_DELETE_ARRAY(heighMap);
-    
-//    g_tex = new DRTextur(path, GL_NEAREST, GL_NEAREST);
-   
-    
-    return DR_OK;
-}
 
 DRReturn render(float fTime)
 {
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glColor3f(1.0f, 1.0f, 1.0f);    
+    glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
     
-    //glEnable(GL_LIGHTING);
+    glClearColor(0.1, 0.2, 0.0, 0);
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    
+    glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
-    //glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     //if(g_terrain)
       //  g_terrain->bind();
-    if(g_Player.getSektor()->render(fTime, g_Player.getCamera()))
+    //if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
+    if(wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+    if(g_Player.getSektor()->renderAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei render sektor", DR_ERROR);
+    ShaderProgram::unbind();
     glDisable(GL_LIGHTING);
     glEnable(GL_CULL_FACE);
     
-    glClear (GL_DEPTH_BUFFER_BIT);
+    glClear (GL_DEPTH_BUFFER_BIT);    
+    glColor3f(1.0f, 1.0f, 1.0f);    
     
     //Reseten der Matrixen
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
     //gluPerspective(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f);
-    glMultMatrixf(DRMatrix::view_frustum(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
+    glMultMatrixf(DRMatrix::perspective_projection(g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 2000.0f));
     DRFrustumCulling cull(g_cam, g_Player.getCameraFOV(), (GLfloat)XWIDTH/(GLfloat)YHEIGHT, 0.1f, 1000.0f);
     glMatrixMode(GL_MODELVIEW);          // Select the modelview matrix
 
     glLoadIdentity();                    // Reset (init) the modelview matrix
     DRVector3 translate(0.0f);
-        
     g_cam->setKameraMatrix();
     glEnable(GL_DEPTH_TEST);             // Enables depth test
-    
+        
     //light
     //Add ambient light
     GLfloat ambientColor[] = {0.4f, 0.4f, 0.4f, 1.0f}; //Color(0.2, 0.2, 0.2)
@@ -538,7 +425,7 @@ DRReturn render(float fTime)
     glLightfv(GL_LIGHT1, GL_POSITION, lightPos1);
     glEnable(GL_LIGHT1);       
     
-    if(g_tex)
+    if(g_tex.getResourcePtrHolder())
         g_tex->bind();
       
     //glColor3f(0.2f, 0.5f, 0.1f);
@@ -583,36 +470,15 @@ DRReturn render(float fTime)
     glTranslatef(0.0f, 2.0f, 0.0f);
     translate.y += 2.0f;
     
-
 	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate));
-        if(res != OUTSIDE)    
-                g_RenderBlockLoader.getRenderBlock("benc")->render();
+    if(res != OUTSIDE)    
+        g_RenderBlockLoader.getRenderBlock("benc")->render();
     
     glDisable(GL_TEXTURE_2D);
     //glDisable(GL_LIGHTING);
-    glPushMatrix();
     
-    glTranslatef(0.0, 0.0f, -15.0f);
-    //renderSphere(5.0f);
-    
-    static float sphereRotate = 0;
-    glRotatef(sphereRotate, 0.0f, 1.0f, 0.0f);
-    
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	GlobalRenderer::Instance().getPlanetShaderPtr()->bind();
-    if(sphereList)
-        glCallList(sphereList);
-    glTranslatef(5.0f, 0.0f, 0.0f);
-    CreateSphere(DRVector3(), 1.0f, 20.0f);
-    GlobalRenderer::Instance().getPlanetShaderPtr()->unbind();
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    //g_geo.render();
-    
-    //sphereRotate += fTime*10.0f;
-      
-    
-    glPopMatrix();
     //*/
+    
     static u32 start = 0;
     float dir[] = {1.0f, 1.0f};
     int y = 0;
@@ -689,23 +555,30 @@ DRReturn render(float fTime)
     text.drawText();
     
     text.setText("Steuerung: %d - %s/s", gCurrentControlMode+1, gControlModes[gCurrentControlMode].mValue.print().data());
-    /*switch(controlMode)
-    {
-        case 0: text.setText("Steuerung: (NONE)"); break;
-        case 1: text.setText("Steuerung: 1 - 20 m/s"); break;
-        case 2: text.setText("Steuerung: 3 - 20.000 km/s"); break;
-        case 3: text.setText("Steuerung: 4 - 0.005 AE/s"); break;
-        case 4: text.setText("Steuerung: 2 - 100 km/s"); break;
-        default: text.setText("Steuerung: (default)");
-    }
-     */
     text.setPosition(DRVector2(0.0f, 0.08f));
     text.drawText();
+
+	GlobalRenderer& gb = GlobalRenderer::Instance();
+    DRTextureManager& tx = DRTextureManager::Instance();
+    text.setColor12(DRColor(1.0f, 1.0f, 1.0f));
+    text.setScaling(DRVector2(0.8f));
+	text.setText("Grafik Memory: %.0f MByte", static_cast<double>(tx.getGrafikMemoryTexture()+gb.getGrafikMemoryGeometrie())/(1024.0f*1024.0));
+	text.setPosition(DRVector2(0.8f, 0.0f));
+	text.drawText();
+    
+	text.setText("Texture: %.0f MByte", static_cast<double>(tx.getGrafikMemoryTexture())/(1024.0f*1024.0));
+	text.setPosition(DRVector2(0.8f, 0.04f));
+	text.drawText();
+
+	text.setText("Geometrie: %.0f MByte",static_cast<double>(gb.getGrafikMemoryGeometrie())/(1024.0f*1024.0));
+	text.setPosition(DRVector2(0.8f, 0.08f));
+	text.drawText();
     
     g_Font->end();
-    
-    start = SDL_GetTicks();
-    
+   
+    start = SDL_GetTicks();    
+    if(GlobalRenderer::Instance().renderTasks())
+        LOG_ERROR("Fehler bei calling GlobalRenderer::renderTasks", DR_ERROR);
 
     return DR_OK;
 }

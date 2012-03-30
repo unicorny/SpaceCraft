@@ -3,10 +3,13 @@
  * Author: dario
  *
  * Created on 20. August 2011, 23:52
+ * 
  */
 
 #ifndef BLOCK_H
 #define	BLOCK_H
+
+#include "main.h"
 
 struct BlockName
 {

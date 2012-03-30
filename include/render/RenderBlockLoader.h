@@ -8,6 +8,9 @@
 #ifndef RENDERBLOCKLOADER_H
 #define	RENDERBLOCKLOADER_H
 
+//#include "main.h"
+#include "RenderBlock.h"
+
 class RenderBlockLoader {
 public:
     RenderBlockLoader();
@@ -18,10 +21,8 @@ public:
     DRReturn init();
     void exit();
     RenderBlock* getRenderBlock(BlockName name);
-    DRTextur* getTexture(const char* filename, GLint filter);
     
 private:
-    DRHashList* mTextures;
     DRHashList* mRenderBlocks;
     DRIni* mCfg;
 

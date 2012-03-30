@@ -8,6 +8,8 @@
 #ifndef __SPACE_CRAFT_VECTOR3_UNIT_H
 #define	__SPACE_CRAFT_VECTOR3_UNIT_H
 
+#include "Unit.h"
+
 class Vector3Unit
 {
 public:
@@ -84,12 +86,20 @@ public:
     //! \param f Skalar durch den geteilt wird
     //! \return einen neuen Vektor
     Vector3Unit operator / (const Unit f)       const {return Vector3Unit(x/f, y/f, z/f);}
-    //!  multiplieziert diesen Vektor mit einem Skalar, const
+    Vector3Unit operator / (const double f)      const {return Vector3Unit(x/f, y/f, z/f);}
+    //!  multiplieziert diesen Vektor mit einem Unit Skalar, const
     //! \brief * operator
     //! \param f Skalar mit dem multipliziert wird
     //! \return einen neuen Vektor
     Vector3Unit operator *  (const Unit f)       const {return Vector3Unit(x*f, y*f, z*f);}
-    Vector3Unit operator *= (const Unit f)             {return *this * f;}
+    Vector3Unit operator *= (const Unit f)             {*this = *this * f; return *this;}
+    
+    //!  multiplieziert diesen Vektor mit einem Skalar, const
+    //! \brief * operator
+    //! \param f Skalar mit dem multipliziert wird
+    //! \return einen neuen Vektor
+    Vector3Unit operator *  (const double f)       const {return Vector3Unit(x*f, y*f, z*f);}
+    Vector3Unit operator *= (const double f)             {*this = *this * f; return *this;}
  
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
@@ -141,6 +151,9 @@ public:
 
 private:
 };
+
+// Unit * Vector3 = Vector3Unit
+__inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v*(float)u, u.getType());}
 
 #endif	/* __SPACE_CRAFT_VECTOR3_UNIT_H */
 
