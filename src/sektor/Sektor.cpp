@@ -1,8 +1,8 @@
 #include "Sektor.h"
 
-Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent) 
-: mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mThis(this),
-  mRenderer(NULL), mIdleSeconds(0.0f), mNotRenderSeconds(0.0f)
+Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent) 
+: mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
+  mIdleSeconds(0.0f), mNotRenderSeconds(0.0f)
 {
     getSektorPath(mSektorPath);
     DRFileManager::addFolderToFileSystem(getSektorPathName().data());
@@ -10,6 +10,12 @@ Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent)
 
 Sektor::~Sektor()
 {
+    for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+    {
+        Sektor* temp = it->second;
+        temp->setParent(NULL);
+        DR_SAVE_DELETE(temp);
+    }
     mChilds.clear();
     DR_SAVE_DELETE(mRenderer);
 }
@@ -17,7 +23,7 @@ Sektor::~Sektor()
 void Sektor::setSektorSeed()
 {
     u64 seed = mID;
-    if(mParent.getResourcePtrHolder())
+    if(mParent)
         seed += mParent->getID();
     DRRandom::seed(static_cast<long>(seed));
     printf("[Sektor::setSektorSeed] randomSeed: %d\n", seed);
@@ -65,15 +71,15 @@ DRReturn Sektor::render(float fTime, Camera* cam)
 
 DRReturn Sektor::renderAll(float fTime, Camera* cam, bool rootRendered/* = false*/)
 {
-    if(!rootRendered && mParent.getResourcePtrHolder()) return mParent->renderAll(fTime, cam, false);
-    else if(!mParent.getResourcePtrHolder() || rootRendered) 
+    if(!rootRendered && mParent) return mParent->renderAll(fTime, cam, false);
+    else if(!mParent || rootRendered) 
     {
         DRReturn ret = DR_OK;
-        if(!mParent.getResourcePtrHolder()) ret = render(fTime, cam);
+        if(!mParent) ret = render(fTime, cam);
         if(ret) LOG_ERROR("Fehler bei render this", DR_ERROR);
-        for(std::map<u64, SektorPtr>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+        for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
         {
-            SektorPtr temp = it->second;     
+            Sektor* temp = it->second;     
             ret = temp->render(fTime, cam);
             if(ret == DR_NOT_ERROR) 
             {
@@ -92,15 +98,15 @@ DRReturn Sektor::renderAll(float fTime, Camera* cam, bool rootRendered/* = false
 
 DRReturn Sektor::moveAll(float fTime, Camera* cam, bool rootMoved/* = false*/)
 {
-    if(!rootMoved && mParent.getResourcePtrHolder()) return mParent->moveAll(fTime, cam, false);
-    else if(!mParent.getResourcePtrHolder() || rootMoved) 
+    if(!rootMoved && mParent) return mParent->moveAll(fTime, cam, false);
+    else if(!mParent || rootMoved) 
     {
         DRReturn ret = DR_OK;
         
-		if(!mParent.getResourcePtrHolder()) ret = move(fTime, cam);
-        for(std::map<u64, SektorPtr>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+		if(!mParent) ret = move(fTime, cam);
+        for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
         {
-            SektorPtr temp = it->second;     
+            Sektor* temp = it->second;     
             ret = temp->move(fTime, cam);
             if(ret) LOG_ERROR("Fehler bei move", DR_ERROR);
             
@@ -117,21 +123,21 @@ DRReturn Sektor::moveAll(float fTime, Camera* cam, bool rootMoved/* = false*/)
 void Sektor::updateCameraSektor(Camera* cam)
 {
     if(!cam) return;
-    Vector3Unit pos = cam->getSektorPositionAtSektor(mThis);
+    Vector3Unit pos = cam->getSektorPositionAtSektor(this);
     //update camera position
     if(isObjectInSektor(pos))
     {
-        if(cam->getCurrentSektor() != mThis && cam->getSektorPathSize() < mSektorPath.size())
+        if(cam->getCurrentSektor() != this && cam->getSektorPathSize() < mSektorPath.size())
         {
             cam->setSektorPosition(pos);
-            cam->setCurrentSektor(mThis);            
+            cam->setCurrentSektor(this);            
             cam->updateSektorPath();            
             pos.convertTo(KM).print("new camera pos after switch lower");
         }
     }
     else
     {
-        if(cam->getCurrentSektor() == mThis && mParent.getResourcePtrHolder())
+        if(cam->getCurrentSektor() == this && mParent)
         {
             cam->setSektorPosition(cam->getSektorPositionAtSektor(mParent));
             cam->setCurrentSektor(mParent);
@@ -141,26 +147,26 @@ void Sektor::updateCameraSektor(Camera* cam)
     }
 }
 
-SektorPtr Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 0*/)
+Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 0*/)
 {
-    if(thisIndex < 0) return SektorPtr();
-    if(path.size() == 0) return SektorPtr();
-    if(thisIndex && path[thisIndex] != mID) return SektorPtr();
-    if(!thisIndex && *path.begin() != mID) return SektorPtr();
-    if(path[path.size()-1] == mID) return mThis;
+    if(thisIndex < 0) return NULL;
+    if(path.size() == 0) return NULL;
+    if(thisIndex && path[thisIndex] != mID) return NULL;
+    if(!thisIndex && *path.begin() != mID) return NULL;
+    if(path[path.size()-1] == mID) return this;
     
-    SektorPtr child = getChild(path[++thisIndex]);
-    if(!child.getResourcePtrHolder()->mResource)
+    Sektor* child = getChild(path[++thisIndex]);
+    if(!child)
     {
         printf("child: %uld\n", (u64)path[thisIndex]);
-        LOG_ERROR("child didn't exist", SektorPtr());
+        LOG_ERROR("child didn't exist", NULL);
     }
     //Sektor* child = mChilds.find(path[thisIndex])->second;// mChilds[path[thisIndex]];
     //if(!child) LOG_ERROR("child didn't exist", NULL);
     //return child->getSektorByPath(path, thisIndex+1);
 	return child->getSektorByPath(path, thisIndex);
         
-    return SektorPtr();
+    return NULL;
 }
 
 DRString Sektor::getSektorPathName() const
@@ -205,7 +211,7 @@ bool Sektor::isObjectInSektor(Vector3Unit positionInSektor)
 
 void Sektor::getSektorPath(std::vector<SektorID>& storage) const
 {
-    if(!mParent.getResourcePtrHolder())
+    if(!mParent)
         storage.clear();
     else
         mParent->getSektorPath(storage);
@@ -215,21 +221,23 @@ void Sektor::getSektorPath(std::vector<SektorID>& storage) const
 
 void Sektor::removeInactiveChilds(double idleThreshold/* = 1.0*/)
 {
-    for(std::map<u64, SektorPtr>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+    for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
     {
-        SektorPtr temp = it->second;
+        Sektor* temp = it->second;
         if(temp->mIdleSeconds < idleThreshold) continue;
+        temp->setParent(NULL);
+        DR_SAVE_DELETE(temp);
         mChilds.erase(it);
 		break;
 	}
 }
 
-DRReturn Sektor::callForChilds(DRReturn (*callbackFunction)(SektorPtr sektor, void* data), void* data)
+DRReturn Sektor::callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data)
 {
     DRReturn ret = DR_OK;
-    for(std::map<u64, SektorPtr>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+    for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
     {
-        SektorPtr temp = it->second;
+        Sektor* temp = it->second;
         ret = callbackFunction(temp, data);  
         if(ret) LOG_ERROR("Fehler bei callbackFunction", DR_ERROR);
 	}

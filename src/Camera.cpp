@@ -8,11 +8,11 @@
 #include "Camera.h"
 
 Camera::Camera()
-: mSektorPosition(Unit(0, AE))
+: mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL)
 {
 }
 
-Camera::Camera(const DRVector3& position, SektorPtr sektor) 
+Camera::Camera(const DRVector3& position, Sektor* sektor) 
 : DRObjekt(position), mSektorPosition(Unit(0, NONE)), mCurrentSektor(sektor)
 {
 }
@@ -75,7 +75,7 @@ void Camera::update()
 
 void Camera::updateSektorPath()
 {
-    if(mCurrentSektor.getResourcePtrHolder())
+    if(mCurrentSektor)
         mCurrentSektor->getSektorPath(mSektorPath);
     else
         return;
@@ -84,14 +84,14 @@ void Camera::updateSektorPath()
     std::cout << std::endl;
 }
 
-Vector3Unit Camera::getSektorPositionAtSektor(const SektorPtr targetSektor)
+Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
 {
-    if(!targetSektor.getResourcePtrHolder()) return Vector3Unit(0.0f, M);
-    if(!mCurrentSektor.getResourcePtrHolder()) return Vector3Unit(0.0f, M);
+    if(!targetSektor) return Vector3Unit(0.0f, M);
+    if(!mCurrentSektor) return Vector3Unit(0.0f, M);
     if(targetSektor == mCurrentSektor) return mSektorPosition;
     
     Vector3Unit newPos = mSektorPosition;
-    SektorPtr cur = mCurrentSektor;
+    Sektor* cur = mCurrentSektor;
     
     std::vector<SektorID> sektorPath;
     targetSektor->getSektorPath(sektorPath);
@@ -115,7 +115,7 @@ Vector3Unit Camera::getSektorPositionAtSektor(const SektorPtr targetSektor)
             index++;
             SektorID i = sektorPath[index];
             cur = cur->getChild(i);
-            if(!cur.getResourcePtrHolder()) LOG_ERROR("sektor didn't exist", Vector3Unit(0.0, M))
+            if(!cur) LOG_ERROR("sektor didn't exist", Vector3Unit(0.0, M))
             newPos -= cur->getPosition();
         }
     }

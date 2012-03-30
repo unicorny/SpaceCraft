@@ -1,7 +1,7 @@
 #include "SolarSystemSektor.h"
 #include "noise/noise.h"
 
-SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent)
+SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
 : Sektor(position, radius, id, parent)
 {
     mType = SOLAR_SYSTEM;
@@ -25,8 +25,8 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     DRLog.writeToLog("[SolarSystemSektor::SolarSystemSektor] Planeten Radius: %s", planetRadius.print().data());
     
     //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
-    PlanetSektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, mThis);
-    mChilds.insert(SEKTOR_ENTRY(seed, temp->getThis()));
+    Sektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, this);
+    mChilds.insert(SEKTOR_ENTRY(seed, temp));
 }
 
 SolarSystemSektor::~SolarSystemSektor()
@@ -36,10 +36,10 @@ SolarSystemSektor::~SolarSystemSektor()
 
 DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
 {
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(mThis);
+    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     if(fTime == 0.0f)
     {
-        SektorPtr temp = mChilds.begin()->second;
+        Sektor* temp = mChilds.begin()->second;
         DRLog.writeToLog("new Game, set camera");
         cam->lookAt(temp->getPosition().getVector3());
     }

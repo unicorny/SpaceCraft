@@ -7,8 +7,8 @@
 class SubPatchPlanetSektor : public SubPlanetSektor
 {
 public:
-    SubPatchPlanetSektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent, SektorPtr planet,
-                    float patchScaling = 1.0f, int subLevel = 2);
+    SubPatchPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
+                    float patchScaling = 1.0f, int subLevel = 7);
     virtual ~SubPatchPlanetSektor();
     
     /*! \brief move sektor

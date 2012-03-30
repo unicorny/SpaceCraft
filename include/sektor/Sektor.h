@@ -13,10 +13,6 @@ struct SektorID
     bool operator() (const SektorID& x, const SektorID& y) const {
         return x.id<y.id;
     }
-    bool operator < (const SektorID& b) const
-    {
-        return id<b.id;
-    }
     operator u64() {return id;}
     // multipliziert x, y und z ccordinate with scalar
     __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar);}
@@ -72,13 +68,11 @@ enum SektorType
  */
 
 //! TODO: Matrix-Stack ersetzen durch manuelle implementation, OpenGL Matrix Stack kann mindestens 32 matritzen halten
-class Sektor;
-typedef DRResourcePtr<Sektor> SektorPtr;
 
-class Sektor : public DRIResource
+class Sektor
 {
 public:
-    Sektor(Vector3Unit position, Unit radius, SektorID id, SektorPtr parent);
+    Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent);
     virtual ~Sektor();
     
     /*! \brief render sektor and childs
@@ -119,10 +113,9 @@ public:
     __inline__ RenderSektor* getRenderer() const {return mRenderer;}
     __inline__ Vector3Unit getPosition() const {return mSektorPosition;}
     __inline__ Unit getRadius() const {return mRadius;}
-    __inline__ void setParent(SektorPtr parent) {mParent = parent;}
-    __inline__ SektorPtr getParent() const {return mParent;}
-    __inline__ SektorPtr getThis() {return mThis;}
-    virtual SektorPtr getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
+    __inline__ void setParent(Sektor* parent) {mParent = parent;}
+    __inline__ Sektor* getParent() const {return mParent;}
+    virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
     
     __inline__ SektorType getType() const {return mType;} 
     __inline__ SektorID getID() const {return mID;}
@@ -130,7 +123,7 @@ public:
     // is the position inside the current sektor
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
-    SektorPtr getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);
+    Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);
     
     //! \brief fill a vector with all sektorID
     //!
@@ -143,15 +136,12 @@ public:
 
     __inline__ const DRMatrix& getMatrix() {return mMatrix;}
     
-    virtual const char* getResourceType() const {return "Sektor";}
-    virtual bool less_than(DRIResource& b) const {return mID < dynamic_cast<Sektor&>(b).mID;}
-    
 protected:    
     
     virtual void removeInactiveChilds(double idleThreshold = 1.0);
     void updateCameraSektor(Camera* cam);
     
-    DRReturn callForChilds(DRReturn (*callbackFunction)(SektorPtr sektor, void* data), void* data);
+    DRReturn callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data);
     
     void setSektorSeed();
     
@@ -165,8 +155,7 @@ protected:
     //! die größe des Sektors, oder der Sektor-Einschließenden Kugel
     Unit                mRadius;
     //! Pointer at the parent-sektor
-    SektorPtr           mParent;
-    SektorPtr           mThis;
+    Sektor*             mParent;
     
     //! renderer for this sektor
     RenderSektor*       mRenderer;
@@ -180,15 +169,13 @@ protected:
     //! seconds since last rendered, but visible
     float              mNotRenderSeconds;              
     
-    std::map<u64, SektorPtr> mChilds;
-    typedef std::pair<u64, SektorPtr> SEKTOR_ENTRY;
+    std::map<u64, Sektor*> mChilds;
+    typedef std::pair<u64, Sektor*> SEKTOR_ENTRY;
     
     std::vector<SektorID> mSektorPath;
     
 private:
     
 };
-
-
 
 #endif //__SC_SEKTOR_

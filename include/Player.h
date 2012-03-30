@@ -26,7 +26,7 @@ public:
     __inline__ void setCameraFOV(float newFOV) {mCameraFOV = newFOV;}
     __inline__ float getCameraFOV() {return mCameraFOV;}
     __inline__ Camera* getCamera() {return &mCamera;}
-    __inline__ SektorPtr getSektor() {return mCurrentSektor;}
+    __inline__ Sektor* getSektor() {return mCurrentSektor;}
     
 private:
     
@@ -48,7 +48,7 @@ private:
     int mSeed;
     
     //runtime (not to save)
-    SektorPtr mCurrentSektor;
+    Sektor* mCurrentSektor;
 };
 
 #endif	/* PLAYER_H */
