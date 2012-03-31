@@ -153,7 +153,7 @@ private:
 };
 
 // Unit * Vector3 = Vector3Unit
-__inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v*(float)u, u.getType());}
+__inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v, u.getType())*u;}
 
 #endif	/* __SPACE_CRAFT_VECTOR3_UNIT_H */
 

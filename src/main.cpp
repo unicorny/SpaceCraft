@@ -281,8 +281,8 @@ DRReturn load()
 
 void ende()
 {
-    g_tex.release();
     g_Player.exit();
+    g_tex.release();    
     DR_SAVE_DELETE(g_Font);
     g_terrain.release();
     ShaderManager::getSingleton().exit();

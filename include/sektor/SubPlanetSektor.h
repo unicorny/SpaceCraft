@@ -12,7 +12,7 @@
 class SubPlanetSektor : public Sektor
 {
 public:
-    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
+    SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling = 1.0f, int subLevel = 6);
     virtual ~SubPlanetSektor();
     
@@ -38,6 +38,8 @@ public:
     virtual Sektor* getChild(SektorID childID);
     
     const DRMatrix& getRotation() {return mRotation;}
+    __inline__ DRVector3 getVectorToPlanet() {return mVectorToPlanetCenter;}
+    __inline__ DRVector3 getTextureTranslate() {return mTextureTranslate;}
     
 protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
@@ -45,7 +47,9 @@ protected:
     PlanetSektor*       mPlanet;
     float               mPatchScaling;
     DRMatrix            mRotation;
+    //! position relative to planet center
     DRVector3           mVectorToPlanetCenter;
+    DRVector3           mTextureTranslate;
     
     // temporäre variablen      
     //double              mHorizontCulling;

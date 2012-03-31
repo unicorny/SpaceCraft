@@ -128,14 +128,16 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     distance = distance.convertTo(KM);
     //printf("\rEntfernung zur Oberflaeche: %s", distance.print().data());
    
-    //printf("\rtheta: %f (%f Grad), distance: %f", theta, theta*RADTOGRAD,  (float)mRadius/mLastRelativeCameraPosition.length());
+    //printf("\rtheta: %f (%f Grad), distance: %f", mTheta, mTheta*RADTOGRAD,  (float)mRadius/mLastRelativeCameraPosition.length());
 //    mLastRelativeCameraPosition.print("cameraPos");
     
-    //printf("\rdistance: %f, theta: %f (%f Grad)", static_cast<double>(distance), mTheta, mTheta*RADTOGRAD);
+    printf("\rdistance: %.3f KM, theta: %f (%f Grad)", static_cast<double>(distance), mTheta, mTheta*RADTOGRAD);
+    if(EnIsButtonPressed(SDLK_k))
+        cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
-        for(u32 i = 0; i < 6; i++)
+        for(u32 i = 1; i < 2; i++)
         {
             //horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
@@ -261,18 +263,14 @@ Sektor* PlanetSektor::getChild(SektorID childID)
 
         // Position des Quadratmittelpunktes
         //Vector3Unit position = Vector3Unit(childID.x, childID.y, childID.z, KM)*mRadius*faktor;
-        DRVector3 childPos(childID.x, childID.y, childID.z);
-        childPos /= 1000.0f;
-        childPos = childPos.normalize();
-        printf("[PlanetSektor::getChild] pos: %f, %f, %f\n", childPos.x, childPos.y, childPos.z);
-        Vector3Unit position = Vector3Unit(childPos.x, childPos.y, childPos.z, KM)*mRadius;//*faktor;
+
         //position.print("planet pos");
 
         printf("[PlanetSektor::getChild] radius: %s\n", mRadius.print().data());
         //SubPlanetSektor* temp = new SubPlanetSektor(position, radius, childID, this, this, mRadius/mLastRelativeCameraPosition.length());
         //0.617940f theta bei 6 patches
         //0.85-0.83 theta bei 6*4 patches
-        SubPlanetSektor* temp = new SubPlanetSektor(position, mRadius, childID, this, this, 1.0f, 1);
+        SubPlanetSektor* temp = new SubPlanetSektor(mRadius, childID, this, this, 1.0f, 1);
         
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 

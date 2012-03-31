@@ -4,7 +4,7 @@
 SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius, 
                                            SektorID id, Sektor* parent, PlanetSektor* planet,
                                            float patchScaling/* = 1.0f*/, int subLevel/* = 7*/)
-: SubPlanetSektor(position, radius, id, parent, planet, patchScaling, subLevel), mVectorToPlanetCenter(DRVector3(0.0f, 0.0f, -1.0f))
+: SubPlanetSektor(radius, id, parent, planet, patchScaling, subLevel), mVectorToPlanetCenter(DRVector3(0.0f, 0.0f, -1.0f))
 {
     mType = SUB_PATCH_PLANET;  
     DRVector3 childPos(mID.x, mID.y, mID.z);
