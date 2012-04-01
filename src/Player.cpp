@@ -10,12 +10,12 @@
 #include "time.h"
 
 Player::Player()
-: mServerID(0), mSektorID(0), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
+: mServerID(0), mSektorID(0), mCamera(NULL), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
 {
 }
 
 Player::Player(const Player& orig) 
-: mServerID(orig.mServerID), mSektorID(orig.mSektorID), mPosition(orig.mPosition),
+: mServerID(orig.mServerID), mSektorID(orig.mSektorID), mCamera(orig.mCamera), mPosition(orig.mPosition),
   mCameraFOV(orig.mCameraFOV), mSeed(orig.mSeed), mCurrentSektor(orig.mCurrentSektor)
 {
 }
@@ -26,6 +26,8 @@ Player::~Player() {
 DRReturn Player::init()
 {
     bool newPlayer = false;
+	if(!mCamera)
+		mCamera = new Camera;
     mSeed = static_cast<int>(time(NULL));//SDL_GetTicks();
     if(loadFromFile())
     {
@@ -52,15 +54,15 @@ DRReturn Player::init()
     
     if(newPlayer)
     {
-        mCurrentSektor->moveAll(0.0f, &mCamera);
+        mCurrentSektor->moveAll(0.0f, mCamera);
         mCameraFOV = 45.0f;
     }
     Sektor* camSektor = root->getSektorByPath(mCameraSektorPath);
     if(camSektor)
-        mCamera.setCurrentSektor(camSektor);
+        mCamera->setCurrentSektor(camSektor);
     else
-        mCamera.setCurrentSektor(mCurrentSektor);
-    mCamera.updateSektorPath();
+        mCamera->setCurrentSektor(mCurrentSektor);
+    mCamera->updateSektorPath();
     //DRLog.writeToLog("camera sektor path after load: %s", mCamera.getCurrentSektor()->getSektorPathName().data());
     //mCamera.getSektorPosition().print("camera position");
    
@@ -71,6 +73,7 @@ void Player::exit()
 {
     saveIntoFile();
     //DR_SAVE_DELETE(mCurrentSektor);
+    DR_SAVE_DELETE(mCamera);
 }
 
 DRReturn Player::loadFromFile(const char* file)
@@ -92,13 +95,13 @@ DRReturn Player::loadFromFile(const char* file)
     for(int i = 0; i < 4; i++)
         f.read(temp[i].c, sizeof(float), 3);
     
-    mCamera.setPosition(temp[0]);
-    mCamera.setAxis(temp[1], temp[2], temp[3]);
+    mCamera->setPosition(temp[0]);
+    mCamera->setAxis(temp[1], temp[2], temp[3]);
     
     f.read(&mPosition, sizeof(Vector3Unit), 1);
     Vector3Unit t;
     f.read(&t, sizeof(Vector3Unit), 1);
-    mCamera.setSektorPosition(t);
+    mCamera->setSektorPosition(t);
     
     int size = 0;
     f.read(&size, sizeof(int), 1);
@@ -129,17 +132,17 @@ DRReturn Player::saveIntoFile(const char* file)
     f.write(&mServerID, sizeof(long long), 1);
     f.write(&mSektorID, sizeof(SektorID), 1);    
     f.write(&mCameraFOV, sizeof(float), 1);
-    f.write(mCamera.getPosition().c, sizeof(float), 3);
-    f.write(mCamera.getXAxis().c, sizeof(float), 3);
-    f.write(mCamera.getYAxis().c, sizeof(float), 3);
-    f.write(mCamera.getZAxis().c, sizeof(float), 3);
+    f.write(mCamera->getPosition().c, sizeof(float), 3);
+    f.write(mCamera->getXAxis().c, sizeof(float), 3);
+    f.write(mCamera->getYAxis().c, sizeof(float), 3);
+    f.write(mCamera->getZAxis().c, sizeof(float), 3);
     f.write(&mPosition, sizeof(Vector3Unit), 1);
-    Vector3Unit temp = mCamera.getSektorPosition();
+    Vector3Unit temp = mCamera->getSektorPosition();
     f.write(&temp, sizeof(Vector3Unit), 1);
     
     std::vector<SektorID> sektorPath;
-    mCamera.getCurrentSektor()->getSektorPath(sektorPath);
-    DRLog.writeToLog("camera sektor path by save: %s", mCamera.getCurrentSektor()->getSektorPathName().data());
+    mCamera->getCurrentSektor()->getSektorPath(sektorPath);
+    DRLog.writeToLog("camera sektor path by save: %s", mCamera->getCurrentSektor()->getSektorPathName().data());
     temp.print("camera position");
     int size = sektorPath.size();
     f.write(&size, sizeof(int), 1);

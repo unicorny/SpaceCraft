@@ -30,7 +30,8 @@ void Sektor::setSektorSeed()
 }
 DRReturn Sektor::move(float fTime, Camera* cam)
 {
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
+    else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     if(mParent)
     {
         if(!isObjectInSektor(mLastRelativeCameraPosition))    
@@ -123,28 +124,38 @@ DRReturn Sektor::moveAll(float fTime, Camera* cam, bool rootMoved/* = false*/)
 void Sektor::updateCameraSektor(Camera* cam)
 {
     if(!cam) return;
-    Vector3Unit pos = cam->getSektorPositionAtSektor(this);
+    Vector3Unit pos = mLastRelativeCameraPosition; //cam->getSektorPositionAtSektor(this);
+    
     //update camera position
-    if(isObjectInSektor(pos))
+    if(isObjectInSektor(pos)) // down
     {
         if(cam->getCurrentSektor() != this && cam->getSektorPathSize() < mSektorPath.size())
         {
             cam->setSektorPosition(pos);
             cam->setCurrentSektor(this);            
             cam->updateSektorPath();            
-            pos.convertTo(KM).print("new camera pos after switch lower");
+            pos.convertTo(KM).print("[Sektor::updateCameraSektor] camPos after switch lower");
+            printTypeInfos("[Sektor::updateCameraSektor]");
+            mParent->printTypeInfos("[Sektor::updateCameraSektor] parent ");
         }
     }
-    else
+    else // up
     {
         if(cam->getCurrentSektor() == this && mParent)
         {
             cam->setSektorPosition(cam->getSektorPositionAtSektor(mParent));
             cam->setCurrentSektor(mParent);
             cam->updateSektorPath();     
-            pos.convertTo(KM).print("new camera pos after switch higher");
+            pos.convertTo(KM).print("[Sektor::updateCameraSektor] camPos after switch higher");
+            mParent->printTypeInfos("[Sektor::updateCameraSektor]");
+            mParent->getParent()->printTypeInfos("[Sektor::updateCameraSektor] parent ");
         }
     }
+}
+
+void Sektor::printTypeInfos(const char* name)
+{
+    printf("%s %s\n", name, getSektorTypeName(mType));
 }
 
 Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 0*/)
@@ -195,7 +206,7 @@ const char* Sektor::getSektorTypeName(SektorType type)
         case STAR_CLUSTER:  return "star_cluster";
         case SOLAR_SYSTEM:  return "solar_system";
         case STELLAR_BODY:  return "stellar_body";
-        case PLANET:        return "plante";
+        case PLANET:        return "planet";
         case SUB_PLANET:    return "sub_planet";
         case SEKTOR_NONE:   return "none";
         default:            return "- default -";
@@ -225,6 +236,7 @@ void Sektor::removeInactiveChilds(double idleThreshold/* = 1.0*/)
     {
         Sektor* temp = it->second;
         if(temp->mIdleSeconds < idleThreshold) continue;
+        if(temp->hasObserver()) continue;
         temp->setParent(NULL);
         DR_SAVE_DELETE(temp);
         mChilds.erase(it);
@@ -242,4 +254,29 @@ DRReturn Sektor::callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void
         if(ret) LOG_ERROR("Fehler bei callbackFunction", DR_ERROR);
 	}
     return ret;
+}
+
+void Sektor::addObserver(DHASH hash, Observer* data)
+{
+    mObserver.insert(SEKTOR_OBSERVER(hash, data));
+}
+
+void Sektor::removeObserver(DHASH hash)
+{
+    if(mObserver.find(hash) != mObserver.end())
+        mObserver.erase(hash);
+}
+
+bool Sektor::hasObserver()
+{
+    if(mObserver.empty())
+    {
+        for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+        {
+            if(it->second->hasObserver()) return true;
+        }
+        return false;
+    }
+    return true;
+        
 }

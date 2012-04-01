@@ -25,7 +25,7 @@ public:
     // setter und getter
     __inline__ void setCameraFOV(float newFOV) {mCameraFOV = newFOV;}
     __inline__ float getCameraFOV() {return mCameraFOV;}
-    __inline__ Camera* getCamera() {return &mCamera;}
+    __inline__ Camera* getCamera() {return mCamera;}
     __inline__ Sektor* getSektor() {return mCurrentSektor;}
     
 private:
@@ -36,7 +36,7 @@ private:
     // position
     u64 mServerID;
     SektorID mSektorID;
-    Camera mCamera;
+    Camera* mCamera;
     
     std::vector<SektorID> mCameraSektorPath;
     // current position of player in current sektor in sektor coordinates (for exapmle, in AE)

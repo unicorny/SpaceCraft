@@ -52,7 +52,7 @@ public:
     Unit operator [] (int index) const {switch(index){case 0: return x; case 1: return y; case 2: return z; default: return Unit();}}
 
     //operator DRVector3() {return DRVector3((float)x, (float)y, (float)z);}
-    DRVector3 getVector3() {return DRVector3((float)x, (float)y, (float)z);}
+    DRVector3 getVector3() const {return DRVector3((float)x, (float)y, (float)z);}
 
     //!  addiert auf den aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors hinzu
     //! \brief additions operator

@@ -2,6 +2,7 @@
 #define __SC_PLANET_SEKTOR__
 
 #include "RenderPlanet.h"
+#include "SolarSystemSektor.h"
 
 enum PlanetNoiseParameterNames
 {
@@ -82,7 +83,7 @@ public:
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     __inline__ double getTheta() {return mTheta;}
     __inline__ const PlanetNoiseParameter* getPlanetNoiseParameters() const {return &mPlanetNoiseParameters;}
-    
+      
 protected:
     ShaderProgram*              mSphericalShaderForSubPlanet;
     double                      mTheta;

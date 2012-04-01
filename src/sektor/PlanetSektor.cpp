@@ -122,13 +122,15 @@ PlanetSektor::~PlanetSektor()
 DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
     RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
+    else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
     distance = distance.convertTo(KM);
-    //printf("\rEntfernung zur Oberflaeche: %s", distance.print().data());
+    
    
-    //printf("\rtheta: %f (%f Grad), distance: %f", mTheta, mTheta*RADTOGRAD,  (float)mRadius/mLastRelativeCameraPosition.length());
+    
 //    mLastRelativeCameraPosition.print("cameraPos");
     
     printf("\rdistance: %.3f KM, theta: %f (%f Grad)", static_cast<double>(distance), mTheta, mTheta*RADTOGRAD);
@@ -137,7 +139,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     
     if(isObjectInSektor(mLastRelativeCameraPosition))
     {                
-        for(u32 i = 1; i < 2; i++)
+        for(u32 i = 0; i < 6; i++)
         {
             //horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();

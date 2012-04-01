@@ -12,11 +12,13 @@ class Sektor;
 struct SektorID;
 
 //#include "main.h"
+#include "Observer.h"
 #include "Sektor.h"
 #include "Vector3Unit.h"
 
 
-class Camera : public DRObjekt
+
+class Camera : public Observer
 {
 public:
     Camera();
@@ -48,7 +50,7 @@ public:
     
     void translateRel(const DRVector3& translate);
     
-    __inline__ void setCurrentSektor(Sektor* current) {mCurrentSektor = current;}
+    void setCurrentSektor(Sektor* current);
     __inline__ const Sektor* getCurrentSektor() const {return mCurrentSektor;}
     __inline__ uint getSektorPathSize() const {return mSektorPath.size();}
     

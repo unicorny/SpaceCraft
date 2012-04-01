@@ -10,16 +10,18 @@
 Camera::Camera()
 : mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL)
 {
+    mType = OBSERVER_CAMERA;
 }
 
 Camera::Camera(const DRVector3& position, Sektor* sektor) 
-: DRObjekt(position), mSektorPosition(Unit(0, NONE)), mCurrentSektor(sektor)
+: Observer(position), mSektorPosition(Unit(0, NONE)), mCurrentSektor(sektor)
 {
+    mType = OBSERVER_CAMERA;
 }
 
 Camera::~Camera() 
 {
-    mCurrentSektor = NULL;    
+    setCurrentSektor(NULL);    
 }
 
 void Camera::setKameraMatrix()
@@ -84,6 +86,14 @@ void Camera::updateSektorPath()
     std::cout << std::endl;
 }
 
+void Camera::setCurrentSektor(Sektor* current)
+{
+    if(mCurrentSektor) mCurrentSektor->removeObserver(DRMakeStringHash("Camera"));
+    if(current)
+		current->addObserver(DRMakeStringHash("Camera"), this);
+    mCurrentSektor = current;
+}
+
 Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
 {
     if(!targetSektor) return Vector3Unit(0.0f, M);
@@ -97,18 +107,26 @@ Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
     targetSektor->getSektorPath(sektorPath);
     
     int index = 0;
-    // 1
+    // TODO: go from root throw list, because childs have same name, with different parents!
+    // 1 up
     {
+        /*int stop = 0;
+        while(sektorPath[stop] == mSektorPath[stop] &&
+              stop < mSektorPath.size()-1 &&
+              stop < sektorPath.size()-1) 
+            stop++;*/
         index = mSektorPath.size()-1;
         while(index >= static_cast<int>(sektorPath.size()) || sektorPath[index] != mSektorPath[index])
+        //while(index >= stop && index >= static_cast<int>(sektorPath.size()))
         {
             newPos += cur->getPosition();
             cur = cur->getParent(); 
             index--;
-            if(index < 0) LOG_ERROR("haven't the same root", Vector3Unit(0.0, M));
+            if(index < 0)
+				LOG_ERROR("haven't the same root", Vector3Unit(0.0, M));
         }
     }
-    // 2
+    // 2 down
     {
         while(index < static_cast<int>(sektorPath.size())-1)
         {

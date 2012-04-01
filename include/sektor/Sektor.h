@@ -9,11 +9,16 @@ struct SektorID
 {
     SektorID(u64 id) : id(id) {}
     SektorID(s16 _x, s16 _y, s16 _z): x(_x), y(_y), z(_z), count(0) {}
+    SektorID(DRVector3 id): x(static_cast<short>(id.x*1000.0f)),
+                            y(static_cast<short>(id.y*1000.0f)), 
+                            z(static_cast<short>(id.z*1000.0f)) {}
     
     bool operator() (const SektorID& x, const SektorID& y) const {
         return x.id<y.id;
     }
     operator u64() {return id;}
+    operator DRVector3() const {return DRVector3(x, y, z)/1000.0f;}
+    
     // multipliziert x, y und z ccordinate with scalar
     __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar);}
     __inline__ SektorID const operator /(short scalar) {return SektorID(x/scalar, y/scalar, z/scalar);}
@@ -107,21 +112,24 @@ public:
      */
     DRReturn moveAll(float fTime, Camera* cam, bool rootMoved = false);
     
+    // is the position inside the current sektor/ is the current sektor visible from that position
+    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    
     static const char* getSektorTypeName(SektorType type);
+    virtual void printTypeInfos(const char* name);
+    __inline__ SektorType getType() const {return mType;} 
+    __inline__ SektorID getID() const {return mID;}
     
     //! inline getter and setter
     __inline__ RenderSektor* getRenderer() const {return mRenderer;}
+    
     __inline__ Vector3Unit getPosition() const {return mSektorPosition;}
+    __inline__ const DRMatrix& getMatrix() {return mMatrix;}
     __inline__ Unit getRadius() const {return mRadius;}
     __inline__ void setParent(Sektor* parent) {mParent = parent;}
     __inline__ Sektor* getParent() const {return mParent;}
     virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
-    
-    __inline__ SektorType getType() const {return mType;} 
-    __inline__ SektorID getID() const {return mID;}
-    
-    // is the position inside the current sektor
-    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+        
     
     Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);
     
@@ -133,11 +141,16 @@ public:
     DRString getSektorPathName() const;
     
     __inline__ const Vector3Unit& getCameraPosition() {return mLastRelativeCameraPosition;}
-
-    __inline__ const DRMatrix& getMatrix() {return mMatrix;}
+    //! Observer
+    void addObserver(DHASH hash, Observer* data);
+    void removeObserver(DHASH hash);
+    // weder sektor noch einer der childs hat noch einen Observer
+    //! \return true if no observer exist and sektor can be delete
+    bool hasObserver();
     
 protected:    
     
+    //! remove childs where mIdleSeconds is greater than idleThreshold and which haven't an observer
     virtual void removeInactiveChilds(double idleThreshold = 1.0);
     void updateCameraSektor(Camera* cam);
     
@@ -171,6 +184,9 @@ protected:
     
     std::map<u64, Sektor*> mChilds;
     typedef std::pair<u64, Sektor*> SEKTOR_ENTRY;
+    
+    std::map<DHASH, Observer*> mObserver;
+    typedef std::pair<DHASH, Observer*> SEKTOR_OBSERVER;
     
     std::vector<SektorID> mSektorPath;
     

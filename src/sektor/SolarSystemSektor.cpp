@@ -36,7 +36,8 @@ SolarSystemSektor::~SolarSystemSektor()
 
 DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
 {
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
     if(fTime == 0.0f)
     {
         Sektor* temp = mChilds.begin()->second;

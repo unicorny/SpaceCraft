@@ -79,7 +79,9 @@ DRReturn GlobalRenderer::renderTasks()
     // proceed mPreviewRenderTasks
     if(renderTaskFromQueue(&mPreviewRenderTasks)) 
         LOG_ERROR("Fehler bei mPreviewRenderTasks", DR_ERROR);
+    
     // procceed mRenderTasks
+    if(mPreviewRenderTasks.empty())
     if(renderTaskFromQueue(&mRenderTasks))
         LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
     
@@ -125,6 +127,8 @@ void GlobalRenderer::exit()
 			static_cast<double>(mGrafikMemGeometrie)/(1024.0*1024.0),
 			static_cast<double>(mGrafikMemTexture)/(1024.0*1024.0));
 	}
+	mRenderTasks.clear();
+	mPreviewRenderTasks.clear();
     m_bInitialized = false;    
 }
 

@@ -37,16 +37,8 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 	int stepSize = gb.getTextureRenderStepSize();
 	//float stepSize = static_cast<float>(stepSizei);
 
-	//clear texture
-	size_t bufferSize = stepSize*stepSize*4;
-	GLubyte* buffer = new GLubyte[bufferSize];
-	memset(buffer, 0, bufferSize);
-
 	mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
-    //    TexturePtr(new Texture(stepSizei, stepSizei, GL_UNSIGNED_BYTE, 4, buffer, bufferSize));
     
-	DR_SAVE_DELETE_ARRAY(buffer);
-	buffer = NULL;
 	mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
     mTexturePath = texturePath;
 

@@ -28,7 +28,7 @@ Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTexturePtr g_tex;
 DRTexturePtr g_terrain;
-int blockCount = 100;
+int blockCount = 0;
 #define MAX_CONTROL_MODES 9
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
@@ -64,6 +64,13 @@ void test()
     DRLog.writeMatrixToLog(m1);
     DRLog.writeMatrixToLog(m2);
     DRLog.writeMatrixToLog(m3);
+    
+    DRVector3 rot1(1.0f, 0.0f, 0.0f);
+    m2 = DRMatrix::rotationY(90.0f);
+    rot1 = rot1.transformCoords(m2);
+    DRLog.writeVector3ToLog(rot1, "1/0/0 90 Grad um y-Achse rotiert");
+    rot1 = rot1.transformCoords(m2.invert());
+    DRLog.writeVector3ToLog(rot1, "zurueckrotiert, 1/0/0 erwartet!");
     
     DRLog.writeToLog("RekursionTest: %d", rekursionTest(0));
     
@@ -199,16 +206,17 @@ DRReturn load()
     sizeOfClasses();
     
     //Steuerung
-  
-    gControlModes[0] = ControlMode(Unit(20, M), 120.0f);
-    gControlModes[1] = ControlMode(Unit(0.100, KM), 100.0f);
-    gControlModes[2] = ControlMode(Unit(10, KM), 80.0f);
-    gControlModes[3] = ControlMode(Unit(1000, KM), 30.0f);
-    gControlModes[4] = ControlMode(Unit(20000, KM), 10.0f);
-    gControlModes[5] = ControlMode(Unit(400000, KM), 4.0f);
-    gControlModes[6] = ControlMode(Unit(0.1, AE), 1.0f);
-    gControlModes[7] = ControlMode(Unit(10, AE), 1.0f);
-    gControlModes[8] = ControlMode(Unit(500, AE), 1.0f);
+    u16 i = 0;
+    gControlModes[i++] = ControlMode(Unit(20, M), 120.0f);
+    gControlModes[i++] = ControlMode(Unit(0.100, KM), 100.0f);
+    gControlModes[i++] = ControlMode(Unit(10, KM), 80.0f);
+    gControlModes[i++] = ControlMode(Unit(100, KM), 60.0f);
+    gControlModes[i++] = ControlMode(Unit(1000, KM), 30.0f);
+    gControlModes[i++] = ControlMode(Unit(20000, KM), 10.0f);
+    gControlModes[i++] = ControlMode(Unit(400000, KM), 4.0f);
+    gControlModes[i++] = ControlMode(Unit(0.1, AE), 1.0f);
+    gControlModes[i++] = ControlMode(Unit(10, AE), 1.0f);
+    //gControlModes[8] = ControlMode(Unit(500, AE), 1.0f);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
@@ -285,11 +293,11 @@ void ende()
     g_tex.release();    
     DR_SAVE_DELETE(g_Font);
     g_terrain.release();
+	GlobalRenderer::getSingleton().exit();
     ShaderManager::getSingleton().exit();
     DRGeometrieManager::getSingleton().exit();
     g_RenderBlockLoader.exit();
-    Server::freeAllServer();
-	GlobalRenderer::getSingleton().exit();
+    Server::freeAllServer();	
     EnExit();
 }
 
@@ -429,7 +437,7 @@ DRReturn render(float fTime)
         g_tex->bind();
       
     //glColor3f(0.2f, 0.5f, 0.1f);
-    glColor3f(1.0f, 1.0f, 1.0f);
+ /*   glColor3f(1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
         glTexCoord2f(1.0, 0.0f);
         glVertex3f( 50.0f, 0.0f, -50.0f);
@@ -457,7 +465,9 @@ DRReturn render(float fTime)
     
     glTranslatef(0.0f, 10.0f, 0.0f);
     translate.y += 10.0f;
+	//*/
     RenderBlock* rb =  g_RenderBlockLoader.getRenderBlock("dirt");
+	/*
     rb->render();
     
     glTranslatef(0.0f, -5.0f, 0.0f);

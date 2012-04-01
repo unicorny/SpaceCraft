@@ -9,6 +9,8 @@
 #include "PlanetSektor.h"
 #include "RenderSubPlanet.h"
 
+
+
 class SubPlanetSektor : public Sektor
 {
 public:
@@ -41,6 +43,8 @@ public:
     __inline__ DRVector3 getVectorToPlanet() {return mVectorToPlanetCenter;}
     __inline__ DRVector3 getTextureTranslate() {return mTextureTranslate;}
     
+    virtual void printTypeInfos(const char* name);
+    
 protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
@@ -50,6 +54,8 @@ protected:
     //! position relative to planet center
     DRVector3           mVectorToPlanetCenter;
     DRVector3           mTextureTranslate;
+    
+    static DRVector2    mSubLevelBorder[];
     
     // temporäre variablen      
     //double              mHorizontCulling;

@@ -61,6 +61,7 @@ private:
     DRTextureManager();
     __inline__ void addGrafikMemTexture(GLuint addValue) {mGrafikMemTexture += addValue;}
     __inline__ void removeGrafikMemTexture(GLuint subtractValue) {mGrafikMemTexture -= subtractValue;}
+    void calculateGrafikMemTexture();
     GLuint _getTexture(DRVector2i size, GLuint format);
 
     void      addAsynchronTextureLoadTask(DRTexturePtr texture);

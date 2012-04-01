@@ -33,11 +33,6 @@ class ENGINE2_API DRTexture : public DRIResource
 {
     friend class DRTextureManager;
 public:
-	// create an empty texture
-        //! \param dataSize size of data in bytes
-        DRTexture(DRVector2i size, GLuint format, GLubyte* data = NULL, GLint dataSize = 0); 
-        ~DRTexture();
-	
 	__inline__ bool isLoadingFinished() {return mLoadingState == 2;}
 	__inline__ bool isTextureEmpty() {return mLoadingState == 3;}
 	__inline__ bool isLoadingError() {return mLoadingState == -1;}
@@ -64,6 +59,11 @@ public:
 protected:
         DRTexture(const char* filename);
         DRTexture(GLuint textureID, GLubyte* data = NULL, GLint dataSize = 0, GLint dataType = GL_UNSIGNED_BYTE);
+        // create an empty texture
+        //! \param dataSize size of data in bytes
+        DRTexture(DRVector2i size, GLuint format, GLubyte* data = NULL, GLint dataSize = 0); 
+        
+        virtual ~DRTexture();
         
         // load texture
 	//! \brief load pixel data from File into system memory, can be called from another thread
