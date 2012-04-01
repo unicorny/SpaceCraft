@@ -215,8 +215,9 @@ DRReturn load()
     gControlModes[i++] = ControlMode(Unit(20000, KM), 10.0f);
     gControlModes[i++] = ControlMode(Unit(400000, KM), 4.0f);
     gControlModes[i++] = ControlMode(Unit(0.1, AE), 1.0f);
-    gControlModes[i++] = ControlMode(Unit(10, AE), 1.0f);
-    //gControlModes[8] = ControlMode(Unit(500, AE), 1.0f);
+    gControlModes[i++] = ControlMode(Unit(1, AE), 1.0f);
+    //gControlModes[i++] = ControlMode(Unit(10, AE), 1.0f);
+    gControlModes[i++] = ControlMode(Unit(500, AE), 1.0f);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))

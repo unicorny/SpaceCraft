@@ -39,7 +39,8 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 
 	mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
     
-	mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+	if(mPreviewTextur.getResourcePtrHolder())
+		mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
     mTexturePath = texturePath;
 
 	mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
@@ -62,7 +63,8 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 //        mPreviewTextureID = DRTextureManager::Instance().getGLTextureMemory(stepSizei, stepSizei,
   //                                                                   GL_UNSIGNED_BYTE, 4);    		
 		mTexture = tx.getTexture(DRVector2i(textureSize), 4);
-        mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+		if(mTexture.getResourcePtrHolder())
+			mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
             //TexturePtr(new Texture(textureSize, textureSize, GL_UNSIGNED_BYTE, 4));
 
         //mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    

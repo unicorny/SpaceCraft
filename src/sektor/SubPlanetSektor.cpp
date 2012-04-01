@@ -6,12 +6,14 @@ DRVector2 SubPlanetSektor::mSubLevelBorder[] =
 {DRVector2(70.0f, 125.0f), // 0
  DRVector2(50.0f, 110.0f), // 1
  DRVector2(30.0f, 100.0f), // 2
- DRVector2(15.0f, 95.0f), // 3
- DRVector2(9.0f,  90.0f), // 4
- DRVector2(4.0f,  80.0f)}; // 5
+ DRVector2(20.0f, 100.0f), // 3
+ DRVector2(15.0f,  95.0f), // 4
+ DRVector2(10.0f,  95.0f), // 5
+ DRVector2(8.0f,  89.0f), // 6
+ DRVector2(6.0f,   85.0f)}; // 7
 //*/
 
-#define MAX_SUB_LEVEL 6
+#define MAX_SUB_LEVEL 8
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
@@ -132,8 +134,16 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
                 DRVector3 planetVector = DRVector3(mTextureTranslate + childId[i]).transformCoords(mRotation).normalize();
                 Vector3Unit posVector = (mRadius * planetVector) - (mRadius * mVectorToPlanetCenter);
                 DRVector3 camVector = Vector3Unit(mLastRelativeCameraPosition - posVector).getVector3().normalize();
+                camVector = mPlanet->getCameraPosition().getVector3().normalize();
                 double angle = acos(camVector.dot(planetVector))*RADTOGRAD;
-                if(mSubLevel >= 3 || angle <= mSubLevelBorder[mSubLevel-1].y)
+                
+                //if(mSubLevel <= 3)
+				angle -= 45.0f;
+                //if(mSubLevel <= 5) angle -= 34.0f;
+                //else angle -= 25.0f;
+                
+                if(angle < mPlanet->getTheta())
+                //if(mSubLevel >= 3 || angle <= mSubLevelBorder[mSubLevel-1].y)
                     getChild(childId[i]);
 				//printf("\r angle: %f, theta: %f", angle, mPlanet->getTheta());
             }

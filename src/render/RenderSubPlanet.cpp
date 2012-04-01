@@ -5,7 +5,7 @@
 RenderSubPlanet::RenderSubPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
 : RenderPlanet(seed, translate, patchScaling, rotation, texturePath, planetNoiseParameter), mGeometrieGrid(NULL)
 {
-    mGeometrieGrid = DRGeometrieManager::Instance().getGrid(50, GEO_FULL);
+    mGeometrieGrid = DRGeometrieManager::Instance().getGrid(100, GEO_FULL);
     if(mShader) ShaderManager::Instance().releaseShader(mShader);
 	mShader = ShaderManager::Instance().getShader("sphere.vert", "sphere.frag");
 }
