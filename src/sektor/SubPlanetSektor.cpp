@@ -13,7 +13,7 @@ DRVector2 SubPlanetSektor::mSubLevelBorder[] =
  DRVector2(6.0f,   85.0f)}; // 7
 //*/
 
-#define MAX_SUB_LEVEL 8
+#define MAX_SUB_LEVEL 5
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)

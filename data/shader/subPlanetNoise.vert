@@ -12,7 +12,7 @@ uniform vec3  translate;
 // simple vertex shader
 void main()
 {
-	vec4 scaledVertex = vec4(gl_Vertex.xy*patchScaling+translate.xy, gl_Vertex.z, 1.0);
+	vec4 scaledVertex = vec4(gl_Vertex.xy*(patchScaling*1.002)+translate.xy, gl_Vertex.z, 1.0);
 	// make it spherical
 	vec4 dir = vec4(normalize(scaledVertex.xyz), 1.0);
 	

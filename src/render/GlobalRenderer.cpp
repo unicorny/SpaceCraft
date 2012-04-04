@@ -75,15 +75,30 @@ DRReturn GlobalRenderer::renderTaskFromQueue(std::list<RenderInStepsToTexturePtr
 DRReturn GlobalRenderer::renderTasks()
 {
     Uint32 start = SDL_GetTicks();
-    
-    // proceed mPreviewRenderTasks
-    if(renderTaskFromQueue(&mPreviewRenderTasks)) 
-        LOG_ERROR("Fehler bei mPreviewRenderTasks", DR_ERROR);
+    static bool bswitch = true;
     
     // procceed mRenderTasks
     if(mPreviewRenderTasks.empty())
-    if(renderTaskFromQueue(&mRenderTasks))
-        LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
+    {
+        if(renderTaskFromQueue(&mRenderTasks))
+            LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
+    }
+    else
+    {
+        if(bswitch)
+        {
+            // procceed mPreviewRenderTasks
+           if(renderTaskFromQueue(&mPreviewRenderTasks)) 
+                LOG_ERROR("Fehler bei mPreviewRenderTasks", DR_ERROR);
+        }
+        else
+        {
+            // procceed mRenderTasks
+            if(renderTaskFromQueue(&mRenderTasks))
+                LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
+        }
+        bswitch = !bswitch;             
+    }
     
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);   
     glMatrixMode(GL_TEXTURE);
