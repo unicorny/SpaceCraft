@@ -125,6 +125,7 @@ void Sektor::updateCameraSektor(Camera* cam)
 {
     if(!cam) return;
     Vector3Unit pos = mLastRelativeCameraPosition; //cam->getSektorPositionAtSektor(this);
+	if(pos.length() <= 0.0) pos = cam->getSektorPositionAtSektor(this);
     
     //update camera position
     if(isObjectInSektor(pos)) // down
@@ -148,7 +149,8 @@ void Sektor::updateCameraSektor(Camera* cam)
             cam->updateSektorPath();     
             pos.convertTo(KM).print("[Sektor::updateCameraSektor] camPos after switch higher");
             mParent->printTypeInfos("[Sektor::updateCameraSektor]");
-            mParent->getParent()->printTypeInfos("[Sektor::updateCameraSektor] parent ");
+			if(mParent->getParent())
+				mParent->getParent()->printTypeInfos("[Sektor::updateCameraSektor] parent ");
         }
     }
 }

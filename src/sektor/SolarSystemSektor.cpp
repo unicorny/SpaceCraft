@@ -8,7 +8,7 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     
     //neuen Planeten erstellen
     Vector3Unit planetPosition(DRRandom::rVector3(7000), KM);
-    planetPosition = planetPosition.normalize()*300000;
+    planetPosition = Unit(200000, KM)*planetPosition.normalize();
     //Vector3Unit planetPosition(DRRandom::rVector3(10), AE);
     //planetPosition = planetPosition.normalize()*12;
     //planetPosition = planetPosition.normalize();

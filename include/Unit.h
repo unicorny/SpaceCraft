@@ -86,6 +86,7 @@ private:
 };
 
 __inline__ Unit sqrt(Unit& a) {return Unit(sqrt(a), a.getType());}
+//__inline__ Vector3Unit operator *(DRVector3 v, Unit f) {return Vector3Unit(v.x*f, v.y*f, v.z*f, f.getType());}
 
 #endif	/* __SPACE_CRAFT_UNIT_H */
 

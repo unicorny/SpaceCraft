@@ -105,7 +105,7 @@ public:
  
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
-    Vector3Unit normalize()                      const  {return *this / length();}
+    DRVector3 normalize()                      const  {return *this / length();}
     //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
     //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll
     //! \return einen neuen Vektor, das Kreuzprodukt aus diesem und dem &uuml;bergebendem Vektor
@@ -155,7 +155,7 @@ private:
 };
 
 // Unit * Vector3 = Vector3Unit
-__inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v, u.getType())*u;}
+__inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v.x*u, v.y*u, v.z*u, u.getType());}
 
 #endif	/* __SPACE_CRAFT_VECTOR3_UNIT_H */
 

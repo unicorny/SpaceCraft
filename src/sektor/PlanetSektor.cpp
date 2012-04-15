@@ -127,8 +127,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
-    distance = distance.convertTo(KM);
-       
+    distance = distance.convertTo(KM);       
     
 //    mLastRelativeCameraPosition.print("cameraPos");
     //printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
