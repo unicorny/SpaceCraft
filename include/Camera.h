@@ -36,7 +36,7 @@ public:
     //! \brief setzt die Objekt-Rotation als Kameramatrix
     void setKameraMatrixRotation();
 
-	DRMatrix getKameraMatrixRotation() {return DRMatrix::axis(mXAxis, mYAxis, mZAxis);}
+    DRMatrix getKameraMatrixRotation() {return DRMatrix::axis(mXAxis, mYAxis, mZAxis);}
     
     __inline__ Vector3Unit getSektorPosition() const {return mSektorPosition;}
     //! \brief calculate camera sektor position relative to targetSektor
@@ -56,6 +56,7 @@ public:
     
     void updateSektorPath();
     
+   
 protected:
     virtual void update();
         
@@ -65,6 +66,7 @@ private:
     Vector3Unit mSektorPosition;
     Sektor*     mCurrentSektor;
     std::vector<SektorID> mSektorPath;
+        
 };
 
 #endif	/* CAMERA_H */

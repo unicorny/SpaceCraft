@@ -352,6 +352,7 @@ DRReturn move(float fTime)
     else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
     
     GlobalRenderer::Instance().setTimeForInactiveChild(gControlModes[gCurrentControlMode].mTime);
+    g_Player.setCurrentSpeed(gControlModes[gCurrentControlMode].mValue);
      
     // R-Taste
     if(EnIsButtonPressed(SDLK_r)) wireframe = !wireframe;

@@ -1,19 +1,21 @@
 #include "SubPlanetSektor.h"
 #include "GlobalRenderer.h"
 #include "SubPatchPlanetSektor.h"
+#include "Player.h"
+#include "main.h"
 
-DRVector2 SubPlanetSektor::mSubLevelBorder[] = 
-{DRVector2(70.0f, 125.0f), // 0
- DRVector2(50.0f, 110.0f), // 1
- DRVector2(30.0f, 100.0f), // 2
- DRVector2(20.0f, 100.0f), // 3
- DRVector2(15.0f,  95.0f), // 4
- DRVector2(10.0f,  95.0f), // 5
- DRVector2(8.0f,  89.0f), // 6
- DRVector2(6.0f,   85.0f)}; // 7
+DRVector3 SubPlanetSektor::mSubLevelBorder[] = 
+{DRVector3(70.0f, 105.0f, 2.2f), // 0 
+ DRVector3(50.0f, 102.0f, 1.0f), // 1 
+ DRVector3(30.0f, 101.0f, 0.9f), // 2 
+ DRVector3(20.0f, 100.0f, 0.45f), // 3
+ DRVector3(15.0f, 100.0f, 0.30f), // 4
+ DRVector3(10.0f,  99.0f, 0.1f), // 5
+ DRVector3(8.0f,  95.0f, 0.04f), // 6
+ DRVector3(6.0f,   94.0f, 0.02f)}; // 7
 //*/
 
-#define MAX_SUB_LEVEL 5
+#define MAX_SUB_LEVEL 8
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
@@ -70,7 +72,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     printf("[SubPlanetSektor::SubPlanetSektor] subLevel: %d, position.length: %s\n", mSubLevel, mSektorPosition.length().print().data());
     mParent->printTypeInfos("[SubPlanetSektor::SubPlanetSektor] parent ");
  
-    mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+    //mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
 }
 
 SubPlanetSektor::~SubPlanetSektor()
@@ -101,24 +103,47 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);    
     double horizontCulling = acos(mLastRelativeCameraPosition.getVector3().normalize().dot(mVectorToPlanetCenter))*RADTOGRAD;   
     
-    if(mSubLevel == 3)
+    if(mSubLevel == 1)
     {
         DRVector3 cam = mLastRelativeCameraPosition.convertTo(KM).getVector3();
         //printf("\r cam: %f %f %f", cam.x, cam.y, cam.z);
+        //printf("\ridle: %f, renderIdle: %f", mIdleSeconds, mNotRenderSeconds);
     }
     
     if(mIdleSeconds <= 0.0f)
     {
+        DRVector3 camVector = mLastRelativeCameraPosition.getVector3().normalize();
+        float distance = DRVector3(mLastRelativeCameraPosition/mRadius).length();
+        //double angle = acos(camVector.dot(mVectorToPlanetCenter))*RADTOGRAD;
+        //angle -= mPlanet->getTheta();
+        
+        //if(mSubLevel == 4)
+            //printf("\r distance: %f", distance);
+        int maxSubLevel = MAX_SUB_LEVEL;
+        double relativePlayerSpeed = g_Player.getCurrentSpeed()/mRadius;
+        //if(mSubLevel == 1) printf("\rplayerSpeed: %f", static_cast<double>(relativePlayerSpeed));
+        if(relativePlayerSpeed <= 0.002) maxSubLevel = MAX_SUB_LEVEL;
+        else if(relativePlayerSpeed <= 0.01) maxSubLevel = MAX_SUB_LEVEL-1;
+        else if(relativePlayerSpeed <= 0.02) maxSubLevel = MAX_SUB_LEVEL-2;
+        else if(relativePlayerSpeed <= 0.1) maxSubLevel = MAX_SUB_LEVEL-3;
+        else if(relativePlayerSpeed <= 0.2) maxSubLevel = MAX_SUB_LEVEL-4;
+        else if(relativePlayerSpeed <= 2) maxSubLevel = MAX_SUB_LEVEL-5;
+        else maxSubLevel = MAX_SUB_LEVEL-6;
+        
         //if child visible                           50 Grad                         120 Grad
-        if(mSubLevel > 0 && mSubLevel < MAX_SUB_LEVEL &&
-           mPlanet->getTheta() <= mSubLevelBorder[mSubLevel].x && horizontCulling < mSubLevelBorder[mSubLevel-1].y)
+        if(mSubLevel > 0 && mSubLevel < maxSubLevel &&
+            mPlanet->getTheta() <= mSubLevelBorder[mSubLevel].x
+            && distance < mSubLevelBorder[mSubLevel].z) /*
+            //&& horizontCulling < mSubLevelBorder[mSubLevel-1].y)
+            && angle < mPlanet->getTheta())
      /*   if( (mSubLevel == 1 && mPlanet->getTheta() <= 50.0 && horizontCulling < 125.0) ||
             (mSubLevel == 2 && mPlanet->getTheta() <= 30.0 && horizontCulling < 110.0f) ||
             (mSubLevel == 3 && mPlanet->getTheta() <= 15.0 && horizontCulling < 100.0f))
       * */
         {
             mNotRenderSeconds += fTime;
-            short value = 500;
+            s16 value = 500;
+            //u16 count = 0;
           /*  if(mSubLevel == 2) value = 250;
             else if(mSubLevel == 3) value = 125;
             else if(mSubLevel == 4) value = 62;
@@ -131,9 +156,9 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
                                    SektorID(-value, -value, 0)};
             for(int i = 0; i < 4; i++)
             {
-                DRVector3 planetVector = DRVector3(mTextureTranslate + childId[i]).transformCoords(mRotation).normalize();
+                /*DRVector3 planetVector = DRVector3(mTextureTranslate + childId[i]).transformCoords(mRotation).normalize();
                 Vector3Unit posVector = (mRadius * planetVector) - (mRadius * mVectorToPlanetCenter);
-                DRVector3 camVector = Vector3Unit(mLastRelativeCameraPosition - posVector).getVector3().normalize();
+                camVector = Vector3Unit(mLastRelativeCameraPosition - posVector).getVector3().normalize();
                 camVector = mPlanet->getCameraPosition().getVector3().normalize();
                 double angle = acos(camVector.dot(planetVector))*RADTOGRAD;
                 
@@ -143,10 +168,15 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
                 //else angle -= 25.0f;
                 
                 if(angle < mPlanet->getTheta())
+                {
                 //if(mSubLevel >= 3 || angle <= mSubLevelBorder[mSubLevel-1].y)
+                 * */
                     getChild(childId[i]);
+                    //count++;
+                //}
 				//printf("\r angle: %f, theta: %f", angle, mPlanet->getTheta());
             }
+            //if(!count) mNotRenderSeconds = 0.0f; 
         }
         else
         {
@@ -181,8 +211,14 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         mMatrix = mRotation * mParent->getMatrix();
     else
         mMatrix = mParent->getMatrix();
-       
-    if(mNotRenderSeconds <= 0.0f)
+     
+    short count = 0;
+    for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+    {
+        if(it->second->isVisible())
+            count++;
+	}
+    if(mNotRenderSeconds <= 0.0f || !count)
     {
         if(!mRenderer)
         {
@@ -224,13 +260,23 @@ bool SubPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
     //if(theta <= 0.5109/*0.3060*/) return false;
     
     DRVector3 posInSektorNorm = positionInSektor.getVector3().normalize();
+    float h  = 1.0f-sqrtf(1.0f-0.5f/powf(2.0f, static_cast<float>(mSubLevel-1)));
+    posInSektorNorm += mVectorToPlanetCenter*h;
     //DRVector3 sektorPosNorm = mSektorPosition.getVector3().normalize();
     float d = posInSektorNorm.dot(mVectorToPlanetCenter);
     double angle = acos(posInSektorNorm.dot(mVectorToPlanetCenter))*RADTOGRAD;   
+    
    /* printf("\r angle: %f (dot: %f), idle: %f, sektorPos: %f, %f, %f, posInSektor: %f, %f, %f", angle*RADTOGRAD, d, mIdleSeconds, 
                                                                                          sektorPosNorm.x, sektorPosNorm.y, sektorPosNorm.z,
                                                                                          posInSektorNorm.x, posInSektorNorm.y, posInSektorNorm.z);
+    * 
     //*/ 
+    //if(mSubLevel > 1 && mPlanet->getTheta() < 45.0)
+        //angle -= (45.0-mPlanet->getTheta()/2.0);
+    
+  //  if(mSubLevel == 2)
+		//printf("\r theta: %f, angle: %f ", mPlanet->getTheta(), angle);
+    
     //angle = horizontCulling
     if(angle > mSubLevelBorder[mSubLevel-1].y) return false;
     /*if(mSubLevel == 1)

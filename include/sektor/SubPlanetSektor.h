@@ -55,7 +55,7 @@ protected:
     DRVector3           mVectorToPlanetCenter;
     DRVector3           mTextureTranslate;
     
-    static DRVector2    mSubLevelBorder[];
+    static DRVector3    mSubLevelBorder[];
     
     // temporäre variablen      
     //double              mHorizontCulling;

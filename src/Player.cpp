@@ -10,13 +10,15 @@
 #include "time.h"
 
 Player::Player()
-: mServerID(0), mSektorID(0), mCamera(NULL), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL)
+: mServerID(0), mSektorID(0), mCamera(NULL), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL),
+  mCurrentSpeed(0.0, M)
 {
 }
 
 Player::Player(const Player& orig) 
 : mServerID(orig.mServerID), mSektorID(orig.mSektorID), mCamera(orig.mCamera), mPosition(orig.mPosition),
-  mCameraFOV(orig.mCameraFOV), mSeed(orig.mSeed), mCurrentSektor(orig.mCurrentSektor)
+  mCameraFOV(orig.mCameraFOV), mSeed(orig.mSeed), mCurrentSektor(orig.mCurrentSektor),
+  mCurrentSpeed(orig.mCurrentSpeed)
 {
 }
 

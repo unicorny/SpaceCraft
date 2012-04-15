@@ -128,12 +128,10 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
     distance = distance.convertTo(KM);
-    
-   
+       
     
 //    mLastRelativeCameraPosition.print("cameraPos");
-    
-    printf("\rdistance: %.3f KM, theta: %f (%f Grad)", static_cast<double>(distance), mTheta, mTheta*RADTOGRAD);
+    //printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     

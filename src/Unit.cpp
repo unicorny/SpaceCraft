@@ -78,11 +78,11 @@ Unit Unit::operator * (const Unit& b) const
     return Unit(a.mValue * b2.mValue, a.mUnitType);   
 }
 
-Unit Unit::operator / (const Unit& b) const
+double Unit::operator / (const Unit& b) const
 {
     Unit a = *this, b2 = b;
     makeSameType(a, b2);
-    return Unit(a.mValue / b2.mValue, a.mUnitType);
+    return a.mValue / b2.mValue;
 }
 
 bool Unit::operator < (const Unit& b) const

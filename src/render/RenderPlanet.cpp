@@ -30,7 +30,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
               const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
               const PlanetNoiseParameter* planetNoiseParameter)
 {
-	GlobalRenderer& gb = GlobalRenderer::Instance();
+    GlobalRenderer& gb = GlobalRenderer::Instance();
     DRTextureManager& tx = DRTextureManager::Instance();
 	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
 
@@ -109,8 +109,8 @@ DRReturn RenderPlanet::generateAndBindTexture()
 				//DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
                 DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
-                    GlobalRenderer::Instance().getTextureRenderStepSize()*
-                    GlobalRenderer::Instance().getTextureRenderStepSize());
+                GlobalRenderer::Instance().getTextureRenderStepSize()*
+                GlobalRenderer::Instance().getTextureRenderStepSize());
 			}
 			mTextureRenderer.release();
 		}

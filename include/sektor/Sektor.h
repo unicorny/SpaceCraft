@@ -128,6 +128,7 @@ public:
     __inline__ Unit getRadius() const {return mRadius;}
     __inline__ void setParent(Sektor* parent) {mParent = parent;}
     __inline__ Sektor* getParent() const {return mParent;}
+    __inline__ bool isVisible() const {return mIdleSeconds > 0.0f ? false : true;}
     virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
         
     

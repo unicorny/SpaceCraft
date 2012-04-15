@@ -24,7 +24,7 @@ void main()
 	
 	float h = texture2D(texture, gl_TexCoord[0].xy).w;
 	//h = 0.0;
-	vec4 newVertex = vec4(normalize(scaledVertex.xyz)*(1.0+h*MAX_HEIGHT_IN_PERCENT*2.0), 1.0);
+	vec4 newVertex = vec4(normalize(scaledVertex.xyz)*(1.0+h*MAX_HEIGHT_IN_PERCENT), 1.0);
 		
 	gl_Position    = projection * modelview * newVertex;
 //    gl_Position    = gl_ModelViewProjectionMatrix  * newVertex;

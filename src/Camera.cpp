@@ -9,6 +9,7 @@
 
 Camera::Camera()
 : mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL)
+        
 {
     mType = OBSERVER_CAMERA;
 }
@@ -62,6 +63,7 @@ void Camera::translateRel(const DRVector3& translate)
     }
    
 }
+
 
 void Camera::update()
 {

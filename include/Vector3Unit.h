@@ -85,7 +85,9 @@ public:
     //! \brief / operator
     //! \param f Skalar durch den geteilt wird
     //! \return einen neuen Vektor
-    Vector3Unit operator / (const Unit f)       const {return Vector3Unit(x/f, y/f, z/f);}
+    DRVector3 operator / (const Unit f)       const {return DRVector3(static_cast<float>(x/f),
+																	  static_cast<float>(y/f),
+																	  static_cast<float>(z/f));}
     Vector3Unit operator / (const double f)      const {return Vector3Unit(x/f, y/f, z/f);}
     //!  multiplieziert diesen Vektor mit einem Unit Skalar, const
     //! \brief * operator
