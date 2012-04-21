@@ -228,7 +228,7 @@ DRReturn load()
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
 
-    DRLog.writeToLog("CPU-Count: %d", g_CPU_Count);
+    DRLog.writeToLog("CPU-Count: %d", g_CPU_Count);   
     
   //  glShadeModel(GL_SMOOTH);
   //  glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
