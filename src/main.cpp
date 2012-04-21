@@ -220,9 +220,10 @@ DRReturn load()
     gControlModes[i++] = ControlMode(Unit(500, AE), 1.0f);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
-    if(EnInit_INI("data/config.ini"))
+    if(EnInit_INI("./data/config.ini"))
+    //if(EnInit_INI("/data/config.ini"))
         LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
-	LOG_WARNING_SDL();
+    LOG_WARNING_SDL();
 
     
     g_Font = new DRFont();
