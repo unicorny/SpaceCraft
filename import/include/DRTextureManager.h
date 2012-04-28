@@ -43,6 +43,8 @@ public:
     //! Warning. not testet yet!
     DRTexturePtr getTexture(DRVector2i size, GLuint format, DRColor* colors);
     
+    bool isTextureExist(const char* filename, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
+    
     void saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
     
     //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt

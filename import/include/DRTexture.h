@@ -37,7 +37,7 @@ public:
 	__inline__ bool isTextureEmpty() {return mLoadingState == 3;}
 	__inline__ bool isLoadingError() {return mLoadingState == -1;}
 	__inline__ void setErrorByLoading() {mLoadingState = -1;}
-        __inline__ void setFinishRender() {if(mLoadingState == 3) mLoadingState = 2;}
+    __inline__ void setFinishRender() {if(mLoadingState == 3) mLoadingState = 2;}
 
 	void bind();
 	__inline__ static void unbind() {glBindTexture(GL_TEXTURE_2D, 0);}

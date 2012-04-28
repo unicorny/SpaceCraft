@@ -143,12 +143,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         {
             mNotRenderSeconds += fTime;
             s16 value = 500;
-            //u16 count = 0;
-          /*  if(mSubLevel == 2) value = 250;
-            else if(mSubLevel == 3) value = 125;
-            else if(mSubLevel == 4) value = 62;
-             */
-            //value = 0;
+            
             //sub sektoren erstellen
             SektorID childId[4] = {SektorID( value,  value, 0),
                                    SektorID( value, -value, 0),
@@ -222,7 +217,13 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     {
         if(!mRenderer)
         {
-            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+            DRTexturePtr parentTexture;
+            if(mSubLevel > 1 && mParent && mParent->getRenderer())
+            {
+                RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
+                parentTexture = parentRenderer->getTexture();
+            }
+            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
         }
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
@@ -236,6 +237,8 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         shader->setUniform1f("patchScaling", mPatchScaling);
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
+        
+        shader->setUniform2fv("textureCoordsParam", DRVector2(0.25f)-DRVector2(mID.x, mID.y).normalize()*DRVector2(0.25f).length());
         mRenderer->render(fTime, cam);
         shader->unbind();
         //GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();

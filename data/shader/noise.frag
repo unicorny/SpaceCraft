@@ -575,6 +575,7 @@ void main( void )
 	vec2 curveTemp[10];
 	float terraceTemp[6];
 	float n = 0;
+
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: continent definition
 	////////////////////////////////////////////////////////////////////////////
@@ -595,8 +596,8 @@ void main( void )
 	//    This noise module has a high number of octaves so that detail is
 	//    visible at high zoom levels.
 	f_lacunarity = CONTINENT_LACUNARITY;
-	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
-//n = baseContinentDef_pe0;
+	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);//14);
+
 
 	// 2: [Continent-with-ranges module]: Next, a curve module modifies the
 	//    output value from the continent module so that very high values appear
@@ -641,6 +642,7 @@ void main( void )
 	//    carved-continent module to ensure that the output value of this
 	//    subgroup is between -1.0 and 1.0.
 	float baseContinentDef_cl = clampf(baseContinentDef_mi, -1.0, 1.0);
+
 
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: terrain type definition
@@ -1039,6 +1041,7 @@ void main( void )
 	terraceTemp[5] =  1.0000;
 	float badlandsCliffs_te = terrace(badlandsCliffs_cl, terraceTemp, 6);
 	//n = badlandsCliffs_te;
+
 	////////////////////////////////////////////////////////////////////////////
 	// Module subgroup: badlands terrain (3 noise modules)
 	//
@@ -1169,8 +1172,7 @@ void main( void )
 	// 5: [Peak-height-multiplier module]: This multiplier module modulates the
 	//    heights of the mountain peaks from the base-scaled-mountainous-terrain
 	//    module using the output value from the scaled-peak-modulation module.
-	float scaledMountainousTerrain_mu = scaledMountainousTerrain_sb0 * 
-										scaledMountainousTerrain_sb1;
+	float scaledMountainousTerrain_mu = scaledMountainousTerrain_sb0 * scaledMountainousTerrain_sb1;
 
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: scaled hilly terrain
@@ -1391,7 +1393,6 @@ void main( void )
 	//    continents-with-plains subgroup.
 	float continentsWithHills_se = select(continentsWithPlains_ad, continentsWithHills_ad,
 										  terrainTypeDef_te, vec2(1.0-HILLS_AMOUNT, 1001.0 - HILLS_AMOUNT), 0.25);
-	
 	////////////////////////////////////////////////////////////////////////////
 	// Module subgroup: continents with mountains (5 noise modules)
 	//
@@ -1517,6 +1518,7 @@ void main( void )
 
 	if(n == 0.0)
 	   	n = continentsWithRivers_se;
+//*/
 	GradientColor gradient[10];
 	gradient[0] =  GradientColor(-2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     0.0,     1.0));
     gradient[1] =  GradientColor(-0.03125 	  	+ SEA_LEVEL_IN_METRES, vec4(0.02353, 0.22745, 0.49804, 1.0));

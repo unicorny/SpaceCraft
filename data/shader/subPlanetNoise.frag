@@ -598,7 +598,8 @@ void main( void )
 	//    visible at high zoom levels.
 	f_lacunarity = CONTINENT_LACUNARITY;
 	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
-//n = baseContinentDef_pe0;
+n = baseContinentDef_pe0;
+/*
 
 	// 2: [Continent-with-ranges module]: Next, a curve module modifies the
 	//    output value from the continent module so that very high values appear

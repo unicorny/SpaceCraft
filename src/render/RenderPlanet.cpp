@@ -6,29 +6,29 @@
 
 RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
 : RenderSektor(), mTextureRenderer(), mTexture(),
-  mPreviewTextur(), mInitalized(0)
+  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
     init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", 
-         size, texturePath, planetNoiseParameter);
+         size, texturePath, planetNoiseParameter, DRTexturePtr());
 }
 
 RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
                            float patchScaling, const DRMatrix& rotation, DRString texturePath,
-                           const PlanetNoiseParameter* planetNoiseParameter)
+                           const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture)
 : RenderSektor(), mTextureRenderer(), mTexture(), 
-  mPreviewTextur(), mInitalized(0)
+  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
     init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "noise.frag", 
-         size, texturePath, planetNoiseParameter);
+         size, texturePath, planetNoiseParameter, parentTexture);
 }
 
 DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
               float patchScaling, const DRMatrix& rotation, 
               const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
-              const PlanetNoiseParameter* planetNoiseParameter)
+              const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture)
 {
     GlobalRenderer& gb = GlobalRenderer::Instance();
     DRTextureManager& tx = DRTextureManager::Instance();
@@ -37,15 +37,23 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 	int stepSize = gb.getTextureRenderStepSize();
 	//float stepSize = static_cast<float>(stepSizei);
 
-	mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
+    if(parentTexture.getResourcePtrHolder())
+    {
+        mPreviewTextur = parentTexture;
+        mUsingParentTexture = true;
+    }
+    else
+    {
+        mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
     
-	if(mPreviewTextur.getResourcePtrHolder())
-		mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
-    mTexturePath = texturePath;
+        if(mPreviewTextur.getResourcePtrHolder())
+            mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+        mTexturePath = texturePath;
 
-	mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
-	getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
-	GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
+        mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
+        getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
+        GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
+    }
 		
     if(DRIsFileExist(getPathAndFilename().data()))
     {
@@ -66,7 +74,13 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 		if(mTexture.getResourcePtrHolder())
 			mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
             //TexturePtr(new Texture(textureSize, textureSize, GL_UNSIGNED_BYTE, 4));
-
+        if(mUsingParentTexture)
+        {
+            mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
+            getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mTexture, rotation);    
+            GlobalRenderer::Instance().addRenderTask(mTextureRenderer, false);
+            mInitalized = 1;
+        }
         //mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    
     }
     
@@ -109,10 +123,11 @@ DRReturn RenderPlanet::generateAndBindTexture()
 				//DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
                 DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
-                GlobalRenderer::Instance().getTextureRenderStepSize()*
-                GlobalRenderer::Instance().getTextureRenderStepSize());
+                    GlobalRenderer::Instance().getTextureRenderStepSize()*
+                    GlobalRenderer::Instance().getTextureRenderStepSize());
 			}
 			mTextureRenderer.release();
+            mTexture->setFinishRender();
 		}
 	}
 	if(3 == mInitalized && mTexture->isLoadingFinished() && mTextureRenderer->isFinished())
@@ -137,13 +152,18 @@ DRReturn RenderPlanet::generateAndBindTexture()
         mPreviewTextur->bind();
         if(mPreviewTextur->isLoadingFinished()) 
             textureLoaded = 1;
+        if(!mUsingParentTexture)
+            mShader->setUniform2fv("textureCoordsParam", DRVector2(0.0f));
     }
     else
     {
         mTexture->bind();
         textureLoaded = 1;
+        // nur für debug auskommentiert
+        mShader->setUniform2fv("textureCoordsParam", DRVector2(0.0f));
     }
     mShader->setUniform1i("textureLoaded", textureLoaded);
+    
     
     if(DRGrafikError("[RenderPlanet::generateAndBindTexture]")) return DR_ERROR;
     return DR_OK;

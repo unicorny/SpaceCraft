@@ -156,6 +156,20 @@ void ShaderProgram::setUniform3fv(const char* name, const DRVector3& data)
 	DRGrafikError("ShaderProgram::setUniform3fv");
 }
 
+void ShaderProgram::setUniform2fv(const char* name, const DRVector2& data)
+{
+    int loc = glGetUniformLocation(mProgram, name);
+	glUniform2fv(loc, 1, static_cast<const GLfloat*>(data));
+	DRGrafikError("ShaderProgram::setUniform2fv");
+}
+
+void ShaderProgram::setUniform2iv(const char* name, const DRVector2i& data)
+{
+    int loc = glGetUniformLocation(mProgram, name);
+	glUniform2iv(loc, 1, static_cast<const GLint*>(data));
+	DRGrafikError("ShaderProgram::setUniform2iv");
+}
+
 void ShaderProgram::setUniformMatrix(const char* name, const DRMatrix& matrix, bool transpose /* = false*/)
 {
 	int loc = glGetUniformLocation(mProgram, name);
