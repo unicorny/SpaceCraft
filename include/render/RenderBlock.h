@@ -5,8 +5,14 @@
  * Created on 20. August 2011, 23:50
  */
 
+<<<<<<< HEAD
 #ifndef __SC_RENDER_BLOCK__
 #define	__SC_RENDER_BLOCK__
+=======
+#ifndef __SC_RENDER_BLOCK_H
+#define	__SC_RENDER_BLOCK_H
+
+>>>>>>> c1a3e92256268443cee33f382589cb05f672be4a
 
 #include "main.h"
 #include "Block.h"
@@ -35,5 +41,9 @@ private:
 
 };
 
+<<<<<<< HEAD
 #endif	/* __SC_RENDER_BLOCK__ */
+=======
+#endif	/* __SC_RENDER_BLOCK_H */
+>>>>>>> c1a3e92256268443cee33f382589cb05f672be4a
 

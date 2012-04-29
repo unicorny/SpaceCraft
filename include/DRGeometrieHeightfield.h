@@ -1,22 +1,12 @@
 #ifndef __DR_GEOMETRIE_HEIGHTFIELD__
 #define __DR_GEOMETRIE_HEIGHTFIELD__
 
-#include "main.h"
-
-enum GeometrieGridFormat
-{
-    GEO_FULL = 1,
-    GEO_LEFT = 2,
-    GEO_UP = 4,
-    GEO_RIGHT = 8,
-    GEO_DOWN = 16,
-    GEO_NONE = 0
-};
+#include "Engine2Main.h"
 
 class DRGeometrieHeightfield : public DRGeometrie
 {
 public:
-    DRGeometrieHeightfield(DRVector3 sphericalCenter = DRVector3(0.0f));
+    DRGeometrieHeightfield(bool spherical = false);
     virtual ~DRGeometrieHeightfield();
     
     /*! \brief init GeometrieData for a Heightfield

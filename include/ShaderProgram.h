@@ -8,12 +8,12 @@
 #ifndef __SC_SHADER_H
 #define	__SC_SHADER_H
 
-#include "main.h"
+#include "Engine2Main.h"
 
 class ShaderProgram
 {
 public:
-    ShaderProgram(DHASH id = 0);
+    ShaderProgram();
     ~ShaderProgram();
     
     DRReturn init(const char* vertexShaderFile, const char* fragmentShaderFile);
@@ -29,11 +29,11 @@ public:
     
     __inline__ GLuint getProgram() {return mProgram;}
     __inline__ DHASH getID() {return mId;}
+
     
 protected:
     unsigned char* readShaderFile(const char *filename);
     
-    DHASH  mId;
     GLuint mVertexShader;
     GLuint mFragmentShader;
     GLuint mProgram;

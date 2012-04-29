@@ -3,7 +3,13 @@
 
 #include "RenderPlanet.h"
 
+<<<<<<< Updated upstream
 class RenderSubPlanet : public RenderPlanet
+=======
+#include "DRGeometrieHeightfield.h"
+
+class RenderSubPlanet : public RenderSektor
+>>>>>>> Stashed changes
 {
 public:
     //! \param boxSide 
