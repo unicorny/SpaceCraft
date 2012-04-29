@@ -32,16 +32,16 @@ void DRGeometrieManager::exit()
     LOG_INFO("DRGeometrieManager beendet");
 }
 
-DHASH DRGeometrieManager::makeGeometrieHash(GLuint gridSize, GeometrieGridFormat format)
+DHASH DRGeometrieManager::makeGeometrieHash(GLuint gridSize, GeometrieGridFormat format, GeometrieVertexFormat vertexFormat)
 {
-    DHASH id = gridSize | format<<4 | DRMakeStringHash("grid")>>9;
+    DHASH id = gridSize | format<<4 | vertexFormat<<8 | DRMakeStringHash("grid")>>9;
     return id;    
 }
 
-DRGeometrieHeightfield* DRGeometrieManager::getGrid(GLuint gridSize, GeometrieGridFormat gridFormat)
+DRGeometrieHeightfield* DRGeometrieManager::getGrid(GLuint gridSize, GeometrieGridFormat gridFormat, GeometrieVertexFormat vertexFormat/* = GEO_VERTEX_TRIANGLES*/)
 {
     if(!mInitalized) return 0;
-    DHASH id = makeGeometrieHash(gridSize, gridFormat);
+    DHASH id = makeGeometrieHash(gridSize, gridFormat, vertexFormat);
 
 	//Schauen ob schon vorhanden
 	GeometrieEntry* entry = static_cast<GeometrieEntry*>(mGeometrieEntrys.findByHash(id));
@@ -61,7 +61,7 @@ DRGeometrieHeightfield* DRGeometrieManager::getGrid(GLuint gridSize, GeometrieGr
     edges[2] = DRVector3(1.0f, -1.0f, 1.0f);
     edges[3] = DRVector3(-1.0f, -1.0f, 1.0f);
     entry->geometrie = new DRGeometrieHeightfield();
-    dynamic_cast<DRGeometrieHeightfield*>(entry->geometrie)->init(gridSize, edges, gridFormat);
+    dynamic_cast<DRGeometrieHeightfield*>(entry->geometrie)->init(gridSize, edges, gridFormat, vertexFormat);
     
     if(!mGeometrieEntrys.addByHash(id, entry))
 	{

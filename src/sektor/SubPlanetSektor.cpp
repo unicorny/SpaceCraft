@@ -73,6 +73,13 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     mParent->printTypeInfos("[SubPlanetSektor::SubPlanetSektor] parent ");
  
     //mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+    DRTexturePtr parentTexture;
+    if(mSubLevel > 1 && mParent && mParent->getRenderer())
+    {
+        RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
+        parentTexture = parentRenderer->getTexture();
+    }
+    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
 }
 
 SubPlanetSektor::~SubPlanetSektor()
@@ -189,8 +196,8 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         DRReal distance = static_cast<DRReal>(mLastRelativeCameraPosition.length().convertTo(M));
         if(mIdleSeconds > 0.0f) distance *= 1000.0f;
         dynamic_cast<RenderSubPlanet*>(mRenderer)->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
-        if(mNotRenderSeconds > inactiveTime)
-            DR_SAVE_DELETE(mRenderer);
+        //if(mNotRenderSeconds > inactiveTime)
+          //  DR_SAVE_DELETE(mRenderer);
     }
 
     return DR_OK;

@@ -16,14 +16,14 @@ public:
     static bool	isInitialized()	{return Instance().mInitalized;};
     
     DRReturn init();
-    DRGeometrieHeightfield* getGrid(GLuint gridSize, GeometrieGridFormat gridFormat);
-    void freeGrid(GLuint gridSize, GeometrieGridFormat gridFormat) {};
+    DRGeometrieHeightfield* getGrid(GLuint gridSize, GeometrieGridFormat gridFormat, GeometrieVertexFormat vertexFormat = GEO_VERTEX_TRIANGLES);
+    void freeGrid(GLuint gridSize, GeometrieGridFormat gridFormat, GeometrieVertexFormat vertexFormat = GEO_VERTEX_TRIANGLES) {};
     
     void exit();
     
 private:
     DRGeometrieManager();
-    DHASH makeGeometrieHash(GLuint gridSize, GeometrieGridFormat format);    
+    DHASH makeGeometrieHash(GLuint gridSize, GeometrieGridFormat format, GeometrieVertexFormat vertexFormat);    
     
     struct GeometrieEntry
     {

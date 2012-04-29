@@ -10,14 +10,14 @@ RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(const char* vertexShaderN
         LOG_ERROR_VOID("Fehler kein Shader");
 	
     mShader = ShaderManager::Instance().getShader(vertexShaderName, fragmentShaderName);    
-    mRenderSphere = DRGeometrieManager::Instance().getGrid(50, GEO_FULL);
+    mRenderSphere = DRGeometrieManager::Instance().getGrid(50, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP);
        
 }
 
 RenderNoisePlanetToTexture::~RenderNoisePlanetToTexture()
 {
     ShaderManager::Instance().releaseShader(mShader);
-    DRGeometrieManager::Instance().freeGrid(50, GEO_FULL);
+    DRGeometrieManager::Instance().freeGrid(50, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP);
 }
 
 DRReturn RenderNoisePlanetToTexture::renderStuff()
