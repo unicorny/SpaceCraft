@@ -162,12 +162,15 @@ void Sektor::printTypeInfos(const char* name)
 
 Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 0*/)
 {
-    if(thisIndex < 0) return NULL;
-    if(path.size() == 0) return NULL;
-    if(thisIndex && path[thisIndex] != mID) return NULL;
-    if(!thisIndex && *path.begin() != mID) return NULL;
-    if(path[path.size()-1] == mID) return this;
+    if(thisIndex < 0) LOG_ERROR("thisIndex < 0", NULL);
+    if(path.size() == 0) LOG_ERROR("path.size() == 0", NULL);
+    if(thisIndex && path[thisIndex] != mID) LOG_ERROR("thisINdex && path[thisIndex] != mID", NULL);
+    if(!thisIndex && *path.begin() != mID) LOG_ERROR("!thisIndex && *path.begin() != mID", NULL);
+    std::vector<SektorID> sektorPath;
+    getSektorPath(sektorPath);
+    if(path[path.size()-1] == mID && sektorPath.size() == path.size()) return this;
     
+    if(thisIndex+1 >= path.size()) LOG_ERROR("thisIndex+1 >= path.size()", NULL);
     Sektor* child = getChild(path[++thisIndex]);
     if(!child)
     {
@@ -179,7 +182,7 @@ Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 
     //return child->getSektorByPath(path, thisIndex+1);
 	return child->getSektorByPath(path, thisIndex);
         
-    return NULL;
+   // return NULL;
 }
 
 DRString Sektor::getSektorPathName() const

@@ -55,7 +55,7 @@ public:
      *        | /   |
      *        2 --- 3
      * \param format  set geometrie grid format look at GeometrieGridFormat
-     * \param vertexFormat currently choose between GEO_VERTEX_TRIANGLE_STRIP and GEO_VERTEX_QUADS
+     * \param vertexFormat currently choose between GEO_VERTEX_TRIANGLE_STRIP, GEO_VERTEX_QUADS and GEO_VERTEX_TRIANGLES
      *         GEO_VERTEX_TRIANGLE_STRIP use the half count of indices like GEO_VERTEX_QUADS and is faster to render,
      *         but it isn't suitable for mountains and cannot be used for a other GeometrieGridFormat as GEO_FULL
      * \return DR_OK if no error occured

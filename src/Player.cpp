@@ -64,9 +64,10 @@ DRReturn Player::init()
         mCamera->setCurrentSektor(camSektor);
     else
         mCamera->setCurrentSektor(mCurrentSektor);
+    
     mCamera->updateSektorPath();
-    //DRLog.writeToLog("camera sektor path after load: %s", mCamera.getCurrentSektor()->getSektorPathName().data());
-    //mCamera.getSektorPosition().print("camera position");
+    //DRLog.writeToLog("[Player::init] camera sektor path after load: %s", mCamera->getCurrentSektor()->getSektorPathName().data());
+    //mCamera->getSektorPosition().print("[Player::init] camera position after load", true);
    
     return DR_OK;
 }
@@ -108,13 +109,18 @@ DRReturn Player::loadFromFile(const char* file)
     int size = 0;
     f.read(&size, sizeof(int), 1);
     //printf("load Sektor, size: %d\n", size);
+    std::stringstream s(std::stringstream::in|std::stringstream::out);
+    s << "[Player::loadFromFile] sektorpath: ./data/";
     for(int i = 0; i < size; i++)
     {
         SektorID tempID = 0;
         f.read(&tempID, sizeof(SektorID), 1);
         //printf("%d id: %uld", i, (u64)tempID);
         mCameraSektorPath.push_back(tempID);
+        s << "_" << tempID << "/";
     }    
+    s << std::endl;
+   // DRLog.writeToLog(s.str());
     
     f.close();
     LOG_INFO("Player sucessfull loaded");
@@ -144,8 +150,8 @@ DRReturn Player::saveIntoFile(const char* file)
     
     std::vector<SektorID> sektorPath;
     mCamera->getCurrentSektor()->getSektorPath(sektorPath);
-    DRLog.writeToLog("camera sektor path by save: %s", mCamera->getCurrentSektor()->getSektorPathName().data());
-    temp.print("camera position");
+    //DRLog.writeToLog("[Player::saveIntoFile] camera sektor path by save: %s", mCamera->getCurrentSektor()->getSektorPathName().data());
+    //temp.print("[Player::saveIntoFile] camera position", true);
     int size = sektorPath.size();
     f.write(&size, sizeof(int), 1);
     for(int i = 0; i < size; i++)

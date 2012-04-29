@@ -126,12 +126,17 @@ public:
 
     //! \brief gibt den Vektor auf die Konsole aus, const
     //! \param name wenn angegeben, wird name mit auf der Konsole ausgegeben
-    void print(const char* name = NULL) const
+    void print(const char* name = NULL, bool log = false) const
     {
+        if(log)
+            DRLog.writeToLog("%s: x: %s, y: %s, z: %s\n",name!=0?name:"", x.print().data(), y.print().data(), z.print().data());
+        else
+        {
         if(!name)
             printf("x: %s, y: %s, z: %s\n", x.print().data(), y.print().data(), z.print().data());
         else
             printf("%s: x: %s, y: %s, z: %s\n",name, x.print().data(), y.print().data(), z.print().data());
+        }
     }
 
     //! \brief Vergelichsoperator f&uuml;r ungleich, const

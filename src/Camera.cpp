@@ -6,6 +6,7 @@
  */
 
 #include "Camera.h"
+#include "Sektor.h"
 
 Camera::Camera()
 : mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL)
@@ -83,9 +84,11 @@ void Camera::updateSektorPath()
         mCurrentSektor->getSektorPath(mSektorPath);
     else
         return;
-    std::cout << "Camera Sektor Path" << std::endl;
-    for (uint i=0; i<mSektorPath.size(); i++) std::cout << " " << mSektorPath[i];
-    std::cout << std::endl;
+    std::stringstream s(std::stringstream::in|std::stringstream::out);
+    s << "[Camera::updateSektorPath] Camera Sektor Path ./data/";
+    for (uint i=0; i<mSektorPath.size(); i++) s << "_" << mSektorPath[i] << "/";
+    s << std::endl;
+    //DRLog.writeToLog(s.str());
 }
 
 void Camera::setCurrentSektor(Sektor* current)
@@ -108,6 +111,13 @@ Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
     std::vector<SektorID> sektorPath;
     targetSektor->getSektorPath(sektorPath);
     
+    //DRLog.writeToLog("[Camera::getSektorPositionAtSektor]: targetSektor: %s, currentSektor: %s", targetSektor->getSektorPathName().data(), cur->getSektorPathName().data());
+    
+    //find break index, last position where both sektor the same
+    int breakIndex = 0;
+    while(sektorPath[breakIndex+1] == mSektorPath[breakIndex+1]) breakIndex++;
+    //DRLog.writeToLog("[Camera::getSektorPositionAtSektor] breakIndex: %d", breakIndex);
+    
     int index = 0;
     // TODO: go from root throw list, because childs have same name, with different parents!
     // 1 up
@@ -118,8 +128,9 @@ Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
               stop < sektorPath.size()-1) 
             stop++;*/
         index = mSektorPath.size()-1;
-        while(index >= static_cast<int>(sektorPath.size()) || sektorPath[index] != mSektorPath[index])
+        //while(index >= static_cast<int>(sektorPath.size()) || sektorPath[index] != mSektorPath[index])
         //while(index >= stop && index >= static_cast<int>(sektorPath.size()))
+        while(index > breakIndex)
         {
             newPos += cur->getPosition();
             cur = cur->getParent(); 
