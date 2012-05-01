@@ -91,8 +91,8 @@ DRReturn DRGeometrieHeightfield::initHeightfield(DRVector3 edgePoints[4],
 
 DRReturn DRGeometrieHeightfield::init(u32 gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format, GeometrieVertexFormat vertexFormat/* = GEO_VERTEX_QUADS*/)
 {
-    if(GEO_FULL != format && GEO_VERTEX_TRIANGLE_STRIP != vertexFormat)
-        LOG_ERROR("combination o format and vertexFormat didn't work together (not implemented yet)!", DR_ERROR);
+    if(GEO_FULL != format && GEO_VERTEX_TRIANGLES != vertexFormat)
+        LOG_ERROR("combination of format and vertexFormat didn't work together (not implemented yet)!", DR_ERROR);
     //! memory allocation
     // size = gridSize
     // vertexCount = 4 +(size-1)*2 + (size-1)*2 + (size-1)*(size-1)*1 => 2*size + size*size + 1

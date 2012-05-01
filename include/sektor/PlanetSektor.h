@@ -22,7 +22,12 @@ enum PlanetNoiseParameterNames
     CONTINENT_HEIGHT_SCALE = 13,
     SEA_LEVEL_IN_METRES = 14,
     MAX_HEIGHT_IN_PERCENT = 15,
-    MIN_HEIGHT_IN_PERCENT = 16
+    MIN_HEIGHT_IN_PERCENT = 16,
+    TERRAIN_OFFSET = 17,
+    MOUNTAINS_TWIST = 18,
+    HILLS_TWIST = 19,
+    BADLANDS_TWIST = 20
+    
 };
 
 struct PlanetNoiseParameter
@@ -52,8 +57,12 @@ struct PlanetNoiseParameter
             float seaLevelInMetres;
             float maxHeightInPercent;
             float minHeightInPercent;
+            float terrainOffset;
+            float mountainsTwist;
+            float hillsTwist;
+            float badlandsTwist;
         };
-        float values[17];
+        float values[21];
     };
 };
 

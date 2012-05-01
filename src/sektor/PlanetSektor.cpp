@@ -107,6 +107,23 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     
     mPlanetNoiseParameters.maxHeightInPercent = DRRandom::rReal(0.005f, 0.001f);
     mPlanetNoiseParameters.minHeightInPercent = DRRandom::rReal(0.003f, 0.001f);
+    
+    // Offset to apply to the terrain type definition.  Low values (< 1.0) cause
+    // the rough areas to appear only at high elevations.  High values (> 2.0)
+    // cause the rough areas to appear at any elevation.  The percentage of
+    // rough areas on the planet are independent of this value.
+    mPlanetNoiseParameters.terrainOffset = DRRandom::rReal(0.8f, 2.4f);
+    
+    // Specifies the "twistiness" of the mountains.
+    mPlanetNoiseParameters.mountainsTwist = DRRandom::rReal(0.75f, 1.25f);
+
+    // Specifies the "twistiness" of the hills.
+    mPlanetNoiseParameters.hillsTwist = DRRandom::rReal(0.75f, 1.25f);
+
+    // Specifies the "twistiness" of the badlands.
+    mPlanetNoiseParameters.badlandsTwist = DRRandom::rReal(0.75f, 1.25f);
+
+    
     mPlanetNoiseParameters.print(true);
     
     mRenderer = new RenderPlanet(id, getSektorPathName(), &mPlanetNoiseParameters);
@@ -130,7 +147,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     distance = distance.convertTo(KM);       
     
 //    mLastRelativeCameraPosition.print("cameraPos");
-    //printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
+    printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
@@ -376,8 +393,12 @@ const char* PlanetNoiseParameter::getFieldName(PlanetNoiseParameterNames feldNam
         case SEA_LEVEL_IN_METRES: return "SEA_LEVEL_IN_METRES";
         case MAX_HEIGHT_IN_PERCENT: return "MAX_HEIGHT_IN_PERCENT";
         case MIN_HEIGHT_IN_PERCENT: return "MIN_HEIGHT_IN_PERCENT";
+        case TERRAIN_OFFSET: return "TERRAIN_OFFSET";
+        case MOUNTAINS_TWIST: return "MOUNTAINS_TWIST";
+        case HILLS_TWIST: return "HILLS_TWIST";
+        case BADLANDS_TWIST: return "BADLANDS_TWIST";
         default: return "-- invalid --";
     }
-    
+        
     return "-- error --";      
 }

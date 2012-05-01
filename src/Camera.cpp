@@ -119,17 +119,10 @@ Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
     //DRLog.writeToLog("[Camera::getSektorPositionAtSektor] breakIndex: %d", breakIndex);
     
     int index = 0;
-    // TODO: go from root throw list, because childs have same name, with different parents!
     // 1 up
     {
-        /*int stop = 0;
-        while(sektorPath[stop] == mSektorPath[stop] &&
-              stop < mSektorPath.size()-1 &&
-              stop < sektorPath.size()-1) 
-            stop++;*/
+
         index = mSektorPath.size()-1;
-        //while(index >= static_cast<int>(sektorPath.size()) || sektorPath[index] != mSektorPath[index])
-        //while(index >= stop && index >= static_cast<int>(sektorPath.size()))
         while(index > breakIndex)
         {
             newPos += cur->getPosition();

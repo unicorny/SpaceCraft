@@ -37,7 +37,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 	int stepSize = gb.getTextureRenderStepSize();
 	//float stepSize = static_cast<float>(stepSizei);
 
-    if(parentTexture.getResourcePtrHolder())
+    if(parentTexture.getResourcePtrHolder() && parentTexture->isLoadingFinished())
     {
         mPreviewTextur = parentTexture;
         mUsingParentTexture = true;

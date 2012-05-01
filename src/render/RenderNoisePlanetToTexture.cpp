@@ -105,6 +105,21 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
 	mShader->setUniform1f("SEA_LEVEL_IN_METRES", mNoiseParameter->seaLevelInMetres);
     //printf("seaLevelInMeters: %f\n", seaLevelInMeters);
     
+    // Offset to apply to the terrain type definition.  Low values (< 1.0) cause
+    // the rough areas to appear only at high elevations.  High values (> 2.0)
+    // cause the rough areas to appear at any elevation.  The percentage of
+    // rough areas on the planet are independent of this value.
+    mShader->setUniform1f("TERRAIN_OFFSET", mNoiseParameter->terrainOffset);
+    
+    // Specifies the "twistiness" of the mountains.
+    mShader->setUniform1f("MOUNTAINS_TWIST", mNoiseParameter->mountainsTwist);
+
+    // Specifies the "twistiness" of the hills.
+    mShader->setUniform1f("HILLS_TWIST", mNoiseParameter->hillsTwist);
+
+    // Specifies the "twistiness" of the badlands.
+    mShader->setUniform1f("BADLANDS_TWIST", mNoiseParameter->badlandsTwist);
+    
     mShader->setUniformMatrix("projection", mProjectionMatrix);
 	mShader->setUniformMatrix("texture", mRotation);
     

@@ -52,6 +52,10 @@ uniform float BADLANDS_AMOUNT;
 uniform float RIVER_DEPTH;
 uniform float SEA_LEVEL_IN_METRES;
 uniform float CONTINENT_HEIGHT_SCALE;
+uniform float TERRAIN_OFFSET;
+uniform float MOUNTAINS_TWIST;
+uniform float HILLS_TWIST;
+uniform float BADLANDS_TWIST;
 
 float f_lacunarity;
 float f_persistence;
@@ -561,21 +565,22 @@ float blend(vec3 value)
 
 float exponent(float value, float fexponent)
 {
-	return (pow (abs ((value + 1.0) / 2.0), fexponent) * 2.0 - 1.0);
+  return (pow (abs ((value + 1.0) / 2.0), fexponent) * 2.0 - 1.0);
 }
 
-void main( void )
+vec3 turbulence(vec3 value, float seed, float frequency, float power, int roughness)
 {
-	//Default
-	const float DEFAULT_LACUNARTITY = 2.0;
+  vec3 v0 = value + vec3(12414.0/65536.0, 65124.0/65536.0, 31337.0/65536.0) + seed;
+  vec3 v1 = value + vec3(26519.0/65536.0, 18128.0/65536.0, 60493.0/65536.0) + seed;
+  vec3 v2 = value + vec3(53820.0/65536.0, 11213.0/65536.0, 44845.0/65536.0) + seed;
 
-	f_lacunarity = DEFAULT_LACUNARTITY;
-	f_persistence = 0.5;
+  return value + vec3(sOctaveNoise(v0, frequency, roughness)*power,
+		      sOctaveNoise(v1, frequency, roughness)*power,
+		      sOctaveNoise(v2, frequency, roughness)*power);
+}
 
-	vec2 curveTemp[10];
-	float terraceTemp[6];
-	float n = 0;
-
+float BaseContinentDefinition(vec3 value)
+{
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: continent definition
 	////////////////////////////////////////////////////////////////////////////
@@ -596,7 +601,7 @@ void main( void )
 	//    This noise module has a high number of octaves so that detail is
 	//    visible at high zoom levels.
 	f_lacunarity = CONTINENT_LACUNARITY;
-	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);//14);
+	float baseContinentDef_pe0 = sOctaveNoise(value, CONTINENT_FREQUENCY, 14);
 
 
 	// 2: [Continent-with-ranges module]: Next, a curve module modifies the
@@ -618,7 +623,7 @@ void main( void )
 	//    used by subsequent noise modules to carve out chunks from the mountain
 	//    ranges within the continent-with-ranges module so that the mountain
 	//    ranges will not be complely impassible.
-	float baseContinentDef_pe1 = sOctaveNoise(v_texCoord3D+1, CONTINENT_FREQUENCY * 4.34375, 11);
+	float baseContinentDef_pe1 = sOctaveNoise(value+1, CONTINENT_FREQUENCY * 4.34375, 11);
 
 	// 4: [Scaled-carver module]: This scale/bias module scales the output
 	//    value from the carver module such that it is usually near 1.0.  This
@@ -643,6 +648,146 @@ void main( void )
 	//    subgroup is between -1.0 and 1.0.
 	float baseContinentDef_cl = clampf(baseContinentDef_mi, -1.0, 1.0);
 
+	return baseContinentDef_cl;
+}
+
+float BaseContinentDefinition_se(vec3 value)
+{
+	////////////////////////////////////////////////////////////////////////////
+	// Module subgroup: continent definition (5 noise modules)
+	//
+	// This subgroup warps the output value from the the base-continent-
+	// definition subgroup, producing more realistic terrain.
+	//
+	// Warping the base continent definition produces lumpier terrain with
+	// cliffs and rifts.
+	//
+	// -1.0 represents the lowest elevations and +1.0 represents the highest
+	// elevations.
+	//
+
+	// 3: [Warped-base-continent-definition module]: This turbulence module
+	//    warps the output value from the intermediate-turbulence module.  This
+  	//    turbulence has a higher frequency, but lower power, than the
+  	//    intermediate-turbulence module, adding some fine detail to it.
+	vec3 continentDef_tu2 = turbulence(value, 12, CONTINENT_FREQUENCY * 95.25, CONTINENT_FREQUENCY / 1019.75, 11);
+
+	// 2: [Intermediate-turbulence module]: This turbulence module warps the
+  	//    output value from the coarse-turbulence module.  This turbulence has
+  	//    a higher frequency, but lower power, than the coarse-turbulence
+  	//    module, adding some intermediate detail to it.
+	vec3 continentDef_tu1 = turbulence(continentDef_tu2, 11, CONTINENT_FREQUENCY * 47.25, CONTINENT_FREQUENCY / 433.75, 12);
+
+	// 1: [Coarse-turbulence module]: This turbulence module warps the output
+  	//    value from the base-continent-definition subgroup, adding some coarse
+  	//    detail to it.
+	vec3 continentDef_tu0 = turbulence(continentDef_tu1, 10, CONTINENT_FREQUENCY * 15.25, CONTINENT_FREQUENCY / 113.75, 13);
+
+	float baseContinentDef_cl = BaseContinentDefinition(value);
+	float baseContinentDef_cl_tu0 = BaseContinentDefinition(continentDef_tu0);
+
+	// Module subgroup: continent definition (5 noise modules) (turbulencec are calculated bevore)
+	// 4: [Select-turbulence module]: At this stage, the turbulence is applied
+  	//    to the entire base-continent-definition subgroup, producing some very
+  	//    rugged, unrealistic coastlines.  This selector module selects the
+  	//    output values from the (unwarped) base-continent-definition subgroup
+  	//    and the warped-base-continent-definition module, based on the output
+  	//    value from the (unwarped) base-continent-definition subgroup.  The
+  	//    selection boundary is near sea level and has a relatively smooth
+  	//    transition.  In effect, only the higher areas of the base-continent-
+  	//    definition subgroup become warped; the underwater and coastal areas
+  	//    remain unaffected.
+	float continentDef_se = select(baseContinentDef_cl, baseContinentDef_cl_tu0,
+				       baseContinentDef_cl, vec2(SEA_LEVEL-0.0375, SEA_LEVEL+1000.0375), 0.0625);
+	return continentDef_se;
+}
+
+float MountainousTerrain(vec3 value)
+{
+	////////////////////////////////////////////////////////////////////////////
+	// Module group: mountainous terrain
+	////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////
+	// Module subgroup: mountain base definition (9 noise modules)
+	//
+	// This subgroup generates the base-mountain elevations.  Other subgroups
+	// will add the ridges and low areas to the base elevations.
+	//
+	// -1.0 represents low mountainous terrain and +1.0 represents high
+	// mountainous terrain.
+	//
+
+	// 1: [Mountain-ridge module]: This ridged-multifractal-noise module
+	//    generates the mountain ridges.
+	f_lacunarity = MOUNTAIN_LACUNARITY;
+	float mountainBaseDef_rm0 = sridged(value+30, 1723.0, 4);
+
+	// 2: [Scaled-mountain-ridge module]: Next, a scale/bias module scales the
+	//    output value from the mountain-ridge module so that its ridges are not
+	//    too high.  The reason for this is that another subgroup adds actual
+	//    mountainous terrain to these ridges.
+	float mountainBaseDef_sb0 = mountainBaseDef_rm0 * 0.5 + 0.375;
+
+	// 3: [River-valley module]: This ridged-multifractal-noise module generates
+	//    the river valleys.  It has a much lower frequency than the mountain-
+	//    ridge module so that more mountain ridges will appear outside of the
+	//    valleys.  Note that this noise module generates ridged-multifractal
+	//    noise using only one octave; this information will be important in the
+	//    next step.
+	float mountainBaseDef_rm1 = sridged(value+31, 367.0, 1);
+
+	// 4: [Scaled-river-valley module]: Next, a scale/bias module applies a
+	//    scaling factor of -2.0 to the output value from the river-valley
+	//    module.  This stretches the possible elevation values because one-
+	//    octave ridged-multifractal noise has a lower range of output values
+	//    than multiple-octave ridged-multifractal noise.  The negative scaling
+	//    factor inverts the range of the output value, turning the ridges from
+	//    the river-valley module into valleys.
+	float mountainBaseDef_sb1 = mountainBaseDef_rm1 * -2.0 - 0.5;
+
+	// 5: [Low-flat module]: This low constant value is used by step 6.
+	float mountainBaseDef_co = -1.0;
+
+	// 6: [Mountains-and-valleys module]: This blender module merges the
+	//    scaled-mountain-ridge module and the scaled-river-valley module
+	//    together.  It causes the low-lying areas of the terrain to become
+	//    smooth, and causes the high-lying areas of the terrain to contain
+	//    ridges.  To do this, it uses the scaled-river-valley module as the
+	//    control module, causing the low-flat module to appear in the lower
+	//    areas and causing the scaled-mountain-ridge module to appear in the
+	//    higher areas.
+	float mountainBaseDef_bl = blend(vec3(mountainBaseDef_co, mountainBaseDef_sb0, mountainBaseDef_sb1));
+
+	return mountainBaseDef_bl;
+}
+
+void main( void )
+{
+	//Default
+	const float DEFAULT_LACUNARTITY = 2.0;
+
+	f_lacunarity = DEFAULT_LACUNARTITY;
+	f_persistence = 0.5;
+
+	vec2 curveTemp[10];
+	float terraceTemp[6];
+	float n = 0;
+
+	//turbulences must be calculated bevore
+	
+
+	//Module subgroup: terrain type definition (3 noise modules)
+	// 1: [Warped-continent module]: This turbulence module slightly warps the
+  	//    output value from the continent-definition group.  This prevents the
+  	//    rougher terrain from appearing exclusively at higher elevations.
+  	//    Rough areas may now appear in the the ocean, creating rocky islands
+  	//    and fjords.
+	vec3 terrainTypeDef_tu = turbulence(v_texCoord3D, 20, CONTINENT_FREQUENCY * 18.125, CONTINENT_FREQUENCY / 20.59375 * TERRAIN_OFFSET, 3);
+  
+	float continentDef_se = BaseContinentDefinition_se(v_texCoord3D);
+	float continentDef_se_tu = BaseContinentDefinition_se(terrainTypeDef_tu);
+
 
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: terrain type definition
@@ -663,6 +808,7 @@ void main( void )
 	// -1.0 represents the smoothest terrain types (plains and underwater) and
 	// +1.0 represents the roughest terrain types (mountains).
 	//
+	
 
 
 	// 2: [Roughness-probability-shift module]: This terracing module sharpens
@@ -674,7 +820,7 @@ void main( void )
 	terraceTemp[0] = -1.0;
 	terraceTemp[1] = SHELF_LEVEL + SEA_LEVEL / 2.0;
 	terraceTemp[2] =  1.0;
-	float terrainTypeDef_te = terrace(baseContinentDef_cl, terraceTemp, 3);
+	float terrainTypeDef_te = terrace(continentDef_se_tu, terraceTemp, 3);
 
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: mountainous terrain
@@ -690,10 +836,21 @@ void main( void )
 	// mountainous terrain.
 	//
 
+	// 8: [Warped-mountains-and-valleys module]: This turbulence module warps
+  	//    the output value from the coarse-turbulence module.  This turbulence
+	//    has a higher frequency, but lower power, than the coarse-turbulence
+	//    module, adding some fine detail to it.
+	vec3 mountainBaseDef_tu1 = turbulence(v_texCoord3D, 33, 21221.0,  1.0 / 120157.0 * MOUNTAINS_TWIST, 6);
+
+	// 7: [Coarse-turbulence module]: This turbulence module warps the output
+  	//    value from the mountain-and-valleys module, adding some coarse detail
+  	//    to it.
+	vec3 mountainBaseDef_tu0 = turbulence(mountainBaseDef_tu1, 32, 1337.0, 1.0 / 6730.0 * MOUNTAINS_TWIST, 4);
+
 	// 1: [Mountain-ridge module]: This ridged-multifractal-noise module
 	//    generates the mountain ridges.
 	f_lacunarity = MOUNTAIN_LACUNARITY;
-	float mountainBaseDef_rm0 = sridged(v_texCoord3D+30, 1723.0, 4);
+	float mountainBaseDef_rm0 = sridged(mountainBaseDef_tu0+30, 1723.0, 4);
 
 	// 2: [Scaled-mountain-ridge module]: Next, a scale/bias module scales the
 	//    output value from the mountain-ridge module so that its ridges are not
@@ -707,7 +864,7 @@ void main( void )
 	//    valleys.  Note that this noise module generates ridged-multifractal
 	//    noise using only one octave; this information will be important in the
 	//    next step.
-	float mountainBaseDef_rm1 = sridged(v_texCoord3D+31, 367.0, 1);
+	float mountainBaseDef_rm1 = sridged(mountainBaseDef_tu0+31, 367.0, 1);
 
 	// 4: [Scaled-river-valley module]: Next, a scale/bias module applies a
 	//    scaling factor of -2.0 to the output value from the river-valley
@@ -741,15 +898,19 @@ void main( void )
 	// elevations.
 	//
 
+	// 4: [Warped-high-mountains module]: This turbulence module warps the
+  	//    output value from the high-mountains module, adding some detail to it.
+  	vec3 mountainousHigh_tu = turbulence(v_texCoord3D, 42, 31511.0, 1.0 / 180371.0 * MOUNTAINS_TWIST, 4);
+
 	// 1: [Mountain-basis-0 module]: This ridged-multifractal-noise module,
 	//    along with the mountain-basis-1 module, generates the individual
 	//    mountains.
-	float mountainousHigh_rm0 = sridged(v_texCoord3D+40, 2371.0, 3);
+	float mountainousHigh_rm0 = sridged(mountainousHigh_tu+40, 2371.0, 3);
 
 	// 2: [Mountain-basis-1 module]: This ridged-multifractal-noise module,
 	//    along with the mountain-basis-0 module, generates the individual
 	//    mountains.
-	float mountainousHigh_rm1 = sridged(v_texCoord3D+41, 2341.0, 3); 
+	float mountainousHigh_rm1 = sridged(mountainousHigh_tu+41, 2341.0, 3); 
 
 	// 3: [High-mountains module]: Next, a maximum-value module causes more
 	//    mountains to appear at the expense of valleys.  It does this by
@@ -860,9 +1021,21 @@ void main( void )
 	// elevations.
 	//
 
+	// 10: [Warped-hilly-terrain module]: This turbulence module warps the
+	//     output value from the coarse-turbulence module.  This turbulence has
+  	//     a higher frequency, but lower power, than the coarse-turbulence
+	//     module, adding some fine detail to it.
+	vec3 hillyTerrain_tu1 = turbulence(v_texCoord3D, 63, 21617.0, 1.0 / 117529.0 * HILLS_TWIST, 6);
+
+	// 9: [Coarse-turbulence module]: This turbulence module warps the output
+	//    value from the increased-slope-hilly-terrain module, adding some
+	//    coarse detail to it.
+	vec3 hillyTerrain_tu0 = turbulence(hillyTerrain_tu1, 62, 1531.0, 1.0 / 16921.0 * HILLS_TWIST, 4); 
+
+
 	// 1: [Hills module]: This billow-noise module generates the hills.
 	f_lacunarity = HILLS_LACUNARITY;
-	float hillyTerrain_bi = sbillow(v_texCoord3D+60, 1663.0, 6);
+	float hillyTerrain_bi = sbillow(hillyTerrain_tu0+60, 1663.0, 6);
 
 	// 2: [Scaled-hills module]: Next, a scale/bias module scales the output
 	//    value from the hills module so that its hilltops are not too high.
@@ -875,7 +1048,7 @@ void main( void )
 	//    will appear in between the valleys.  Note that this noise module
 	//    generates ridged-multifractal noise using only one octave; this
 	//    information will be important in the next step.
-	float hillyTerrain_rm = sridged(v_texCoord3D+61, 367.5, 1);
+	float hillyTerrain_rm = sridged(hillyTerrain_tu0+61, 367.5, 1);
 
 	// 4: [Scaled-river-valley module]: Next, a scale/bias module applies a
 	//    scaling factor of -2.0 to the output value from the river-valley
@@ -1007,9 +1180,21 @@ void main( void )
 	// elevations.
 	//
 
+	// 6: [Warped-cliffs module]: This turbulence module warps the output value
+  	//    from the coarse-turbulence module.  This turbulence has a higher
+  	//    frequency, but lower power, than the coarse-turbulence module, adding
+  	//    some fine detail to it.
+	vec3 badlandsCliffs_tu1 = turbulence(v_texCoord3D, 92, 36107.0, 1.0 / 211543.0 * BADLANDS_TWIST, 3);
+
+	// 5: [Coarse-turbulence module]: This turbulence module warps the output
+  	//    value from the terraced-cliffs module, adding some coarse detail to
+  	//    it.
+	vec3 badlandsCliffs_tu0 = turbulence(badlandsCliffs_tu1, 91, 16111.0, 1.0 / 141539.0 * BADLANDS_TWIST, 3);
+  
+
 	// 1: [Cliff-basis module]: This Perlin-noise module generates some coherent
 	//    noise that will be used to generate the cliffs.
-	float badlandsCliffs_pe = sOctaveNoise(v_texCoord3D+90, CONTINENT_FREQUENCY * 839.0, 6);
+	float badlandsCliffs_pe = sOctaveNoise(badlandsCliffs_tu0+90, CONTINENT_FREQUENCY * 839.0, 6);
 
 	// 2: [Cliff-shaping module]: Next, this curve module applies a curve to the
 	//    output value from the cliff-basis module.  This curve is initially
@@ -1081,10 +1266,15 @@ void main( void )
 	// elevations.
 	//
 
+	// 6: [Warped-rivers module]: This turbulence module warps the output value
+  	//    from the combined-rivers module, which twists the rivers.  The high
+  	//    roughness produces less-smooth rivers.
+  	vec3 riverPositions_tu = turbulence(v_texCoord3D, 102, 9.25, 1.0 / 57.75, 6);
+
 	// 1: [Large-river-basis module]: This ridged-multifractal-noise module
 	//    creates the large, deep rivers.
 	f_lacunarity = CONTINENT_LACUNARITY;
-	float riverPositions_rm0 = sridged(v_texCoord3D+100, 18.75, 1);
+	float riverPositions_rm0 = sridged(riverPositions_tu+100, 18.75, 1);
 
 	// 2: [Large-river-curve module]: This curve module applies a curve to the
 	//    output value from the large-river-basis module so that the ridges
@@ -1101,7 +1291,7 @@ void main( void )
 
 	/// 3: [Small-river-basis module]: This ridged-multifractal-noise module
 	//     creates the small, shallow rivers.
-	float riverPositions_rm1 = sridged(v_texCoord3D+101, 43.25, 1);
+	float riverPositions_rm1 = sridged(riverPositions_tu+101, 43.25, 1);
 
 	// 4: [Small-river-curve module]: This curve module applies a curve to the
 	//    output value from the small-river-basis module so that the ridges
@@ -1305,7 +1495,7 @@ void main( void )
 	terraceTemp[1] = -0.75;
 	terraceTemp[2] = SHELF_LEVEL;
 	terraceTemp[3] = 1.0;
-	float continentalShelf_te = terrace(baseContinentDef_cl, terraceTemp, 4);
+	float continentalShelf_te = terrace(continentDef_se, terraceTemp, 4);
 
 	// 2: [Oceanic-trench-basis module]: This ridged-multifractal-noise module
 	//    generates some coherent noise that will be used to generate the
@@ -1343,7 +1533,7 @@ void main( void )
 	// 1: [Base-scaled-continent-elevations module]: This scale/bias module
 	//    scales the output value from the continent-definition group so that it
 	//    is measured in planetary elevation units 
-	float baseContinentElev_sb = baseContinentDef_cl * CONTINENT_HEIGHT_SCALE;
+	float baseContinentElev_sb = continentDef_se * CONTINENT_HEIGHT_SCALE;
 
 	// 2: [Base-continent-with-oceans module]: This selector module applies the
 	//    elevations of the continental shelves to the base elevations of the
@@ -1352,7 +1542,7 @@ void main( void )
 	//    continent-definition group is below the shelf level.  Otherwise, it
 	//    selects the output value from the base-scaled-continent-elevations
 	//    module.
-	float baseContinentElev_se = select(baseContinentElev_sb, continentalShelf_ad, baseContinentDef_cl, 
+	float baseContinentElev_se = select(baseContinentElev_sb, continentalShelf_ad, continentDef_se, 
 										vec2(SHELF_LEVEL - 1000.0, SHELF_LEVEL), 0.03125);
 
 	////////////////////////////////////////////////////////////////////////////
@@ -1419,7 +1609,7 @@ void main( void )
 	curveTemp[1] =  vec2(                   0.0,  0.0000);
 	curveTemp[2] =  vec2(1.0 - MOUNTAINS_AMOUNT,  0.0625);
 	curveTemp[3] =  vec2(                   1.0,  0.2500);
-	float continentsWithMountains_cu = curve(baseContinentDef_cl, curveTemp, 4);
+	float continentsWithMountains_cu = curve(continentDef_se, curveTemp, 4);
 
 	// 3: [Add-increased-mountain-heights module]: This addition module adds
 	//    the increased-mountain-heights module to the continents-and-
@@ -1533,7 +1723,7 @@ void main( void )
 
    	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
 	gl_FragColor.w = n * 0.5 + 0.5;
-	//gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), 1.0);
+//        gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
 	vec4 color = vec4(v_texCoord3D, 1.0);
 	//gl_FragColor = color;
 	
