@@ -14,7 +14,7 @@ void main()
 {
 	vec4 scaledVertex = vec4(gl_Vertex.xy*(patchScaling*1.001)+translate.xy, gl_Vertex.z, 1.0);
 			
-//calculate texture coordinates
+	//calculate texture coordinates
 	float scale = 1.0;
 	if(textureCoordsParam.x != 0.0 && textureCoordsParam.y != 0.0) scale = 0.5;
 

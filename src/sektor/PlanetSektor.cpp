@@ -355,7 +355,7 @@ void PlanetNoiseParameter::print(bool toLog /*= false*/)
     if(toLog)
     {
         DRLog.writeToLog("----- PlanetNoiseParameter Begin ----");
-        for(int i = 0; i < 17; i++)
+        for(int i = 0; i < 21; i++)
         {
             DRLog.writeToLog("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
         }
@@ -364,7 +364,7 @@ void PlanetNoiseParameter::print(bool toLog /*= false*/)
     else
     {
         printf("----- PlanetNoiseParameter Begin ----");
-        for(int i = 0; i < 17; i++)
+        for(int i = 0; i < 21; i++)
         {
             printf("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
         }
