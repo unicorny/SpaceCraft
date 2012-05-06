@@ -6,6 +6,8 @@ uniform mat4 modelview;
 uniform vec3 translate;
 uniform float MAX_HEIGHT_IN_PERCENT;
 uniform float MIN_HEIGHT_IN_PERCENT;
+uniform float SEA_LEVEL;
+uniform int   textureLoaded;
 uniform vec2  textureCoordsParam; //contain id.xy (norm)
 
 uniform sampler2D texture;
@@ -26,8 +28,9 @@ void main()
 	*/
 	
 	//gl_TexCoord[1] = vec4((-gl_Vertex.xy*0.5+0.5)*scale+posOffset, 0.0, 1.0);
-	
-	float h = texture2D(texture, gl_TexCoord[0].xy).w;
+	float h = 0.0;
+	if(textureLoaded != 0)
+		h = texture2D(texture, gl_TexCoord[0].xy).w- (SEA_LEVEL* 0.5 + 0.5);
 	//h = 0.0;
 	vec4 newVertex = vec4(normalize(scaledVertex.xyz)*(1.0+h*MAX_HEIGHT_IN_PERCENT), 1.0);
 		

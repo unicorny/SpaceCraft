@@ -134,7 +134,7 @@ void Sektor::updateCameraSektor(Camera* cam)
         {
             cam->setSektorPosition(pos);
             cam->setCurrentSektor(this);            
-            cam->updateSektorPath();            
+            cam->updateSektorPath();  
             pos.convertTo(KM).print("[Sektor::updateCameraSektor] camPos after switch lower");
             printTypeInfos("[Sektor::updateCameraSektor]");
             mParent->printTypeInfos("[Sektor::updateCameraSektor] parent ");

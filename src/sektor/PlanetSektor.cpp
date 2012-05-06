@@ -354,12 +354,12 @@ void PlanetNoiseParameter::print(bool toLog /*= false*/)
 {
     if(toLog)
     {
-        DRLog.writeToLog("----- PlanetNoiseParameter Begin ----");
+        DREngineLog.writeToLog("----- PlanetNoiseParameter Begin ----");
         for(int i = 0; i < 21; i++)
         {
-            DRLog.writeToLog("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
+            DREngineLog.writeToLog("%s: %.4f", getFieldName(static_cast<PlanetNoiseParameterNames>(i)), values[i]);
         }
-        DRLog.writeToLog("----- PlanetNoiseParameter Ende ----");
+        DREngineLog.writeToLog("----- PlanetNoiseParameter Ende ----");
     }
     else
     {

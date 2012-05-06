@@ -25,7 +25,7 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     //Unit planetRadius(9.3048028075, AE); //VY Canis Majoris
     
         
-    DRLog.writeToLog("[SolarSystemSektor::SolarSystemSektor] Planeten Radius: %s", planetRadius.print().data());
+    DREngineLog.writeToLog("[SolarSystemSektor::SolarSystemSektor] Planeten Radius: %s", planetRadius.print().data());
     
     //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
     Sektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, this);
@@ -44,7 +44,7 @@ DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
     if(fTime == 0.0f)
     {
         Sektor* temp = mChilds.begin()->second;
-        DRLog.writeToLog("new Game, set camera");
+        DREngineLog.writeToLog("new Game, set camera");
         cam->lookAt(temp->getPosition().getVector3());
     }
     

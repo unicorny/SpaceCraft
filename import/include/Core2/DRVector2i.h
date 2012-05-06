@@ -55,9 +55,8 @@ public:
         
 	//Operatoren
 	//Casting
-	operator int* () {return (int*)(c);}
-    
-    operator const int* () const {return c;}
+	operator int* () {return c;}
+        operator const int* () const {return c;}
 
 		// Zuweisungsoperatoren
 	inline DRVector2i& operator = (const DRVector2i& v)	{x = v.x; y = v.y; return *this;}

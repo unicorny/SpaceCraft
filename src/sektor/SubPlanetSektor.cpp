@@ -57,7 +57,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
         //mVectorToPlanetCenter
         if(mSubLevel > 2)
             childID = childID / powf(2.0f, static_cast<float>(mSubLevel-2));
-		printf("[SubPlanetSektor::SubPlanetSektor] id: %f %f %f\n", childID.x, childID.y, childID.z);
+		//printf("[SubPlanetSektor::SubPlanetSektor] id: %f %f %f\n", childID.x, childID.y, childID.z);
         //printf("[SubPlanetSektor::SubPlanetSektor] )
         mTextureTranslate = parentSektor->getTextureTranslate() + childID;
         mVectorToPlanetCenter = mTextureTranslate.transformCoords(mRotation).normalize();
@@ -66,11 +66,12 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
         
         mSektorPosition = (mRadius * mVectorToPlanetCenter) - (mRadius * parentSektor->getVectorToPlanet());
     }
-    printf("[SubPlanetSektor::SubPlanetSektor] mVectorToPlanetCenter: %f %f %f\n", mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
+    /*printf("[SubPlanetSektor::SubPlanetSektor] mVectorToPlanetCenter: %f %f %f\n", mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
     printf("[SubPlanetSektor::SubPlanetSektor] mTextureTranslate: %f %f %f\n", mTextureTranslate.x, mTextureTranslate.y, mTextureTranslate.z);
     mSektorPosition.print("[SubPlanetSektor::SubPlanetSektor] position");
     printf("[SubPlanetSektor::SubPlanetSektor] subLevel: %d, position.length: %s\n", mSubLevel, mSektorPosition.length().print().data());
     mParent->printTypeInfos("[SubPlanetSektor::SubPlanetSektor] parent ");
+     */
  
     //mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
     DRTexturePtr parentTexture;
@@ -244,6 +245,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         shader->setUniform1f("patchScaling", mPatchScaling);
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
+        shader->setUniform1f("SEA_LEVEL", p->seaLevel);
         
         shader->setUniform2fv("textureCoordsParam", DRVector2(0.25f)-DRVector2(mID.x, mID.y).normalize()*DRVector2(0.25f).length());
         mRenderer->render(fTime, cam);

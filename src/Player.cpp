@@ -40,7 +40,7 @@ DRReturn Player::init()
     }
     //Server::getServer(mServerID);
     //mCurrentSektor = Server::getServer(mServerID)->getRootSektor();
-    DRLog.writeToLog("Player Seed: %d", mSeed);
+    DREngineLog.writeToLog("Player Seed: %d", mSeed);
     
     // position, radius, id, parent
     RootSektor* root = Server::getServer(mServerID)->getRootSektor();

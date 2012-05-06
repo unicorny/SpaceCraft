@@ -129,7 +129,7 @@ public:
     void print(const char* name = NULL, bool log = false) const
     {
         if(log)
-            DRLog.writeToLog("%s: x: %s, y: %s, z: %s\n",name!=0?name:"", x.print().data(), y.print().data(), z.print().data());
+            DREngineLog.writeToLog("%s: x: %s, y: %s, z: %s\n",name!=0?name:"", x.print().data(), y.print().data(), z.print().data());
         else
         {
         if(!name)

@@ -59,8 +59,7 @@ public:
 	//Operatoren
 	//Casting
 	operator DRReal* () {return (DRReal*)(c);}
-    
-    operator const DRReal* () const {return c;}
+        operator const DRReal* () const {return (DRReal*)(c);}
 
 		// Zuweisungsoperatoren
 	inline DRVector2& operator = (const DRVector2& v)	{x = v.x; y = v.y; return *this;}

@@ -170,7 +170,7 @@ DRReturn DRGeometrieHeightfield::init(u32 gridSize, DRVector3 edgePoints[4], Geo
             setRenderMode(GL_TRIANGLES); 
     }
     
-    DRLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
+    DREngineLog.writeToLog("vertexCount: %d, indexCount: %d", mVertexCount, mIndexCount);
     
     
     copyDataToVertexBuffer(GL_STATIC_DRAW_ARB, true);  

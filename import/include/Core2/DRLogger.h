@@ -49,23 +49,28 @@ private:
 	//Membervariablen
 	DRFile m_File;			//Log-File
 	char  m_acFilename[256];//Dateinamen des Log-Files
+        bool    m_bPrintToConsole;
 
 public:
 	//Und die &ouml;ffentlichen Funktionen
 	DRLogger();
-	~DRLogger();
+        DRLogger(const DRLogger& log);
+	virtual ~DRLogger();
 
-	DRReturn init(const char* pcFilename);
-	void exit();
+	virtual DRReturn init(const char* pcFilename, bool printToConsole);
+	virtual void exit();
+        
+        void setPrintToConsole(bool printToConsole) {m_bPrintToConsole = printToConsole;}
 
 	//in die Log-Datei schreiben
-	DRReturn writeToLog(const char* pcText, ...);
-        DRReturn writeToLog(DRString text);
-	DRReturn writeToLogDirect(const char* pcText, ...);
+	virtual DRReturn writeToLog(const char* pcText, ...);
+        virtual DRReturn writeToLog(DRString text);
+	virtual DRReturn writeToLogDirect(const char* pcText, ...);
+        virtual DRReturn writeToLogDirect(DRString text);
 
 	DRReturn writeVector2ToLog(const DRVector2& v, const char* name = NULL);			// 2D-Vektor ins Logbuch schreiben
-    DRReturn writeVector3ToLog(const DRVector3& v, const char* pcName = NULL);			// 3D-Vektor ins Logbuch schreiben
-    DRReturn writeMatrixToLog(const DRMatrix& m, const char* name = NULL);			// Matrix ins Logbuch schreiben
+        DRReturn writeVector3ToLog(const DRVector3& v, const char* pcName = NULL);			// 3D-Vektor ins Logbuch schreiben
+        DRReturn writeMatrixToLog(const DRMatrix& m, const char* name = NULL);			// Matrix ins Logbuch schreiben
 	//DRReturn WritePlaneToLog(DRPlane& p);				// Ebene ins Logbuch schreiben
 	DRReturn writeColorToLog(const DRColor& c);				// Farbe ins Logbuch schreiben
 
@@ -73,12 +78,7 @@ public:
 	//inline um Variablen abzufragen
 	inline DRFile* getFile() {return &m_File;};
 
-	//Funktionszeiger f&uuml;r SDL Mutex bei verwendung von SDL
-	void (*mLockMutex)(void);
-	void (*mUnlockMutex)(void);
-	void*	mMutex;
-
-
+	
 //	DRReturn WriteDXError(HRESULT hr);
 
 

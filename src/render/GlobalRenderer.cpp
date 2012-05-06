@@ -122,7 +122,7 @@ DRReturn GlobalRenderer::setupFrameBuffer(DRTexturePtr texture)
     ret = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if(ret != GL_FRAMEBUFFER_COMPLETE_EXT)
     {
-        DRLog.writeToLog("Fehler bei Check Framebuffer Status: %s", getFrameBufferEnumName(ret));
+        DREngineLog.writeToLog("Fehler bei Check Framebuffer Status: %s", getFrameBufferEnumName(ret));
         LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
     }
    // glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
@@ -138,7 +138,7 @@ void GlobalRenderer::exit()
     gluDeleteQuadric(mQuadratic); 
 	if(m_bInitialized)
 	{
-		DRLog.writeToLog("[GlobalRenderer::exit] geo memory by exit: %f MByte, texture memory by exit: %f MByte",
+		DREngineLog.writeToLog("[GlobalRenderer::exit] geo memory by exit: %f MByte, texture memory by exit: %f MByte",
 			static_cast<double>(mGrafikMemGeometrie)/(1024.0*1024.0),
 			static_cast<double>(mGrafikMemTexture)/(1024.0*1024.0));
 	}

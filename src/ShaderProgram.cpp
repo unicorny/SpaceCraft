@@ -47,7 +47,7 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     unsigned char* vertexShaderAssembly = readShaderFile( vertexShaderFile );
     if(!vertexShaderAssembly)
     {
-        DRLog.writeToLog("<font color='red'>Fehler:</font>couldn't open Vertex shader file: %s", vertexShaderFile);
+        DREngineLog.writeToLog("<font color='red'>Fehler:</font>couldn't open Vertex shader file: %s", vertexShaderFile);
         LOG_ERROR("Fehler by opening vertex-shader", DR_ERROR);
     }
 
@@ -60,7 +60,7 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     if(vertexCompiled  == GL_FALSE)
     {
         glGetShaderInfoLog(mVertexShader, sizeof(str), NULL, str);
-        DRLog.writeToLog("<font color='red'>Fehler:</font>Vertex shader (%s) compile error: %s", vertexShaderFile, str);
+        DREngineLog.writeToLog("<font color='red'>Fehler:</font>Vertex shader (%s) compile error: %s", vertexShaderFile, str);
     }
     if(DRGrafikError("ShaderProgram::init create Vertex Shader")) LOG_WARNING("Fehler bei shader init");
 // -------------------------------------------------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     unsigned char* fragmentShaderAssembly = readShaderFile( fragmentShaderFile );
     if(!fragmentShaderAssembly)
     {
-        DRLog.writeToLog("<font color='red'>Fehler:</font>couldn't open Fragment shader file: %s", vertexShaderFile);
+        DREngineLog.writeToLog("<font color='red'>Fehler:</font>couldn't open Fragment shader file: %s", vertexShaderFile);
         LOG_ERROR("Fehler by opening fragment-shader", DR_ERROR);
     }
     
@@ -84,7 +84,7 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     if(fragmentCompiled == GL_FALSE)
     {
         glGetShaderInfoLog( mFragmentShader, sizeof(str), NULL, str );
-        DRLog.writeToLog("<font color='red'>Fehler:</font>Fragment shader (%s) compile error: %s", fragmentShaderFile, str);
+        DREngineLog.writeToLog("<font color='red'>Fehler:</font>Fragment shader (%s) compile error: %s", fragmentShaderFile, str);
     }
     if(DRGrafikError("ShaderProgram::init create fragment shader")) LOG_WARNING("Fehler bei shader init");    
 //----------------------------------------------------------------------------------------------------
@@ -102,9 +102,9 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
         glGetProgramInfoLog( mProgram, sizeof(str), &length, str );
         //printError("Program object linking error", str);
         if(length > 1023)
-            DRLog.writeToLog(DRString(str));
+            DREngineLog.writeToLog(DRString(str));
         else
-            DRLog.writeToLog("<font color='red'>Fehler:</font>Program object linking error:\n%s", str);
+            DREngineLog.writeToLog("<font color='red'>Fehler:</font>Program object linking error:\n%s", str);
     }
     
     if(DRGrafikError("ShaderProgram::init create programm")) LOG_WARNING("Fehler bei shader init");
@@ -176,8 +176,8 @@ void ShaderProgram::setUniformMatrix(const char* name, const DRMatrix& matrix, b
 	glUniformMatrix4fv(loc, 1, transpose, static_cast<const GLfloat*>(matrix));
 	if(DRGrafikError("ShaderProgramm::setUniformMatrix"))
     {
-        DRLog.writeToLog("[ShaderProgram::setUniformMatrix] name: %s, transpose: %d", name, transpose);
-        DRLog.writeMatrixToLog(matrix, "[ShaderProgram::setUniformMatrix] matrix");
+        DREngineLog.writeToLog("[ShaderProgram::setUniformMatrix] name: %s, transpose: %d", name, transpose);
+        DREngineLog.writeMatrixToLog(matrix, "[ShaderProgram::setUniformMatrix] matrix");
     }
 }
 

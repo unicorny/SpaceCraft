@@ -706,6 +706,19 @@ float BaseContinentDefinition_se(vec3 value)
 	return continentDef_se;
 }
 
+float unpackHeight(vec3 color)
+{   
+	return (color.r+color.g*256.0 + (color.b*256.0*256.0))/(256.0*256.0);
+}
+
+vec3 packHeight(float height) 
+{ 
+	float b = floor(height * 256.0);
+	float g = floor(height * 65536.0) - (b*256.0);
+	float r = (floor(height * 16777216.0) - (b*65536.0)) - (g*256.0);
+	return vec3(r, g, b)/ 256.0;
+}
+
 void main( void )
 {
 	//Default
@@ -1651,7 +1664,10 @@ void main( void )
 	if(n == 0.0)
 	   	n = continentsWithRivers_se;
 //*/
+	vec3 temp = packHeight(n);
+	
 	GradientColor gradient[10];
+	
 	gradient[0] =  GradientColor(-2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     0.0,     1.0));
     gradient[1] =  GradientColor(-0.03125 	  	+ SEA_LEVEL_IN_METRES, vec4(0.02353, 0.22745, 0.49804, 1.0));
     gradient[2] =  GradientColor(-0.0001220703 	+ SEA_LEVEL_IN_METRES, vec4(0.05490, 0.43922, 0.75294, 1.0));
@@ -1664,8 +1680,9 @@ void main( void )
     gradient[9] =  GradientColor( 2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     1.0,     1.0));
 
    	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
+	n = unpackHeight(temp);
 	gl_FragColor.w = n * 0.5 + 0.5;
-//        gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
+        //gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
 	vec4 color = vec4(v_texCoord3D, 1.0);
 	//gl_FragColor = color;
 	
