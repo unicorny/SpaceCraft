@@ -229,7 +229,6 @@ DRReturn load()
     glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &textureCount);
     if(textureCount < 4) LOG_ERROR("Multitexturing mit mindestens 4 Texturen wird nicht unterstuetzt!", DR_ERROR);
     DREngineLog.writeToLog("Multitexturing supported up to: %d textures\n", textureCount);
-
     
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");

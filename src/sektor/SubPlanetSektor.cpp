@@ -32,10 +32,11 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     //printf("[SubPlanetSektor::SubPlanetSektor] patchScaling: %f\n", mPatchScaling);
     if(mSubLevel == 1)
     {
-        mSektorPosition = Vector3Unit(childID.normalize(), KM)*mRadius;
         mVectorToPlanetCenter = childID.normalize();
+        mSektorPosition = Vector3Unit(mVectorToPlanetCenter, KM)*mRadius;
+        
         //berechnen der Rotationsmatrix für die Texturgenerierung
-        DRVector3 centerPosition = mSektorPosition.getVector3().normalize(); 
+        DRVector3 centerPosition = mVectorToPlanetCenter; 
         DRVector3 startAxis(0.00001f, 0.00001f, 1.0f);
 
         DRVector3 rotationAxis = startAxis.cross(centerPosition).normalize();//startAxis.cross(centerPosition).normalize();
