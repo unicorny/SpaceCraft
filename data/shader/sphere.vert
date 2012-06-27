@@ -32,7 +32,7 @@ void main()
 	float h = 0.0;
 	if(textureLoaded != 0)
 		h = texture2D(texture, gl_TexCoord[0].xy).w- (SEA_LEVEL* 0.5 + 0.5);
-	//h = 0.0;
+	h = 0.0;
 	vec4 newVertex = vec4(normalize(scaledVertex.xyz)*(1.0+h*MAX_HEIGHT_IN_PERCENT), 1.0);
 		
 	gl_Position    = projection * modelview * newVertex;

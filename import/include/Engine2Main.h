@@ -143,6 +143,7 @@ ENGINE2_API extern DRVector2  g_v2WindowLength;
 ENGINE2_API extern Uint8*    g_piPressed;
 ENGINE2_API extern u16       g_CPU_Count;
 ENGINE2_API extern DREngineLogger DREngineLog;
+ENGINE2_API extern DRGameStateManager* g_pGameStateManager;
 
 #undef WRITETOLOG
 #undef LOG_ERROR
@@ -174,6 +175,7 @@ ENGINE2_API DRReturn EnInit_Simple(DRReal fVersion = 1.0f, bool initSound = fals
 ENGINE2_API DRReturn EnInit(DRReal fVersion = 1.0f, bool initSound = false);
 ENGINE2_API DRReturn EnInit_INI(const char* iniFileName);
 ENGINE2_API DRReturn EnInit_OpenGL(DRReal fVersion = 1.0f, DRVideoConfig video = DRVideoConfig(), const char* pcTitel = "OpenGL Render Fenster", const char* pcBMPIcon = NULL, bool bInitSound = true);
+ENGINE2_API DRReturn EnGameLoop(DRGameStatePtr firstGameState, bool bExitByEsc = true);
 ENGINE2_API DRReturn EnGameLoop(DRReturn (*pMoveProc)(DRReal), DRReturn (*pRenderProc)(DRReal), bool bExitByEsc = true);
 ENGINE2_API void     EnExit();
 

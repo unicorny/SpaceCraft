@@ -47,6 +47,7 @@
 #include <cstdarg>
 #include <cstddef>
 #include <math.h>
+#include <list>
 
 
 
@@ -152,6 +153,7 @@ enum /*CORE_API*/ DRReturn
 #include "DRIResource.h"
 #include "DRResourcePtrHolder.h"
 #include "DRResourcePtr.h"
+#include "DRGameStateManager.h"
 
 //Globale Variablen
 CORE2_API extern DRLogger DRLog;

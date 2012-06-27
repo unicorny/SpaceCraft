@@ -11,6 +11,7 @@ xcopy /Y Y:\Engine2\dependencies\bin\Debug\DRCore2.dll import\bin\
 xcopy /Y Y:\Engine2\dependencies\bin\Debug\DRImage.dll .
 
 xcopy /Y Y:\Engine2\bin\Debug\DREngine2.dll Debug\
+xcopy /Y Y:\Engine2\bin\Release\DREngine2.dll Release\
 xcopy /Y Y:\Engine2\dependencies\bin\Debug\DRCore2.dll Debug\
 xcopy /Y Y:\Engine2\dependencies\bin\Debug\DRImage.dll Debug\
 xcopy /Y Y:\Engine2\dependencies\bin\Release\DRCore2.dll Release\
