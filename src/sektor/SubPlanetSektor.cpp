@@ -11,11 +11,14 @@ DRVector3 SubPlanetSektor::mSubLevelBorder[] =
  DRVector3(20.0f, 100.0f, 0.45f), // 3
  DRVector3(15.0f, 100.0f, 0.30f), // 4
  DRVector3(10.0f,  99.0f, 0.1f), // 5
- DRVector3(8.0f,  95.0f, 0.04f), // 6
- DRVector3(6.0f,   94.0f, 0.02f)}; // 7
+ DRVector3(8.0f,   95.0f, 0.04f), // 6
+ DRVector3(6.0f,   95.0f, 0.03f),// 7
+ DRVector3(4.0f,   94.0f, 0.01f), // 8
+ DRVector3(2.0f,   93.0f, 0.009f), // 9
+ DRVector3(1.0f,   92.0f, 0.0035f)}; // 10
 //*/
 
-#define MAX_SUB_LEVEL 8
+#define MAX_SUB_LEVEL 11
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
