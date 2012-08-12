@@ -22,8 +22,6 @@ public:
      */
     virtual DRReturn move(float fTime, Camera* cam);
     
-    virtual bool less_than(DRIResource& b) const {return Sektor::less_than(b);}
-    
 protected:
     
 private:

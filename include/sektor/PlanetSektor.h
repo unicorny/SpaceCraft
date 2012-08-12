@@ -2,6 +2,7 @@
 #define __SC_PLANET_SEKTOR__
 
 #include "RenderPlanet.h"
+#include "SolarSystemSektor.h"
 
 enum PlanetNoiseParameterNames
 {
@@ -21,7 +22,12 @@ enum PlanetNoiseParameterNames
     CONTINENT_HEIGHT_SCALE = 13,
     SEA_LEVEL_IN_METRES = 14,
     MAX_HEIGHT_IN_PERCENT = 15,
-    MIN_HEIGHT_IN_PERCENT = 16
+    MIN_HEIGHT_IN_PERCENT = 16,
+    TERRAIN_OFFSET = 17,
+    MOUNTAINS_TWIST = 18,
+    HILLS_TWIST = 19,
+    BADLANDS_TWIST = 20
+    
 };
 
 struct PlanetNoiseParameter
@@ -51,8 +57,12 @@ struct PlanetNoiseParameter
             float seaLevelInMetres;
             float maxHeightInPercent;
             float minHeightInPercent;
+            float terrainOffset;
+            float mountainsTwist;
+            float hillsTwist;
+            float badlandsTwist;
         };
-        float values[17];
+        float values[21];
     };
 };
 
@@ -78,11 +88,11 @@ public:
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
     // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet
-    virtual SektorPtr getChild(SektorID childID);
+    virtual Sektor* getChild(SektorID childID);
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     __inline__ double getTheta() {return mTheta;}
     __inline__ const PlanetNoiseParameter* getPlanetNoiseParameters() const {return &mPlanetNoiseParameters;}
-    
+      
 protected:
     ShaderProgram*              mSphericalShaderForSubPlanet;
     double                      mTheta;

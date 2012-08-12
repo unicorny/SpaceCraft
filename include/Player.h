@@ -25,8 +25,10 @@ public:
     // setter und getter
     __inline__ void setCameraFOV(float newFOV) {mCameraFOV = newFOV;}
     __inline__ float getCameraFOV() {return mCameraFOV;}
-    __inline__ Camera* getCamera() {return &mCamera;}
+    __inline__ Camera* getCamera() {return mCamera;}
     __inline__ Sektor* getSektor() {return mCurrentSektor;}
+    __inline__ void setCurrentSpeed(Unit currentSpeed) {mCurrentSpeed = currentSpeed;}
+    __inline__ Unit getCurrentSpeed() {return mCurrentSpeed;}
     
 private:
     
@@ -36,7 +38,7 @@ private:
     // position
     u64 mServerID;
     SektorID mSektorID;
-    Camera mCamera;
+    Camera* mCamera;
     
     std::vector<SektorID> mCameraSektorPath;
     // current position of player in current sektor in sektor coordinates (for exapmle, in AE)
@@ -49,6 +51,7 @@ private:
     
     //runtime (not to save)
     Sektor* mCurrentSektor;
+    Unit    mCurrentSpeed;
 };
 
 #endif	/* PLAYER_H */

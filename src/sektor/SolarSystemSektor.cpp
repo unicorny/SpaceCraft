@@ -8,7 +8,9 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     
     //neuen Planeten erstellen
     Vector3Unit planetPosition(DRRandom::rVector3(7000), KM);
-    planetPosition = planetPosition.normalize()*300000;
+    planetPosition = Unit(200000, KM)*planetPosition.normalize();
+    //Vector3Unit planetPosition(DRRandom::rVector3(10), AE);
+    //planetPosition = planetPosition.normalize()*12;
     //planetPosition = planetPosition.normalize();
     //planetPosition = planetPosition * Unit(0.2f, AE);
     planetPosition.print("[SolarSystemSektor::SolarSystemSektor] Planeten position");
@@ -20,13 +22,14 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
 	idVector /= SHRT_MAX;
     int seed = (int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX);
     Unit planetRadius(DRRandom::rDouble(7000, 6000), KM);
+    //Unit planetRadius(9.3048028075, AE); //VY Canis Majoris
     
         
-    DRLog.writeToLog("[SolarSystemSektor::SolarSystemSektor] Planeten Radius: %s", planetRadius.print().data());
+    DREngineLog.writeToLog("[SolarSystemSektor::SolarSystemSektor] Planeten Radius: %s", planetRadius.print().data());
     
     //mCurrentSektor->setStellarBody(new Planet(radius, position, seed, mCurrentSektor));    
-    PlanetSektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, this);
-    mChilds.insert(SEKTOR_ENTRY(seed, temp->getThis()));
+    Sektor* temp = new PlanetSektor(planetPosition, planetRadius, seed, this);
+    mChilds.insert(SEKTOR_ENTRY(seed, temp));
 }
 
 SolarSystemSektor::~SolarSystemSektor()
@@ -36,11 +39,12 @@ SolarSystemSektor::~SolarSystemSektor()
 
 DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
 {
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(mThis);
+    //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
     if(fTime == 0.0f)
     {
-        SektorPtr temp = mChilds.begin()->second;
-        DRLog.writeToLog("new Game, set camera");
+        Sektor* temp = mChilds.begin()->second;
+        DREngineLog.writeToLog("new Game, set camera");
         cam->lookAt(temp->getPosition().getVector3());
     }
     

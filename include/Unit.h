@@ -58,8 +58,8 @@ public:
     __inline__ Unit operator *  (const double b) const {return Unit(this->mValue*b, this->mUnitType);}
     __inline__ Unit operator *= (const double b) {*this = Unit(this->mValue*b, this->mUnitType); return *this;}
         
-    Unit operator /(const Unit& b) const;
-    __inline__ Unit operator /= (const Unit& b) {*this = *this / b; return *this;}
+    double operator /(const Unit& b) const;
+    //__inline__ double operator /= (const Unit& b) {*this = *this / b; return *this;}
     
     __inline__ Unit operator / (const double b) const {return Unit(this->mValue/b, this->mUnitType);}
     __inline__ Unit operator /= (const double b) {*this = Unit(this->mValue/b, this->mUnitType); return *this;}
@@ -86,6 +86,7 @@ private:
 };
 
 __inline__ Unit sqrt(Unit& a) {return Unit(sqrt(a), a.getType());}
+//__inline__ Vector3Unit operator *(DRVector3 v, Unit f) {return Vector3Unit(v.x*f, v.y*f, v.z*f, f.getType());}
 
 #endif	/* __SPACE_CRAFT_UNIT_H */
 

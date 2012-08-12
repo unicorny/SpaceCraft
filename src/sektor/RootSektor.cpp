@@ -12,14 +12,14 @@ RootSektor::~RootSektor()
     
 }
 
-void RootSektor::addSektor(SektorPtr sektor, SektorID id)
+void RootSektor::addSektor(Sektor* sektor, SektorID id)
 {
     mChilds.insert(SEKTOR_ENTRY(id, sektor));
 }
 
 DRReturn RootSektor::move(float fTime, Camera* cam)
 {
-    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(mThis);
+    mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     return DR_OK;
 }
 

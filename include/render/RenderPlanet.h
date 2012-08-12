@@ -23,12 +23,13 @@ public:
     void setTexturePath(DRString texturePath) {mTexturePath = texturePath;}
     
     RenderNoisePlanetToTexture* getRenderNoisePlanetToTexture();
+    __inline__ DRTexturePtr getTexture() {return mTexture;}
     
 protected:
-    RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
+    RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture);
     DRReturn init(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, 
                   const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
-                  const PlanetNoiseParameter* planetNoiseParameter);
+                  const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture);
     
     DRReturn generateAndBindTexture();
     DRString getPathAndFilename();
@@ -36,8 +37,9 @@ protected:
     RenderInStepsToTexturePtr   mTextureRenderer;
     DRTexturePtr		mTexture;
     DRTexturePtr		mPreviewTextur;
-    short                       mInitalized;
-    DRString                    mTexturePath;
+    short               mInitalized;
+    DRString            mTexturePath;
+    bool                mUsingParentTexture;
     
 private:    
     

@@ -109,7 +109,7 @@ DRReturn Server::loadFromFile()
         if(strcmp(identifier, "serv") != 0)
         {
             LOG_WARNING("identifier isn't correct, server-file maybe corrupt?");
-            DRLog.writeToLog(identifier);
+            DREngineLog.writeToLog(identifier);
         }
         else
         {

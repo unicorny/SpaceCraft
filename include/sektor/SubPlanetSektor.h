@@ -9,14 +9,14 @@
 #include "PlanetSektor.h"
 #include "RenderSubPlanet.h"
 
+
 class SubPlanetSektor : public Sektor
 {
 public:
-    SubPlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent, SektorPtr planet,
-                    float patchScaling = 1.0f, int subLevel = 1);
+    SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
+                    float patchScaling = 1.0f, int subLevel = 6);
     virtual ~SubPlanetSektor();
     
-    virtual void release();
     /*! \brief move sektor
      * 
      * check if child are visible, and move (logical, physical)
@@ -36,23 +36,28 @@ public:
     
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
-    virtual SektorPtr getChild(SektorID childID);
+    virtual Sektor* getChild(SektorID childID);
     
     const DRMatrix& getRotation() {return mRotation;}
-    __inline__ PlanetSektor* getPlanet() {return dynamic_cast<PlanetSektor*>(mPlanet.getResourcePtrHolder() ? mPlanet.getResourcePtrHolder()->mResource : NULL);}
+    __inline__ DRVector3 getVectorToPlanet() {return mVectorToPlanetCenter;}
+    __inline__ DRVector3 getTextureTranslate() {return mTextureTranslate;}
     
-    virtual bool less_than(SubPlanetSektor& b) const {return Sektor::less_than(b);}
+    virtual void printTypeInfos(const char* name);
     
 protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
-    SektorPtr           mPlanet;
+    PlanetSektor*       mPlanet;
     float               mPatchScaling;
     DRMatrix            mRotation;
-    DRVector3           mVectorToPlanetCenter; 
+    //! position relative to planet center
+    DRVector3           mVectorToPlanetCenter;
+    DRVector3           mTextureTranslate;
+    
+    static DRVector3    mSubLevelBorder[];
     
     // temporäre variablen      
-    double              mHorizontCulling;
+    //double              mHorizontCulling;
 private:
     
     

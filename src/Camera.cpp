@@ -6,20 +6,24 @@
  */
 
 #include "Camera.h"
+#include "Sektor.h"
 
 Camera::Camera()
-: mSektorPosition(Unit(0, AE))
+: mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL)
+        
 {
+    mType = OBSERVER_CAMERA;
 }
 
-Camera::Camera(const DRVector3& position, SektorPtr sektor) 
-: DRObjekt(position), mSektorPosition(Unit(0, NONE)), mCurrentSektor(sektor)
+Camera::Camera(const DRVector3& position, Sektor* sektor) 
+: Observer(position), mSektorPosition(Unit(0, NONE)), mCurrentSektor(sektor)
 {
+    mType = OBSERVER_CAMERA;
 }
 
 Camera::~Camera() 
 {
-    mCurrentSektor = NULL;    
+    setCurrentSektor(NULL);    
 }
 
 void Camera::setKameraMatrix()
@@ -61,6 +65,7 @@ void Camera::translateRel(const DRVector3& translate)
    
 }
 
+
 void Camera::update()
 {
 	Vector3Unit pos = mSektorPosition.convertTo(KM);
@@ -75,47 +80,69 @@ void Camera::update()
 
 void Camera::updateSektorPath()
 {
-    if(mCurrentSektor.getResourcePtrHolder())
+    if(mCurrentSektor)
         mCurrentSektor->getSektorPath(mSektorPath);
     else
         return;
-    std::cout << "Camera Sektor Path" << std::endl;
-    for (uint i=0; i<mSektorPath.size(); i++) std::cout << " " << mSektorPath[i];
-    std::cout << std::endl;
+    std::stringstream s(std::stringstream::in|std::stringstream::out);
+    s << "[Camera::updateSektorPath] Camera Sektor Path ./data/";
+    for (uint i=0; i<mSektorPath.size(); i++) s << "_" << mSektorPath[i] << "/";
+    s << std::endl;
+    //DRLog.writeToLog(s.str());
 }
 
-Vector3Unit Camera::getSektorPositionAtSektor(const SektorPtr targetSektor)
+void Camera::setCurrentSektor(Sektor* current)
 {
-    if(!targetSektor.getResourcePtrHolder()) return Vector3Unit(0.0f, M);
-    if(!mCurrentSektor.getResourcePtrHolder()) return Vector3Unit(0.0f, M);
+    if(mCurrentSektor) mCurrentSektor->removeObserver(DRMakeStringHash("Camera"));
+    if(current)
+		current->addObserver(DRMakeStringHash("Camera"), this);
+    mCurrentSektor = current;
+}
+
+Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
+{
+    if(!targetSektor) return Vector3Unit(0.0f, M);
+    if(!mCurrentSektor) return Vector3Unit(0.0f, M);
     if(targetSektor == mCurrentSektor) return mSektorPosition;
     
     Vector3Unit newPos = mSektorPosition;
-    SektorPtr cur = mCurrentSektor;
+    Sektor* cur = mCurrentSektor;
     
     std::vector<SektorID> sektorPath;
     targetSektor->getSektorPath(sektorPath);
     
+    //DRLog.writeToLog("[Camera::getSektorPositionAtSektor]: targetSektor: %s, currentSektor: %s", targetSektor->getSektorPathName().data(), cur->getSektorPathName().data());
+    
+    //find break index, last position where both sektor the same
+    int breakIndex = 0;
+    while(breakIndex+1 < sektorPath.size() &&
+		  breakIndex+1 < mSektorPath.size() &&
+		  sektorPath[breakIndex+1] == mSektorPath[breakIndex+1])
+		  breakIndex++;
+    //DRLog.writeToLog("[Camera::getSektorPositionAtSektor] breakIndex: %d", breakIndex);
+    
     int index = 0;
-    // 1
+    // 1 up
     {
+
         index = mSektorPath.size()-1;
-        while(index >= sektorPath.size() || sektorPath[index] != mSektorPath[index])
+        while(index > breakIndex)
         {
             newPos += cur->getPosition();
-            cur = cur->getParent()->getThis();
+            cur = cur->getParent(); 
             index--;
-            if(index < 0) LOG_ERROR("haven't the same root", Vector3Unit(0.0, M));
+            if(index < 0)
+				LOG_ERROR("haven't the same root", Vector3Unit(0.0, M));
         }
     }
-    // 2
+    // 2 down
     {
-        while(index < sektorPath.size()-1)
+        while(index < static_cast<int>(sektorPath.size())-1)
         {
             index++;
             SektorID i = sektorPath[index];
             cur = cur->getChild(i);
-            if(!cur.getResourcePtrHolder()) LOG_ERROR("sektor didn't exist", Vector3Unit(0.0, M))
+            if(!cur) LOG_ERROR("sektor didn't exist", Vector3Unit(0.0, M))
             newPos -= cur->getPosition();
         }
     }

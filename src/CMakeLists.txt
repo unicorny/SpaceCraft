@@ -7,7 +7,7 @@ SET(spaceCraftSrc main Player sektor/Sektor Server Camera render/RenderBlockLoad
 				  sektor/SolarSystemSektor sektor/RootSektor sektor/PlanetSektor render/RenderSektor render/RenderSolarSystem
 				  sektor/SubPlanetSektor render/RenderSubPlanet DRGeometrieHeightfield 
 				  DRGeometrieManager render/RenderInStepsToTexture render/RenderNoisePlanetToTexture ShaderManager
-				  render/RenderSubPatchPlanet sektor/SubPatchPlanetSektor)
+				  render/RenderSubPatchPlanet sektor/SubPatchPlanetSektor Observer HeightMapTexture)
 #IF(WIN32)
 SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/sektor/Sektor.h ../include/Server.h
 								   ../include/Camera.h ../include/render/RenderBlockLoader.h ../include/render/RenderBlock.h
@@ -20,6 +20,7 @@ SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../incl
 								   ../include/DRGeometrieManager.h ../include/render/RenderInStepsToTexture.h 
 								   ../include/render/RenderNoisePlanetToTexture.h ../include/ShaderManager.h 
 								   ../include/render/RenderSubPatchPlanet.h ../include/sektor/SubPatchPlanetSektor.h
+								   ../include/Observer.h ../include/HeightMapTexture.h
 								   )
 #ENDIF(WIN32)
 
@@ -30,13 +31,14 @@ find_library(DR_CORE2_LIB DRCore2 PATHS ${PA} REQUIRED)
 find_library(LIB_NOISE_DLL libnoise PATHS ${PA} REQUIRED)
 if(WIN32)
 SET(SpaceCraftLibs ${SDL_LIB} ${DR_ENGINE2_LIB} ${DR_CORE2_LIB} glu32 opengl32 ${LIB_NOISE_DLL})
-else()
-SET(SpaceCraftLibs ${SDL_LIB} DREngine2 DRCore2 glut ${LIB_NOISE_DLL})
-endif()
+else(UNIX)
+SET(SpaceCraftLibs ${SDL_LIB} DREngine2 DRCore2 GLU ${LIB_NOISE_DLL})
+endif(WIN32)
 
 if (MSVC)
 ADD_DEFINITIONS(-DNODEFAULTLIB:library)
 endif(MSVC)
+
 
 ADD_EXECUTABLE(SpaceCraft ${spaceCraftSrc})
 

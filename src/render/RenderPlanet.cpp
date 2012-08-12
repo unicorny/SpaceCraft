@@ -6,53 +6,54 @@
 
 RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
 : RenderSektor(), mTextureRenderer(), mTexture(),
-  mPreviewTextur(), mInitalized(0)
+  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
     init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", 
-         size, texturePath, planetNoiseParameter);
+         size, texturePath, planetNoiseParameter, DRTexturePtr());
 }
 
 RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
                            float patchScaling, const DRMatrix& rotation, DRString texturePath,
-                           const PlanetNoiseParameter* planetNoiseParameter)
+                           const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture)
 : RenderSektor(), mTextureRenderer(), mTexture(), 
-  mPreviewTextur(), mInitalized(0)
+  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
     init(seed, translate, patchScaling, rotation, "subPlanetNoise.vert", "noise.frag", 
-         size, texturePath, planetNoiseParameter);
+         size, texturePath, planetNoiseParameter, parentTexture);
 }
 
 DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
               float patchScaling, const DRMatrix& rotation, 
               const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
-              const PlanetNoiseParameter* planetNoiseParameter)
+              const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture)
 {
-	GlobalRenderer& gb = GlobalRenderer::Instance();
+    GlobalRenderer& gb = GlobalRenderer::Instance();
     DRTextureManager& tx = DRTextureManager::Instance();
 	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
 
 	int stepSize = gb.getTextureRenderStepSize();
 	//float stepSize = static_cast<float>(stepSizei);
 
-	//clear texture
-	size_t bufferSize = stepSize*stepSize*4;
-	GLubyte* buffer = new GLubyte[bufferSize];
-	memset(buffer, 0, bufferSize);
-
-	mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
-    //    TexturePtr(new Texture(stepSizei, stepSizei, GL_UNSIGNED_BYTE, 4, buffer, bufferSize));
+    if(parentTexture.getResourcePtrHolder() && parentTexture->isLoadingFinished())
+    {
+        mPreviewTextur = parentTexture;
+        mUsingParentTexture = true;
+    }
+    else
+    {
+        mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
     
-	DR_SAVE_DELETE_ARRAY(buffer);
-	buffer = NULL;
-	mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
-    mTexturePath = texturePath;
+        if(mPreviewTextur.getResourcePtrHolder())
+            mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+        mTexturePath = texturePath;
 
-	mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
-	getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
-	GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
+        mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
+        getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mPreviewTextur, rotation);    
+        GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
+    }
 		
     if(DRIsFileExist(getPathAndFilename().data()))
     {
@@ -70,9 +71,16 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 //        mPreviewTextureID = DRTextureManager::Instance().getGLTextureMemory(stepSizei, stepSizei,
   //                                                                   GL_UNSIGNED_BYTE, 4);    		
 		mTexture = tx.getTexture(DRVector2i(textureSize), 4);
-        mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+		if(mTexture.getResourcePtrHolder())
+			mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
             //TexturePtr(new Texture(textureSize, textureSize, GL_UNSIGNED_BYTE, 4));
-
+        if(mUsingParentTexture)
+        {
+            mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
+            getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mTexture, rotation);    
+            GlobalRenderer::Instance().addRenderTask(mTextureRenderer, false);
+            mInitalized = 1;
+        }
         //mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    
     }
     
@@ -86,7 +94,7 @@ DRString RenderPlanet::getPathAndFilename()
 
 RenderPlanet::~RenderPlanet()
 {
-	ShaderManager::Instance().releaseShader(mShader);
+    ShaderManager::Instance().releaseShader(mShader);
     if(mTextureRenderer.getResourcePtrHolder() && !mTextureRenderer->isFinished())
         GlobalRenderer::Instance().removeRenderTask(mTextureRenderer);
     //DR_SAVE_DELETE(mTextureRenderer);
@@ -95,7 +103,7 @@ RenderPlanet::~RenderPlanet()
 }
 DRReturn RenderPlanet::generateAndBindTexture()
 {
-    if(mTextureRenderer.getResourcePtrHolder() && mTextureRenderer->isFinished())
+    if(mTextureRenderer && mTextureRenderer->isFinished())
     {
 		//finish rendering preview texture
         if(!mInitalized)
@@ -116,9 +124,11 @@ DRReturn RenderPlanet::generateAndBindTexture()
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
                 DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
                     GlobalRenderer::Instance().getTextureRenderStepSize()*
-                    GlobalRenderer::Instance().getTextureRenderStepSize());
+                    GlobalRenderer::Instance().getTextureRenderStepSize()*8);
+                 // */
 			}
 			mTextureRenderer.release();
+            mTexture->setFinishRender();
 		}
 	}
 	if(3 == mInitalized && mTexture->isLoadingFinished() && mTextureRenderer->isFinished())
@@ -129,7 +139,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
         mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
 		mInitalized++;
     }    
-	if(mTexture->isLoadingError())
+	if(mTexture && mTexture->isLoadingError())
 	{
 		int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 		mTexture = DRTextureManager::Instance().getTexture(DRVector2i(size), 4);
@@ -138,18 +148,23 @@ DRReturn RenderPlanet::generateAndBindTexture()
 	}
     glEnable(GL_TEXTURE_2D);
     GLint textureLoaded = 0; //render not
-    if(mPreviewTextur.getResourcePtrHolder())
+    if(mPreviewTextur)
     {
         mPreviewTextur->bind();
         if(mPreviewTextur->isLoadingFinished()) 
             textureLoaded = 1;
+        if(!mUsingParentTexture)
+            mShader->setUniform2fv("textureCoordsParam", DRVector2(0.0f));
     }
     else
     {
         mTexture->bind();
         textureLoaded = 1;
+        // nur für debug auskommentiert
+        mShader->setUniform2fv("textureCoordsParam", DRVector2(0.0f));
     }
     mShader->setUniform1i("textureLoaded", textureLoaded);
+    
     
     if(DRGrafikError("[RenderPlanet::generateAndBindTexture]")) return DR_ERROR;
     return DR_OK;

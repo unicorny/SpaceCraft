@@ -52,7 +52,7 @@ public:
     Unit operator [] (int index) const {switch(index){case 0: return x; case 1: return y; case 2: return z; default: return Unit();}}
 
     //operator DRVector3() {return DRVector3((float)x, (float)y, (float)z);}
-    DRVector3 getVector3() {return DRVector3((float)x, (float)y, (float)z);}
+    DRVector3 getVector3() const {return DRVector3((float)x, (float)y, (float)z);}
 
     //!  addiert auf den aktuellen Vektor, die Koordinaten des &uuml;bergebenden Vektors hinzu
     //! \brief additions operator
@@ -85,7 +85,9 @@ public:
     //! \brief / operator
     //! \param f Skalar durch den geteilt wird
     //! \return einen neuen Vektor
-    Vector3Unit operator / (const Unit f)       const {return Vector3Unit(x/f, y/f, z/f);}
+    DRVector3 operator / (const Unit f)       const {return DRVector3(static_cast<float>(x/f),
+																	  static_cast<float>(y/f),
+																	  static_cast<float>(z/f));}
     Vector3Unit operator / (const double f)      const {return Vector3Unit(x/f, y/f, z/f);}
     //!  multiplieziert diesen Vektor mit einem Unit Skalar, const
     //! \brief * operator
@@ -103,7 +105,7 @@ public:
  
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
-    Vector3Unit normalize()                      const  {return *this / length();}
+    DRVector3 normalize()                      const  {return *this / length();}
     //! \brief berechnet das Kreuzprodukt mit dem &uuml;bergebendem Vektor, const
     //! \param v2 der Vector mit dem das Kreuzprodukt errechnet werden soll
     //! \return einen neuen Vektor, das Kreuzprodukt aus diesem und dem &uuml;bergebendem Vektor
@@ -124,12 +126,17 @@ public:
 
     //! \brief gibt den Vektor auf die Konsole aus, const
     //! \param name wenn angegeben, wird name mit auf der Konsole ausgegeben
-    void print(const char* name = NULL) const
+    void print(const char* name = NULL, bool log = false) const
     {
+        if(log)
+            DREngineLog.writeToLog("%s: x: %s, y: %s, z: %s\n",name!=0?name:"", x.print().data(), y.print().data(), z.print().data());
+        else
+        {
         if(!name)
             printf("x: %s, y: %s, z: %s\n", x.print().data(), y.print().data(), z.print().data());
         else
             printf("%s: x: %s, y: %s, z: %s\n",name, x.print().data(), y.print().data(), z.print().data());
+        }
     }
 
     //! \brief Vergelichsoperator f&uuml;r ungleich, const
@@ -153,7 +160,7 @@ private:
 };
 
 // Unit * Vector3 = Vector3Unit
-__inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v*(float)u, u.getType());}
+__inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v.x*u, v.y*u, v.z*u, u.getType());}
 
 #endif	/* __SPACE_CRAFT_VECTOR3_UNIT_H */
 

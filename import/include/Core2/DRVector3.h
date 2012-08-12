@@ -133,7 +133,9 @@ public:
     //! \return einen neuen, transformierten Vektor
     DRVector3 transformNormal(const DRMatrix& m) const;
     
+    
     DRVector3 transformCoords(const DRMatrix& m, float* const pfOutW = NULL) const;
+    
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
     DRVector3 normalize()                      const  {return *this / length();}

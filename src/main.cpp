@@ -28,11 +28,7 @@ Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTexturePtr g_tex;
 DRTexturePtr g_terrain;
-<<<<<<< HEAD
 int blockCount = 0;
-=======
-int blockCount = 100;
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
 #define MAX_CONTROL_MODES 9
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
@@ -166,17 +162,12 @@ void test()
         tests[4+i] = referenzHolder.getFree();
     referenzHolder.remove(tests[7]);
     tests[9] = referenzHolder.getFree();
-<<<<<<< HEAD
     DREngineLog.writeToLog("index10: (6): %d", tests[9]);
-=======
-    DRLog.writeToLog("index10: (6): %d", tests[9]);
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     
     DRTextureManager::Instance().test();
     
     // Random Test
     
-<<<<<<< HEAD
 }
 
 void sizeOfClasses()
@@ -205,36 +196,6 @@ void sizeOfClasses()
     DREngineLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
 }
 
-=======
-}
-
-void sizeOfClasses()
-{
-    DRLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
-	
-    
-    DRLog.writeToLog("Camera: %d", sizeof(Camera));
-    DRLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
-    DRLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
-	DRLog.writeToLog("DRMatrix: %d", sizeof(DRMatrix));
-    DRLog.writeToLog("DRSaveTexture: %d", sizeof(DRSaveTexture));
-    DRLog.writeToLog("DRTexture: %d", sizeof(DRTexture));
-	DRLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
-    DRLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
-    DRLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
-    DRLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
-    DRLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
-    DRLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
-    DRLog.writeToLog("RenderInStepsToTexture: %d", sizeof(RenderInStepsToTexture));
-    DRLog.writeToLog("RenderNoisePlanetToTexture: %d", sizeof(RenderNoisePlanetToTexture));
-    DRLog.writeToLog("Sektor: %d", sizeof(Sektor));
-    DRLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
-    DRLog.writeToLog("Unit: %d", sizeof(Unit));
-    DRLog.writeToLog("Vector3Unit: %d", sizeof(Vector3Unit));
-    DRLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
-}
-
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
 DRReturn load()
 {
     if(EnInit_Simple())
@@ -245,7 +206,6 @@ DRReturn load()
     sizeOfClasses();
     
     //Steuerung
-<<<<<<< HEAD
     u16 i = 0;
     gControlModes[i++] = ControlMode(Unit(20, M), 120.0f);
     gControlModes[i++] = ControlMode(Unit(0.100, KM), 100.0f);
@@ -258,33 +218,17 @@ DRReturn load()
     gControlModes[i++] = ControlMode(Unit(1, AE), 1.0f);
     //gControlModes[i++] = ControlMode(Unit(10, AE), 1.0f);
     gControlModes[i++] = ControlMode(Unit(500, AE), 1.0f);
-=======
-  
-    gControlModes[0] = ControlMode(Unit(20, M), 120.0f);
-    gControlModes[1] = ControlMode(Unit(0.100, KM), 100.0f);
-    gControlModes[2] = ControlMode(Unit(10, KM), 80.0f);
-    gControlModes[3] = ControlMode(Unit(1000, KM), 30.0f);
-    gControlModes[4] = ControlMode(Unit(20000, KM), 10.0f);
-    gControlModes[5] = ControlMode(Unit(400000, KM), 4.0f);
-    gControlModes[6] = ControlMode(Unit(0.1, AE), 1.0f);
-    gControlModes[7] = ControlMode(Unit(10, AE), 1.0f);
-    gControlModes[8] = ControlMode(Unit(500, AE), 1.0f);
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
         LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
 	LOG_WARNING_SDL();
-<<<<<<< HEAD
     
     //check maximal multitextures
     int textureCount = 0;
     glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &textureCount);
     if(textureCount < 4) LOG_ERROR("Multitexturing mit mindestens 4 Texturen wird nicht unterstuetzt!", DR_ERROR);
     DREngineLog.writeToLog("Multitexturing supported up to: %d textures\n", textureCount);
-=======
-
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
@@ -344,38 +288,22 @@ DRReturn load()
     
     Uint32 start = SDL_GetTicks();
     //g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
-<<<<<<< HEAD
     DREngineLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
-=======
-    DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
 
     return DR_OK;
 }
 
 void ende()
 {
-<<<<<<< HEAD
-=======
-    g_tex.release();
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     g_Player.exit();
     g_tex.release();    
     DR_SAVE_DELETE(g_Font);
     g_terrain.release();
-<<<<<<< HEAD
 	GlobalRenderer::getSingleton().exit();
     ShaderManager::getSingleton().exit();
     DRGeometrieManager::getSingleton().exit();
     g_RenderBlockLoader.exit();
     Server::freeAllServer();	
-=======
-    ShaderManager::getSingleton().exit();
-    DRGeometrieManager::getSingleton().exit();
-    g_RenderBlockLoader.exit();
-    Server::freeAllServer();
-	GlobalRenderer::getSingleton().exit();
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     EnExit();
 }
 
@@ -429,10 +357,7 @@ DRReturn move(float fTime)
     else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
     
     GlobalRenderer::Instance().setTimeForInactiveChild(gControlModes[gCurrentControlMode].mTime);
-<<<<<<< HEAD
     g_Player.setCurrentSpeed(gControlModes[gCurrentControlMode].mValue);
-=======
->>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
      
     // R-Taste
     if(EnIsButtonPressed(SDLK_r)) wireframe = !wireframe;

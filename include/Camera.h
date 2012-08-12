@@ -12,11 +12,13 @@ class Sektor;
 struct SektorID;
 
 //#include "main.h"
+#include "Observer.h"
 #include "Sektor.h"
 #include "Vector3Unit.h"
 
 
-class Camera : public DRObjekt
+
+class Camera : public Observer
 {
 public:
     Camera();
@@ -34,7 +36,7 @@ public:
     //! \brief setzt die Objekt-Rotation als Kameramatrix
     void setKameraMatrixRotation();
 
-	DRMatrix getKameraMatrixRotation() {return DRMatrix::axis(mXAxis, mYAxis, mZAxis);}
+    DRMatrix getKameraMatrixRotation() {return DRMatrix::axis(mXAxis, mYAxis, mZAxis);}
     
     __inline__ Vector3Unit getSektorPosition() const {return mSektorPosition;}
     //! \brief calculate camera sektor position relative to targetSektor
@@ -48,12 +50,13 @@ public:
     
     void translateRel(const DRVector3& translate);
     
-    __inline__ void setCurrentSektor(Sektor* current) {mCurrentSektor = current;}
+    void setCurrentSektor(Sektor* current);
     __inline__ const Sektor* getCurrentSektor() const {return mCurrentSektor;}
     __inline__ uint getSektorPathSize() const {return mSektorPath.size();}
     
     void updateSektorPath();
     
+   
 protected:
     virtual void update();
         
@@ -63,6 +66,7 @@ private:
     Vector3Unit mSektorPosition;
     Sektor*     mCurrentSektor;
     std::vector<SektorID> mSektorPath;
+        
 };
 
 #endif	/* CAMERA_H */
