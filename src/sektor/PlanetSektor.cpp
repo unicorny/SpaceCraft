@@ -147,7 +147,13 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     distance = distance.convertTo(KM);       
     
 //    mLastRelativeCameraPosition.print("cameraPos");
-    printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
+    //printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
+    std::vector<int>* ebene = GlobalRenderer::Instance().getEbenenCount();
+	char buffer[256]; memset(buffer, 0, 256);
+    
+    for(uint i = 1; i < ebene->size(); i++)
+        sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
+    printf("\r%s", buffer);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     

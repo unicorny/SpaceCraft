@@ -731,6 +731,10 @@ void main( void )
 	float terraceTemp[6];
 	float n = 0;
 
+	f_lacunarity = CONTINENT_LACUNARITY;
+	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
+n = baseContinentDef_pe0;
+/*
 	//turbulences must be calculated bevore
 	
 

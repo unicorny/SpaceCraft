@@ -29,7 +29,7 @@
 #ifndef __DR_ENGINE2_GEOMETRIE__
 #define	__DR_ENGINE2_GEOMETRIE__
 
-class ENGINE2_API DRGeometrie
+class ENGINE2_API DRGeometrie : public DRIResource
 {
 public:
     DRGeometrie();
@@ -46,7 +46,7 @@ public:
      * \return DR_OK wenn alles okay ist, oder DR_ERROR bei Fehler 
      * */
     DRReturn init(u32 vertexCount, u32 indexCount = 0, u32 textureCount = 0, bool color = false, bool normals = false);
-    DRReturn initVertexBuffer();
+    
     
     //! \param clearData if set to true, after copying data to vertexbuffer, local copy will be deleted
     DRReturn copyDataToVertexBuffer(GLenum usage = GL_STATIC_DRAW_ARB, bool clearData = false);
@@ -55,17 +55,25 @@ public:
     void setRenderMode(GLenum renderMode) {mRenderMode = renderMode;}
     DRReturn render();
     
-    DRVector3* getVertexPointer() {return mVertices;}
-    DRColor*   getColorPointer()  {return mColors;}
-    GLuint*    getIndexPointer()  {return mIndices;}
+    __inline__ DRVector3* getVertexPointer() {return mVertices;}
+    __inline__ DRColor*   getColorPointer()  {return mColors;}
+    __inline__ GLuint*    getIndexPointer()  {return mIndices;}
+    __inline__ DRVector2* getTextureCoordsPointer(u32 index) {if(index >= mNumTextureCoords) return NULL; 
+                                                              if(!mTextureCoords) return NULL;
+                                                              return mTextureCoords[index];}
     
-    u32         getVertexCount() {return mVertexCount;}
+    __inline__ u32    getVertexCount() {return mVertexCount;}
     
     void clearData();
     void releaseVertexBuffer();
     
+    virtual const char* getResourceType() const {return "Geometrie";}
+    virtual bool less_than(DRIResource& geo) const
+    {
+        return false;
+    }
+    
 protected:
-
     DRVector3*  mVertices;
     DRVector3*  mNormals;
     GLuint*     mIndices;
@@ -83,12 +91,14 @@ protected:
     GLenum      mRenderMode;
 
 private:
+        DRReturn initVertexBuffer();
 	void lock() {if(mBufferMutex) SDL_mutexP(mBufferMutex);}
 	void unlock() {if(mBufferMutex) SDL_mutexV(mBufferMutex);}
 	SDL_mutex*	mBufferMutex;
        
 };
 
+typedef DRResourcePtr<DRGeometrie> DRGeometriePtr;
 
 #endif	/* __DR_ENGINE2_GEOMETRIE__ */
 

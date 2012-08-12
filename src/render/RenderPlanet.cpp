@@ -94,7 +94,7 @@ DRString RenderPlanet::getPathAndFilename()
 
 RenderPlanet::~RenderPlanet()
 {
-	ShaderManager::Instance().releaseShader(mShader);
+    ShaderManager::Instance().releaseShader(mShader);
     if(mTextureRenderer.getResourcePtrHolder() && !mTextureRenderer->isFinished())
         GlobalRenderer::Instance().removeRenderTask(mTextureRenderer);
     //DR_SAVE_DELETE(mTextureRenderer);
@@ -103,7 +103,7 @@ RenderPlanet::~RenderPlanet()
 }
 DRReturn RenderPlanet::generateAndBindTexture()
 {
-    if(mTextureRenderer.getResourcePtrHolder() && mTextureRenderer->isFinished())
+    if(mTextureRenderer && mTextureRenderer->isFinished())
     {
 		//finish rendering preview texture
         if(!mInitalized)
@@ -124,7 +124,8 @@ DRReturn RenderPlanet::generateAndBindTexture()
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
                 DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
                     GlobalRenderer::Instance().getTextureRenderStepSize()*
-                    GlobalRenderer::Instance().getTextureRenderStepSize());
+                    GlobalRenderer::Instance().getTextureRenderStepSize()*8);
+                 // */
 			}
 			mTextureRenderer.release();
             mTexture->setFinishRender();
@@ -138,7 +139,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
         mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
 		mInitalized++;
     }    
-	if(mTexture->isLoadingError())
+	if(mTexture && mTexture->isLoadingError())
 	{
 		int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 		mTexture = DRTextureManager::Instance().getTexture(DRVector2i(size), 4);
@@ -147,7 +148,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
 	}
     glEnable(GL_TEXTURE_2D);
     GLint textureLoaded = 0; //render not
-    if(mPreviewTextur.getResourcePtrHolder())
+    if(mPreviewTextur)
     {
         mPreviewTextur->bind();
         if(mPreviewTextur->isLoadingFinished()) 
