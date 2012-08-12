@@ -69,7 +69,6 @@ private:
     
     static int asynchronTextureLoadThread(void* data);
     
-    void      addAsynchronTextureSaveTask(DRSaveTexture* texture);
     static int asynchronTextureSaveThread(void* data);
     
     //! daten für alte Einträge, dessen Speicher noch Verwendung finden könnte
@@ -142,8 +141,7 @@ private:
     typedef std::pair<DHASH, TextureMemoryEntry>        DR_TEXTURE_MEMORY_ENTRY;
     bool                                                mInitalized;
     GLuint						mGrafikMemTexture;
-    GLuint                                              mSaveTextureCount;
-
+    
     //! stuff for asynchron texture load and save
     std::queue<DRTexturePtr> mAsynchronLoadTextures;
     std::queue<DRTexturePtr> mLoadedAsynchronLoadTextures;
