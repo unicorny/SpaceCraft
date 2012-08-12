@@ -28,7 +28,11 @@ Camera* g_cam = NULL;
 DRFont* g_Font = NULL;
 DRTexturePtr g_tex;
 DRTexturePtr g_terrain;
+<<<<<<< HEAD
+int blockCount = 0;
+=======
 int blockCount = 100;
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
 #define MAX_CONTROL_MODES 9
 ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
@@ -61,11 +65,18 @@ void test()
     if(memcmp(m1, m3, sizeof(float)*16) != 0)
         LOG_WARNING("matrix axis isn't valid");
     
-    DRLog.writeMatrixToLog(m1);
-    DRLog.writeMatrixToLog(m2);
-    DRLog.writeMatrixToLog(m3);
+    DREngineLog.writeMatrixToLog(m1);
+    DREngineLog.writeMatrixToLog(m2);
+    DREngineLog.writeMatrixToLog(m3);
     
-    DRLog.writeToLog("RekursionTest: %d", rekursionTest(0));
+    DRVector3 rot1(1.0f, 0.0f, 0.0f);
+    m2 = DRMatrix::rotationY(90.0f);
+    rot1 = rot1.transformCoords(m2);
+    DREngineLog.writeVector3ToLog(rot1, "1/0/0 90 Grad um y-Achse rotiert");
+    rot1 = rot1.transformCoords(m2.invert());
+    DREngineLog.writeVector3ToLog(rot1, "zurueckrotiert, 1/0/0 erwartet!");
+    
+    DREngineLog.writeToLog("RekursionTest: %d", rekursionTest(0));
     
     
     //Speicher test
@@ -93,28 +104,28 @@ void test()
     printf("\n");
     Unit parsec(1.0, PARSEC);
     Unit lj = parsec.convertTo(LIGHTYEAR);
-    DRLog.writeToLog("%s -> %s", parsec.print().data(), lj.print().data());    
+    DREngineLog.writeToLog("%s -> %s", parsec.print().data(), lj.print().data());    
     lj = Unit(1.0, LIGHTYEAR);
     parsec = lj.convertTo(PARSEC);
-    DRLog.writeToLog("%s -> %s", lj.print().data(), parsec.print().data());    
+    DREngineLog.writeToLog("%s -> %s", lj.print().data(), parsec.print().data());    
     Unit ae = lj.convertTo(AE);
-    DRLog.writeToLog("%s -> %s", lj.print().data(), ae.print().data());    
+    DREngineLog.writeToLog("%s -> %s", lj.print().data(), ae.print().data());    
     ae = parsec.convertTo(AE);
-    DRLog.writeToLog("%s -> %s", parsec.print().data(), ae.print().data());    
+    DREngineLog.writeToLog("%s -> %s", parsec.print().data(), ae.print().data());    
     parsec = ae.convertTo(PARSEC);
-    DRLog.writeToLog("%s -> %s", ae.print().data(), parsec.print().data());    
+    DREngineLog.writeToLog("%s -> %s", ae.print().data(), parsec.print().data());    
     Unit m = parsec.convertTo(M);
-    DRLog.writeToLog("%s -> %s", parsec.print().data(), m.print().data());    
+    DREngineLog.writeToLog("%s -> %s", parsec.print().data(), m.print().data());    
     Unit kpc(1.0, KILOPARSEC);
     m = kpc.convertTo(M);
-    DRLog.writeToLog("%s -> %s", kpc.print().data(), m.print().data());    
+    DREngineLog.writeToLog("%s -> %s", kpc.print().data(), m.print().data());    
     m = Unit(1.0, M);
     kpc = m.convertTo(KILOPARSEC);
-    DRLog.writeToLog("%s -> %s", m.print().data(), kpc.print().data());    
+    DREngineLog.writeToLog("%s -> %s", m.print().data(), kpc.print().data());    
     printf("\n");
     
     Unit aes(0.005, AE);
-    DRLog.writeToLog("%s -> %s", aes.print().data(), aes.convertTo(KM).print().data());
+    DREngineLog.writeToLog("%s -> %s", aes.print().data(), aes.convertTo(KM).print().data());
     
     //Vector Unit Test
     Vector3Unit u1(100, 200, 70, M), u2(1, 0, 0, KILOPARSEC), u3(100, 20, 17, LIGHTYEAR);
@@ -130,37 +141,71 @@ void test()
     Vector3Unit(u1*Unit(1, LIGHTYEAR)).print("u1*1 Lichtjahr");
     
     DRVector3 v(1.0f, 7.0f, 2.0f);
-    DRLog.writeVector3ToLog(v, "init");
+    DREngineLog.writeVector3ToLog(v, "init");
     v = v.normalize();
-    DRLog.writeVector3ToLog(v, "normalized");
+    DREngineLog.writeVector3ToLog(v, "normalized");
     v *= 7.0f;
-    DRLog.writeVector3ToLog(v, "multiplikator");
+    DREngineLog.writeVector3ToLog(v, "multiplikator");
     
     // ----------------------------------  ReferenzHolder Test --------------------------------
     
-    DRLog.writeToLog("DRIndexReferenzHolder test");
+    DREngineLog.writeToLog("DRIndexReferenzHolder test");
     DRIndexReferenzHolder referenzHolder(10);
     uint tests[10];
     tests[0] = referenzHolder.getFree();
     referenzHolder.add(tests[0]);
     tests[1] = referenzHolder.getFree();
     
-    DRLog.writeToLog("index1 (0): %d, index2 (1): %d", tests[0], tests[1]);
+    DREngineLog.writeToLog("index1 (0): %d, index2 (1): %d", tests[0], tests[1]);
     referenzHolder.remove(tests[0]);
     tests[2] = referenzHolder.getFree();
     referenzHolder.remove(tests[1]);
     tests[3] = referenzHolder.getFree();
-    DRLog.writeToLog("index3 (2): %d, index4 (1): %d", tests[2], tests[3]);
+    DREngineLog.writeToLog("index3 (2): %d, index4 (1): %d", tests[2], tests[3]);
     for(int i = 0; i < 5; i++)
         tests[4+i] = referenzHolder.getFree();
     referenzHolder.remove(tests[7]);
     tests[9] = referenzHolder.getFree();
+<<<<<<< HEAD
+    DREngineLog.writeToLog("index10: (6): %d", tests[9]);
+=======
     DRLog.writeToLog("index10: (6): %d", tests[9]);
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     
     DRTextureManager::Instance().test();
     
     // Random Test
     
+<<<<<<< HEAD
+}
+
+void sizeOfClasses()
+{
+    DREngineLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
+	
+    
+    DREngineLog.writeToLog("Camera: %d", sizeof(Camera));
+    DREngineLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
+    DREngineLog.writeToLog("DRGeometrieHeightfield: %d", sizeof(DRGeometrieHeightfield));
+	DREngineLog.writeToLog("DRMatrix: %d", sizeof(DRMatrix));
+    DREngineLog.writeToLog("DRSaveTexture: %d", sizeof(DRSaveTexture));
+    DREngineLog.writeToLog("DRTexture: %d", sizeof(DRTexture));
+	DREngineLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
+    DREngineLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
+    DREngineLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
+    DREngineLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
+    DREngineLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
+    DREngineLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
+    DREngineLog.writeToLog("RenderInStepsToTexture: %d", sizeof(RenderInStepsToTexture));
+    DREngineLog.writeToLog("RenderNoisePlanetToTexture: %d", sizeof(RenderNoisePlanetToTexture));
+    DREngineLog.writeToLog("Sektor: %d", sizeof(Sektor));
+    DREngineLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
+    DREngineLog.writeToLog("Unit: %d", sizeof(Unit));
+    DREngineLog.writeToLog("Vector3Unit: %d", sizeof(Vector3Unit));
+    DREngineLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
+}
+
+=======
 }
 
 void sizeOfClasses()
@@ -189,6 +234,7 @@ void sizeOfClasses()
     DRLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
 }
 
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
 DRReturn load()
 {
     if(EnInit_Simple())
@@ -199,6 +245,20 @@ DRReturn load()
     sizeOfClasses();
     
     //Steuerung
+<<<<<<< HEAD
+    u16 i = 0;
+    gControlModes[i++] = ControlMode(Unit(20, M), 120.0f);
+    gControlModes[i++] = ControlMode(Unit(0.100, KM), 100.0f);
+    gControlModes[i++] = ControlMode(Unit(10, KM), 80.0f);
+    gControlModes[i++] = ControlMode(Unit(100, KM), 60.0f);
+    gControlModes[i++] = ControlMode(Unit(1000, KM), 30.0f);
+    gControlModes[i++] = ControlMode(Unit(20000, KM), 10.0f);
+    gControlModes[i++] = ControlMode(Unit(400000, KM), 4.0f);
+    gControlModes[i++] = ControlMode(Unit(0.1, AE), 1.0f);
+    gControlModes[i++] = ControlMode(Unit(1, AE), 1.0f);
+    //gControlModes[i++] = ControlMode(Unit(10, AE), 1.0f);
+    gControlModes[i++] = ControlMode(Unit(500, AE), 1.0f);
+=======
   
     gControlModes[0] = ControlMode(Unit(20, M), 120.0f);
     gControlModes[1] = ControlMode(Unit(0.100, KM), 100.0f);
@@ -209,17 +269,27 @@ DRReturn load()
     gControlModes[6] = ControlMode(Unit(0.1, AE), 1.0f);
     gControlModes[7] = ControlMode(Unit(10, AE), 1.0f);
     gControlModes[8] = ControlMode(Unit(500, AE), 1.0f);
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
         LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
 	LOG_WARNING_SDL();
+<<<<<<< HEAD
+    
+    //check maximal multitextures
+    int textureCount = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &textureCount);
+    if(textureCount < 4) LOG_ERROR("Multitexturing mit mindestens 4 Texturen wird nicht unterstuetzt!", DR_ERROR);
+    DREngineLog.writeToLog("Multitexturing supported up to: %d textures\n", textureCount);
+=======
 
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     
     g_Font = new DRFont();
     g_Font->init("data/MalgunGothic.tga", "data/MalgunGothic.tbf");
 
-    DRLog.writeToLog("CPU-Count: %d", g_CPU_Count);
+    DREngineLog.writeToLog("CPU-Count: %d", g_CPU_Count);   
     
   //  glShadeModel(GL_SMOOTH);
   //  glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
@@ -274,22 +344,38 @@ DRReturn load()
     
     Uint32 start = SDL_GetTicks();
     //g_terrain = new DRTextur("data/terrainsurface.bmp", GL_NEAREST, GL_NEAREST);
+<<<<<<< HEAD
+    DREngineLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
+=======
     DRLog.writeToLog("%.0f Sekunden fuer Planeten laden/generieren", ((float)SDL_GetTicks()-start)/1000.0f);
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
 
     return DR_OK;
 }
 
 void ende()
 {
+<<<<<<< HEAD
+=======
     g_tex.release();
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     g_Player.exit();
+    g_tex.release();    
     DR_SAVE_DELETE(g_Font);
     g_terrain.release();
+<<<<<<< HEAD
+	GlobalRenderer::getSingleton().exit();
+    ShaderManager::getSingleton().exit();
+    DRGeometrieManager::getSingleton().exit();
+    g_RenderBlockLoader.exit();
+    Server::freeAllServer();	
+=======
     ShaderManager::getSingleton().exit();
     DRGeometrieManager::getSingleton().exit();
     g_RenderBlockLoader.exit();
     Server::freeAllServer();
 	GlobalRenderer::getSingleton().exit();
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
     EnExit();
 }
 
@@ -343,6 +429,10 @@ DRReturn move(float fTime)
     else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
     
     GlobalRenderer::Instance().setTimeForInactiveChild(gControlModes[gCurrentControlMode].mTime);
+<<<<<<< HEAD
+    g_Player.setCurrentSpeed(gControlModes[gCurrentControlMode].mValue);
+=======
+>>>>>>> 748ee5d22a609a9c0911eb725988397866ae1f56
      
     // R-Taste
     if(EnIsButtonPressed(SDLK_r)) wireframe = !wireframe;
@@ -429,7 +519,7 @@ DRReturn render(float fTime)
         g_tex->bind();
       
     //glColor3f(0.2f, 0.5f, 0.1f);
-    glColor3f(1.0f, 1.0f, 1.0f);
+ /*   glColor3f(1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
         glTexCoord2f(1.0, 0.0f);
         glVertex3f( 50.0f, 0.0f, -50.0f);
@@ -457,7 +547,9 @@ DRReturn render(float fTime)
     
     glTranslatef(0.0f, 10.0f, 0.0f);
     translate.y += 10.0f;
+	//*/
     RenderBlock* rb =  g_RenderBlockLoader.getRenderBlock("dirt");
+	/*
     rb->render();
     
     glTranslatef(0.0f, -5.0f, 0.0f);
