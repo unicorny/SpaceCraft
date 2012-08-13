@@ -45,6 +45,7 @@ public:
     DRTexturePtr getTexture(DRVector2i size, GLuint format, DRColor* colors);
     
     void saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
+    void saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture);
     
     //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
     //GLuint    getGLTextureMemory(GLuint width, GLuint height, GLuint format);
@@ -65,12 +66,7 @@ private:
     void calculateGrafikMemTexture();
     GLuint _getTexture(DRVector2i size, GLuint format);
 
-    void      addAsynchronTextureLoadTask(DRTexturePtr texture);
-    
-    static int asynchronTextureLoadThread(void* data);
-    
-    static int asynchronTextureSaveThread(void* data);
-    
+   
     //! daten für alte Einträge, dessen Speicher noch Verwendung finden könnte
     struct TextureMemoryEntry
     {
@@ -86,48 +82,34 @@ private:
         float  timeout; //Speicher wird freigegeben, wenn null erreicht,  0 kein timeout
     };
     
-    struct TextureThreadData
+    class TextureLoadThread : public DRThread
     {
-        TextureThreadData() : mutex(NULL), thread(NULL), condition(NULL), semaphore(NULL)
-        {
-            semaphore = SDL_CreateSemaphore(1);
-            condition = SDL_CreateCond();
-            SDL_SemWait(semaphore);
-            mutex = SDL_CreateMutex();   
-        }
-        ~TextureThreadData() 
-        {
-            if(thread)
-            {
-                //Post Exit to Stream Thread
-                SDL_SemPost(semaphore); LOG_WARNING_SDL();
-                //kill TextureLoad Thread after 1/2 second
-                SDL_Delay(500);
-                SDL_KillThread(thread);
-                LOG_WARNING_SDL();
-
-                thread = NULL;
-                SDL_DestroySemaphore(semaphore);
-                SDL_DestroyMutex(mutex);
-                SDL_DestroyCond(condition);
-            }
-        }
+    public:
+        TextureLoadThread() : DRThread("DRTexLoa") {}
+        ~TextureLoadThread() {while(!mAsynchronLoadTextures.empty()) mAsynchronLoadTextures.pop();
+                              while(!mLoadedAsynchronLoadTextures.empty()) mLoadedAsynchronLoadTextures.pop();}
         
-        DRReturn lock() {SDL_LockMutex(mutex); LOG_ERROR_SDL(DR_ERROR); return DR_OK;}
-        DRReturn unlock() {SDL_UnlockMutex(mutex); LOG_ERROR_SDL(DR_ERROR); return DR_OK;} 
-        DRReturn condSignal()
-        {
-            if(SDL_CondSignal(condition)== -1) //LOG_ERROR_SDL(DR_ERROR);
-            {
-                LOG_WARNING("Fehler beim Aufruf von SDL_CondSignal"); 
-                LOG_ERROR_SDL(DR_ERROR);
-            }
-            return DR_OK;
-        }
-        SDL_mutex*		   mutex;
-        SDL_Thread*		   thread;
-        SDL_cond*		   condition;
-        SDL_sem*		   semaphore;
+        virtual int ThreadFunction();
+        void addLoadTask(DRTexturePtr texture);
+        DRReturn move();
+    protected:
+        std::queue<DRTexturePtr> mAsynchronLoadTextures;
+        std::queue<DRTexturePtr> mLoadedAsynchronLoadTextures;
+    };
+    
+    class TextureSaveThread : public DRThread
+    {
+    public:
+        TextureSaveThread() : DRThread("DRTexSav") {}
+        ~TextureSaveThread() {while(!mAsynchronSaveTextures.empty()) mAsynchronSaveTextures.pop();
+                              while(!mAsynchronReadyToSaveTextures.empty()) mAsynchronReadyToSaveTextures.pop();}
+        
+        virtual int ThreadFunction();
+        __inline__ void addSaveTask(DRSaveTexture* texture) {mAsynchronSaveTextures.push(texture);}
+        DRReturn move();
+    protected:
+        std::queue<DRSaveTexture*> mAsynchronSaveTextures;
+        std::queue<DRSaveTexture*> mAsynchronReadyToSaveTextures;
     };
     
     DHASH makeTextureHash(const char* filename, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
@@ -143,12 +125,9 @@ private:
     GLuint						mGrafikMemTexture;
     
     //! stuff for asynchron texture load and save
-    std::queue<DRTexturePtr> mAsynchronLoadTextures;
-    std::queue<DRTexturePtr> mLoadedAsynchronLoadTextures;
-    std::queue<DRSaveTexture*> mAsynchronSaveTextures;
-    std::queue<DRSaveTexture*> mAsynchronReadyToSaveTextures;
-    TextureThreadData*     mTextureLoadThread;
-    TextureThreadData*     mTextureSaveThread;
+    
+    TextureLoadThread*     mTextureLoadThread;
+    TextureSaveThread*     mTextureSaveThread;
     SDL_mutex*             mGetTextureMutex;
 };
 

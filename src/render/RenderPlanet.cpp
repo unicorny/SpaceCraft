@@ -2,11 +2,12 @@
 #include "ShaderManager.h"
 #include "GlobalRenderer.h"
 #include "DRTextureManager.h"
+#include "PlanetSektor.h"
 
 
 RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
-: RenderSektor(), mTextureRenderer(), mTexture(),
-  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false)
+: RenderSektor(), mTextureRenderer(), mSeaLevelInMetres(0.0f), mTexture(),
+  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false), mHeightMap(NULL)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
     init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), "noise.vert", "noise.frag", 
@@ -16,8 +17,8 @@ RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNois
 RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
                            float patchScaling, const DRMatrix& rotation, DRString texturePath,
                            const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture)
-: RenderSektor(), mTextureRenderer(), mTexture(), 
-  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false)
+: RenderSektor(), mTextureRenderer(), mSeaLevelInMetres(0.0f), mTexture(), 
+  mPreviewTextur(), mInitalized(0), mUsingParentTexture(false), mHeightMap(NULL)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
@@ -32,7 +33,11 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 {
     GlobalRenderer& gb = GlobalRenderer::Instance();
     DRTextureManager& tx = DRTextureManager::Instance();
-	mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
+	//mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
+    mShader = ShaderManager::Instance().getShader("simple.vert", "simpleUnpack.frag");
+    mSeaLevelInMetres = planetNoiseParameter->seaLevelInMetres;
+    int textureStepSize = gb.getTextureRenderStepSize();
+    mHeightMap = new HeightMapTexture(textureStepSize*textureStepSize*8);
 
 	int stepSize = gb.getTextureRenderStepSize();
 	//float stepSize = static_cast<float>(stepSizei);
@@ -41,6 +46,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
     {
         mPreviewTextur = parentTexture;
         mUsingParentTexture = true;
+        mHeightMap->load(mPreviewTextur);
     }
     else
     {
@@ -110,6 +116,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
         {
 			mTextureRenderer->reinit(mTexture);
             mPreviewTextur->setFinishRender();
+            mHeightMap->load(mPreviewTextur);
 			GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
 			//printf("[RenderPlanet::generateAndBindTexture]  reinint\n");
 			mInitalized++;
@@ -127,6 +134,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
                     GlobalRenderer::Instance().getTextureRenderStepSize()*8);
                  // */
 			}
+            mHeightMap->load(mTexture);
 			mTextureRenderer.release();
             mTexture->setFinishRender();
 		}
@@ -138,6 +146,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
         mTexture->setFilter(GL_LINEAR, GL_LINEAR);
         mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
 		mInitalized++;
+        mHeightMap->load(mTexture);
     }    
 	if(mTexture && mTexture->isLoadingError())
 	{
@@ -164,7 +173,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
         mShader->setUniform2fv("textureCoordsParam", DRVector2(0.0f));
     }
     mShader->setUniform1i("textureLoaded", textureLoaded);
-    
+    mShader->setUniform1f("SEA_LEVEL_IN_METRES", mSeaLevelInMetres);    
     
     if(DRGrafikError("[RenderPlanet::generateAndBindTexture]")) return DR_ERROR;
     return DR_OK;

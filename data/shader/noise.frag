@@ -733,8 +733,8 @@ void main( void )
 
 	f_lacunarity = CONTINENT_LACUNARITY;
 	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
-n = baseContinentDef_pe0;
-/*
+//n = baseContinentDef_pe0;
+
 	//turbulences must be calculated bevore
 	
 
@@ -1668,7 +1668,7 @@ n = baseContinentDef_pe0;
 	if(n == 0.0)
 	   	n = continentsWithRivers_se;
 //*/
-	vec3 temp = packHeight(n);
+	vec3 temp = packHeight(n * 0.5 + 0.5);
 	
 	GradientColor gradient[10];
 	
@@ -1688,6 +1688,7 @@ n = baseContinentDef_pe0;
 	gl_FragColor.w = n * 0.5 + 0.5;
         //gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
 	vec4 color = vec4(v_texCoord3D, 1.0);
+	gl_FragColor = vec4(temp, n * 0.5+0.5);
 	//gl_FragColor = color;
 	
 }

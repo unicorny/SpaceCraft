@@ -37,12 +37,12 @@ public:
     //! \param stepSize how many bytes pro call will be readed
     DRReturn putPixelsToImage();
     //! cann be called in other thread, no openGL functions called
-    DRReturn saveImage();
+    virtual DRReturn saveImage();
     
     __inline__ bool isTextureReadyToSave() {return mSavingState == 2;}
     __inline__ bool isTextureSaved() {return mSavingState == 3;}
     
-private:
+protected:
     GLuint      mPboSaveID;// OpenGL Pixel Buffer Object to save texture
     short	mSavingState; //
     GLuint	mSavingCursor;

@@ -87,6 +87,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
         parentTexture = parentRenderer->getTexture();
     }
     mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
+    RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
 }
 
 SubPlanetSektor::~SubPlanetSektor()

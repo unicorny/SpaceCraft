@@ -7,7 +7,8 @@ SET(spaceCraftSrc main Player sektor/Sektor Server Camera render/RenderBlockLoad
 				  sektor/SolarSystemSektor sektor/RootSektor sektor/PlanetSektor render/RenderSektor render/RenderSolarSystem
 				  sektor/SubPlanetSektor render/RenderSubPlanet DRGeometrieHeightfield 
 				  DRGeometrieManager render/RenderInStepsToTexture render/RenderNoisePlanetToTexture ShaderManager
-				  render/RenderSubPatchPlanet sektor/SubPatchPlanetSektor Observer HeightMapTexture)
+				  render/RenderSubPatchPlanet sektor/SubPatchPlanetSektor Observer HeightMapTexture 
+				  )
 #IF(WIN32)
 SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/sektor/Sektor.h ../include/Server.h
 								   ../include/Camera.h ../include/render/RenderBlockLoader.h ../include/render/RenderBlock.h

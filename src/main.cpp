@@ -235,6 +235,8 @@ DRReturn load()
 
     DREngineLog.writeToLog("CPU-Count: %d", g_CPU_Count);   
     
+    
+    
   //  glShadeModel(GL_SMOOTH);
   //  glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
    // glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations

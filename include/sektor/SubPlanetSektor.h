@@ -9,7 +9,6 @@
 #include "PlanetSektor.h"
 #include "RenderSubPlanet.h"
 
-
 class SubPlanetSektor : public Sektor
 {
 public:

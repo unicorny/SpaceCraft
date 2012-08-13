@@ -10,6 +10,7 @@
 
 #include "Sektor.h"
 #include "RenderNoisePlanetToTexture.h"
+#include "HeightMapTexture.h"
 //class RenderNoisePlanetToTexture;
 
 class RenderPlanet : public RenderSektor
@@ -24,6 +25,7 @@ public:
     
     RenderNoisePlanetToTexture* getRenderNoisePlanetToTexture();
     __inline__ DRTexturePtr getTexture() {return mTexture;}
+    __inline__ HeightMapTexture* getHeightMap() {return mHeightMap;}
     
 protected:
     RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture);
@@ -35,11 +37,13 @@ protected:
     DRString getPathAndFilename();
         
     RenderInStepsToTexturePtr   mTextureRenderer;
-    DRTexturePtr		mTexture;
-    DRTexturePtr		mPreviewTextur;
-    short               mInitalized;
-    DRString            mTexturePath;
-    bool                mUsingParentTexture;
+    float                       mSeaLevelInMetres;
+    DRTexturePtr                mTexture;
+    DRTexturePtr                mPreviewTextur;
+    short                       mInitalized;
+    DRString                    mTexturePath;
+    bool                        mUsingParentTexture;
+    HeightMapTexture*           mHeightMap;
     
 private:    
     
