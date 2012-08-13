@@ -16,7 +16,7 @@ class HeightMapLoader;
 
 class HeightMapTexture
 {
-    friend HeightMapLoader;
+    friend class HeightMapLoader;
 public:
     //! \param stepSize bytes to load je frame from texture (like by DRSaveTexture)
     HeightMapTexture(int stepSize);
@@ -48,4 +48,4 @@ private:
     HeightMapTexture* mParent;    
     
 };
-#endif __SC_HEIGHT_MAP_TEXTURE_H
+#endif //__SC_HEIGHT_MAP_TEXTURE_H
