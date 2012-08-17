@@ -25,6 +25,7 @@ struct ControlMode
 Player g_Player;
 RenderBlockLoader g_RenderBlockLoader;
 Camera* g_cam = NULL;
+std::list<Camera*> g_Cameras;
 DRFont* g_Font = NULL;
 DRTexturePtr g_tex;
 DRTexturePtr g_terrain;
@@ -173,7 +174,13 @@ void test()
 void sizeOfClasses()
 {
     DREngineLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
-	
+    DREngineLog.writeToLog("char: %d", sizeof(char));
+    DREngineLog.writeToLog("short: %d", sizeof(short));
+	DREngineLog.writeToLog("int: %d", sizeof(int));
+    DREngineLog.writeToLog("long: %d", sizeof(long));
+    DREngineLog.writeToLog("void*: %d", sizeof(void*));
+    DREngineLog.writeToLog("float: %d", sizeof(float));
+    DREngineLog.writeToLog("double: %d", sizeof(double));
     
     DREngineLog.writeToLog("Camera: %d", sizeof(Camera));
     DREngineLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
@@ -183,6 +190,7 @@ void sizeOfClasses()
     DREngineLog.writeToLog("DRTexture: %d", sizeof(DRTexture));
 	DREngineLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
     DREngineLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
+    DREngineLog.writeToLog("HeightMapTexture: %d", sizeof(HeightMapTexture));
     DREngineLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
     DREngineLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
     DREngineLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
@@ -192,6 +200,7 @@ void sizeOfClasses()
     DREngineLog.writeToLog("Sektor: %d", sizeof(Sektor));
     DREngineLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
     DREngineLog.writeToLog("Unit: %d", sizeof(Unit));
+    DREngineLog.writeToLog("UnitTypes: %d", sizeof(UnitTypes));
     DREngineLog.writeToLog("Vector3Unit: %d", sizeof(Vector3Unit));
     DREngineLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
 }
@@ -284,6 +293,7 @@ DRReturn load()
     if(g_Player.init())
         LOG_ERROR("Fehler bei Player::init", DR_ERROR);
     g_cam = g_Player.getCamera();
+    g_Cameras.push_back(g_cam);
        
     if(g_RenderBlockLoader.init())
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
@@ -297,6 +307,7 @@ DRReturn load()
 
 void ende()
 {
+    g_Cameras.pop_back();
     g_Player.exit();
     g_tex.release();    
     DR_SAVE_DELETE(g_Font);
@@ -370,6 +381,8 @@ DRReturn move(float fTime)
     if(fTime == 0.0f) fTime = 0.00166f;
 
     //if(g_Player.getSektor()->moveAll(fTime, g_cam))
+    if(g_Player.getSektor()->updateVisibilityAll(g_Cameras))
+        LOG_ERROR("Fehler bei update Visibility in sektors", DR_ERROR);
     if(g_Player.getSektor()->moveAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei move sektor", DR_ERROR);
 

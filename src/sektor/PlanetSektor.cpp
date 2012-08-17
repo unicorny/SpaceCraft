@@ -5,8 +5,8 @@
 #include "SubPlanetSektor.h"
 
 
-SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1),SektorID(1,0,0),SektorID(0,0, 1),// front, right, back
-                                        SektorID(-1,0,0),SektorID(0,1,0),SektorID(0,-1,0)};// left, top, bottom
+SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1, 0),SektorID(1,0,0, 1),SektorID(0,0, 1, 2),// front, right, back
+                                        SektorID(-1,0,0, 3),SektorID(0,1,0, 4),SektorID(0,-1,0, 5)};// left, top, bottom
 
 PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
 : Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f)
@@ -140,8 +140,9 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
     RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
     //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
-    else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    Sektor::move(fTime, cam);
+    //if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
+    //else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
     Unit distance = mLastRelativeCameraPosition.length()-mRadius;
     distance = distance.convertTo(KM);       
@@ -153,7 +154,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     
     for(uint i = 1; i < ebene->size(); i++)
         sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
-    printf("\r%s", buffer);
+    //printf("\r%s", buffer);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
@@ -187,6 +188,11 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
         if(mNotRenderSeconds >= GlobalRenderer::Instance().getTimeForInactiveChilds())
             DR_SAVE_DELETE(mRenderer);
     }
+    return DR_OK;
+}
+
+DRReturn PlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
     return DR_OK;
 }
 

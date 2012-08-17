@@ -69,13 +69,14 @@ void Camera::translateRel(const DRVector3& translate)
 void Camera::update()
 {
 	Vector3Unit pos = mSektorPosition.convertTo(KM);
-    //printf("\r camera: %s %s %s: %s", pos.x.print().data(), pos.y.print().data(),
-      //                                              pos.z.print().data(), pos.length().print().data());
+  //  printf("\r camera: %s %s %s: %s", pos.x.print().data(), pos.y.print().data(),
+    //                                                pos.z.print().data(), pos.length().print().data());
     DRMatrix m1 = DRMatrix::axis(mXAxis, mYAxis, mZAxis);
     DRMatrix m2 = DRMatrix::translation(-mPosition);
     //mMatrix = DRMatrix(m1) * DRMatrix(m2);
     mMatrix = DRMatrix(m2) * DRMatrix(m1);
    // mMatrix.print();
+    
 }
 
 void Camera::updateSektorPath()

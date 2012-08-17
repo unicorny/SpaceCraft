@@ -25,6 +25,11 @@ public:
      */
     virtual DRReturn move(float fTime, Camera* cam);
     
+    /*! \brief update visibility of sectors for all active cameras
+     *  \param cameras list with all active cameras, which currently observe at least one sektor
+     */
+    virtual DRReturn updateVisibility(const std::list<Camera*>& cameras);
+    
     /*! \brief render sektor and childs
      * 
      *  using transformation and render sektor,     *  
@@ -37,7 +42,8 @@ public:
     
     virtual Sektor* getChild(SektorID childID);
     
-    const DRMatrix& getRotation() {return mRotation;}
+    const DRMatrix& getRotation() const {return mRotation;}
+    u8 getRotationsIndex() const {return mRotationsIndex;}
     __inline__ DRVector3 getVectorToPlanet() {return mVectorToPlanetCenter;}
     __inline__ DRVector3 getTextureTranslate() {return mTextureTranslate;}
     
@@ -49,11 +55,13 @@ protected:
     PlanetSektor*       mPlanet;
     float               mPatchScaling;
     DRMatrix            mRotation;
+    u8                  mRotationsIndex;
     //! position relative to planet center
     DRVector3           mVectorToPlanetCenter;
     DRVector3           mTextureTranslate;
     
     static DRVector3    mSubLevelBorder[];
+    static DRMatrix     mRotations[];
     
     // temporäre variablen      
     //double              mHorizontCulling;

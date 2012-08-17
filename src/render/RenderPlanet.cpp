@@ -64,7 +64,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
     if(DRIsFileExist(getPathAndFilename().data()))
     {
         mTexture = tx.getTexture(getPathAndFilename().data(), true);
-            //TexturePtr(new Texture(getPathAndFilename().data()));
+        //TexturePtr(new Texture(getPathAndFilename().data()));
 		//mTexture->loadFromFile();
 		//mTexture->pixelsCopyToRenderer();
 //		DRTextureManager::Instance().addAsynchronTextureLoadTask(mTexture);
@@ -131,7 +131,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
                 DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
                     GlobalRenderer::Instance().getTextureRenderStepSize()*
-                    GlobalRenderer::Instance().getTextureRenderStepSize()*8);
+                    GlobalRenderer::Instance().getTextureRenderStepSize());
                  // */
 			}
             mHeightMap->load(mTexture);

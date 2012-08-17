@@ -9,6 +9,7 @@ struct SektorID
 {
     SektorID(u64 id) : id(id) {}
     SektorID(s16 _x, s16 _y, s16 _z): x(_x), y(_y), z(_z), count(0) {}
+    SektorID(s16 _x, s16 _y, s16 _z, s16 _count): x(_x), y(_y), z(_z), count(_count) {}
     SektorID(DRVector3 id): x(static_cast<short>(id.x*1000.0f)),
                             y(static_cast<short>(id.y*1000.0f)), 
                             z(static_cast<short>(id.z*1000.0f)) {}
@@ -19,9 +20,9 @@ struct SektorID
     operator u64() {return id;}
     operator DRVector3() const {return DRVector3(x, y, z)/1000.0f;}
     
-    // multipliziert x, y und z ccordinate with scalar
-    __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar);}
-    __inline__ SektorID const operator /(short scalar) {return SektorID(x/scalar, y/scalar, z/scalar);}
+    // multipliziert x, y und z coordinate with scalar
+    __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar, count);}
+    __inline__ SektorID const operator /(short scalar) {return SektorID(x/scalar, y/scalar, z/scalar, count);}
     
     union
     {
@@ -111,6 +112,19 @@ public:
      * \param rootMoved set to false (used intern)
      */
     DRReturn moveAll(float fTime, Camera* cam, bool rootMoved = false);
+
+    /*! \brief update visibility of sectors for all active cameras
+     *  \param cameras list with all active cameras, which currently observe at least one sektor
+     */
+    virtual DRReturn updateVisibility(const std::list<Camera*>& cameras) = 0;
+
+    /*! \brief call updateVisibility for all parents and childs
+     *
+     * first traverse to root node and then call the childs rekursiv
+     * \param cameras list with all active cameras, which currently observe at least one sektor
+     * \param rootUpdated set to false (used intern)
+     */
+    DRReturn updateVisibilityAll(const std::list<Camera*>& cameras, bool rootUpdated = false);
     
     // is the position inside the current sektor/ is the current sektor visible from that position
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);

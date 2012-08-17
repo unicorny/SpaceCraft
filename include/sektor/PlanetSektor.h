@@ -85,6 +85,11 @@ public:
      */
     virtual DRReturn move(float fTime, Camera* cam);
     
+    /*! \brief update visibility of sectors for all active cameras
+     *  \param cameras list with all active cameras, which currently observe at least one sektor
+     */
+    virtual DRReturn updateVisibility(const std::list<Camera*>& cameras);
+    
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
     
     // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet

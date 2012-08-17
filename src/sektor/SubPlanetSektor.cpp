@@ -18,12 +18,20 @@ DRVector3 SubPlanetSektor::mSubLevelBorder[] =
  DRVector3(1.0f,   92.0f, 0.0035f)}; // 10
 //*/
 
+DRMatrix     SubPlanetSektor::mRotations[] = 
+{DRMatrix::identity(),
+ DRMatrix::rotationY(PI/2.0f),
+ DRMatrix::rotationY(PI),
+ DRMatrix::rotationY(-PI/2.0f),
+ DRMatrix::rotationX(PI/2.0f),
+ DRMatrix::rotationX(-PI/2.0f)};
+
 #define MAX_SUB_LEVEL 11
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
 : Sektor(Vector3Unit(0.0), radius, id, parent), mSubLevel(subLevel), mPlanet(planet),
-  mPatchScaling(patchScaling), mVectorToPlanetCenter(DRVector3(0.0f)),
+  mPatchScaling(patchScaling), mRotationsIndex(0), mVectorToPlanetCenter(DRVector3(0.0f)),
   mTextureTranslate(0.0f, 0.0f, 1.0f)
 {
     mType = SUB_PLANET;  
@@ -39,25 +47,11 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     {
         mVectorToPlanetCenter = childID.normalize();
         mSektorPosition = Vector3Unit(mVectorToPlanetCenter, KM)*mRadius;
-        
-        //berechnen der Rotationsmatrix für die Texturgenerierung
-        DRVector3 centerPosition = mVectorToPlanetCenter; 
-        DRVector3 startAxis(0.00001f, 0.00001f, 1.0f);
-
-        DRVector3 rotationAxis = startAxis.cross(centerPosition).normalize();//startAxis.cross(centerPosition).normalize();
-        float rotationAngle = startAxis.dot(centerPosition);//startAxis.dot(centerPosition);
-
-        Eigen::Affine3f affine;
-        affine = Eigen::AngleAxisf(acosf(rotationAngle), Eigen::Vector3f(rotationAxis));
-                //*Eigen::AngleAxisf(acosf(5.0f*GRADTORAD*faktor), Eigen::Vector3f(0.0f, 0.0f, 1.0f));
-
-        mRotation = DRMatrix(affine.data());
-        //printf("[SubPlanetSektor::SubPlanetSektor] center: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z);
     }
     else
     {
         SubPlanetSektor* parentSektor = dynamic_cast<SubPlanetSektor*>(mParent);
-        mRotation = parentSektor->getRotation();
+        mRotationsIndex = parentSektor->getRotationsIndex();
         //Vector3Unit parentVector = mParent->getRadius() * parentSektor->getVectorToPlanet();
         //mVectorToPlanetCenter = (parentVector+mSektorPosition).getVector3().normalize();
         //mVectorToPlanetCenter
@@ -66,11 +60,31 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
 		//printf("[SubPlanetSektor::SubPlanetSektor] id: %f %f %f\n", childID.x, childID.y, childID.z);
         //printf("[SubPlanetSektor::SubPlanetSektor] )
         mTextureTranslate = parentSektor->getTextureTranslate() + childID;
-        mVectorToPlanetCenter = mTextureTranslate.transformCoords(mRotation).normalize();
+        mVectorToPlanetCenter = mTextureTranslate.transformCoords(mRotations[mRotationsIndex]).normalize();
         
         //mTextureTranslate = parentSektor->getTextureTranslate() + childPos;
         
         mSektorPosition = (mRadius * mVectorToPlanetCenter) - (mRadius * parentSektor->getVectorToPlanet());
+    }
+
+    //berechnen der Rotationsmatrix für die Texturgenerierung, bzw. Transformation der Observer
+    DRVector3 centerPosition = mVectorToPlanetCenter; 
+    DRVector3 startAxis(0.00001f, 0.00001f, 1.0f);
+
+    DRVector3 rotationAxis = startAxis.cross(centerPosition).normalize();//startAxis.cross(centerPosition).normalize();
+    float rotationAngle = startAxis.dot(centerPosition);//startAxis.dot(centerPosition);
+
+    Eigen::Affine3f affine;
+    affine = Eigen::AngleAxisf(acosf(rotationAngle), Eigen::Vector3f(rotationAxis));
+            //*Eigen::AngleAxisf(acosf(5.0f*GRADTORAD*faktor), Eigen::Vector3f(0.0f, 0.0f, 1.0f));
+
+    mRotation = DRMatrix(affine.data());
+
+    if(mSubLevel == 1)
+    {
+        mRotationsIndex = static_cast<u8>(mID.count);
+        mRotations[mRotationsIndex] = mRotation;
+        //printf("[SubPlanetSektor::SubPlanetSektor] center: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z);
     }
     /*printf("[SubPlanetSektor::SubPlanetSektor] mVectorToPlanetCenter: %f %f %f\n", mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
     printf("[SubPlanetSektor::SubPlanetSektor] mTextureTranslate: %f %f %f\n", mTextureTranslate.x, mTextureTranslate.y, mTextureTranslate.z);
@@ -86,7 +100,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
         RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
         parentTexture = parentRenderer->getTexture();
     }
-    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
+    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
     RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
 }
 
@@ -122,8 +136,10 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     if(mSubLevel == 1)
     {
         DRVector3 cam = mLastRelativeCameraPosition.convertTo(KM).getVector3();
-        //printf("\r cam: %f %f %f", cam.x, cam.y, cam.z);
         //printf("\ridle: %f, renderIdle: %f", mIdleSeconds, mNotRenderSeconds);
+        // camera ausgerichtet so das Höhe +y ist
+        cam = cam.transformCoords(DRMatrix::rotationX(-PI/2.0f)*mRotations[mRotationsIndex].invert());
+      //  printf("\r cam: %f %f %f", cam.x, cam.y, cam.z);
     }
     
     if(mIdleSeconds <= 0.0f)
@@ -146,6 +162,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         else if(relativePlayerSpeed <= 2) maxSubLevel = MAX_SUB_LEVEL-5;
         else maxSubLevel = MAX_SUB_LEVEL-6;
         
+        // if child visible and renderer is finished, only than create childs
         //if child visible                           50 Grad                         120 Grad
         if(mSubLevel > 0 && mSubLevel < maxSubLevel &&
             mPlanet->getTheta() <= mSubLevelBorder[mSubLevel].x
@@ -213,6 +230,11 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     return DR_OK;
 }
 
+DRReturn SubPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
+    return DR_OK;
+}
+
 DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
 {
     if(mIdleSeconds > 0.0f) return DR_NOT_ERROR;
@@ -230,6 +252,14 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         if(it->second->isVisible())
             count++;
 	}
+ /*   if(mSubLevel == 2)
+    {
+        DRVector3 childPos(mID.x, mID.y, mID.z);
+        childPos /= 1000.0f;
+        childPos = childPos.transformNormal(mRotation);
+        printf("\rchildPos: %f %f %f", childPos.x, childPos.y, childPos.z);
+    }
+  * */
     if(mNotRenderSeconds <= 0.0f || !count)
     {
         if(!mRenderer)
@@ -240,7 +270,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
                 RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
                 parentTexture = parentRenderer->getTexture();
             }
-            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
+            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
         }
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
@@ -255,6 +285,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
         shader->setUniform1f("SEA_LEVEL", p->seaLevel);
+        shader->setUniform1i("cameraAbove", cam->getCurrentSektor() == this ? 1 : 0);
         
         shader->setUniform2fv("textureCoordsParam", DRVector2(0.25f)-DRVector2(mID.x, mID.y).normalize()*DRVector2(0.25f).length());
         mRenderer->render(fTime, cam);
