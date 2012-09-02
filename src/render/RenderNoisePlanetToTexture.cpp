@@ -11,7 +11,7 @@ RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(const char* vertexShaderN
 	
     mShader = ShaderManager::Instance().getShader(vertexShaderName, fragmentShaderName);    
     mRenderSphere = DRGeometrieManager::Instance().getGrid(50, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP);
-       
+    mPermTexture = DRTextureManager::Instance().getTexture("data/permTexture.tga", false, GL_NEAREST, GL_NEAREST);       
 }
 
 RenderNoisePlanetToTexture::~RenderNoisePlanetToTexture()
@@ -23,6 +23,7 @@ RenderNoisePlanetToTexture::~RenderNoisePlanetToTexture()
 DRReturn RenderNoisePlanetToTexture::renderStuff()
 {
     if(!mNoiseParameter) LOG_ERROR("no noise parameter", DR_ERROR);
+    mPermTexture->bind();
     mShader->bind();
     
     //mShader->setUniform3fv("SphericalCenter", DRVector3(0.0f, 0.0f, -1.0f*(1.0f-mH)));

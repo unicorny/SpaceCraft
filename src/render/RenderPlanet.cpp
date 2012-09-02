@@ -37,7 +37,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
     mShader = ShaderManager::Instance().getShader("simple.vert", "simpleUnpack.frag");
     mSeaLevelInMetres = planetNoiseParameter->seaLevelInMetres;
     int textureStepSize = gb.getTextureRenderStepSize();
-    mHeightMap = new HeightMapTexture(textureStepSize*textureStepSize*8);
+    mHeightMap = new HeightMapTexture(textureStepSize*textureStepSize*16);
 
 	int stepSize = gb.getTextureRenderStepSize();
 	//float stepSize = static_cast<float>(stepSizei);
@@ -53,7 +53,10 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
         mPreviewTextur = tx.getTexture(DRVector2i(stepSize), 4);
     
         if(mPreviewTextur.getResourcePtrHolder())
+        {
             mPreviewTextur->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+            mPreviewTextur->setFilter(GL_NEAREST, GL_NEAREST);
+        }
         mTexturePath = texturePath;
 
         mTextureRenderer = RenderInStepsToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
@@ -63,7 +66,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
 		
     if(DRIsFileExist(getPathAndFilename().data()))
     {
-        mTexture = tx.getTexture(getPathAndFilename().data(), true);
+        mTexture = tx.getTexture(getPathAndFilename().data(), true, GL_NEAREST, GL_NEAREST);
         //TexturePtr(new Texture(getPathAndFilename().data()));
 		//mTexture->loadFromFile();
 		//mTexture->pixelsCopyToRenderer();
@@ -78,7 +81,10 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
   //                                                                   GL_UNSIGNED_BYTE, 4);    		
 		mTexture = tx.getTexture(DRVector2i(textureSize), 4);
 		if(mTexture.getResourcePtrHolder())
+        {
 			mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
+            mTexture->setFilter(GL_NEAREST, GL_NEAREST);
+        }
             //TexturePtr(new Texture(textureSize, textureSize, GL_UNSIGNED_BYTE, 4));
         if(mUsingParentTexture)
         {
@@ -131,7 +137,7 @@ DRReturn RenderPlanet::generateAndBindTexture()
 				//mTextureRenderer->saveImageToFile(getPathAndFilename().data());
                 DRTextureManager::Instance().saveTexture(mTexture, getPathAndFilename().data(),
                     GlobalRenderer::Instance().getTextureRenderStepSize()*
-                    GlobalRenderer::Instance().getTextureRenderStepSize());
+                    GlobalRenderer::Instance().getTextureRenderStepSize()*16);
                  // */
 			}
             mHeightMap->load(mTexture);

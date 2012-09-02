@@ -33,7 +33,7 @@
 //#version 120
 #version 120
 
-uniform sampler2D texture;
+uniform sampler2D permTexture;
 
 varying vec3 v_texCoord3D;
 
@@ -56,6 +56,9 @@ uniform float TERRAIN_OFFSET;
 uniform float MOUNTAINS_TWIST;
 uniform float HILLS_TWIST;
 uniform float BADLANDS_TWIST;
+
+uniform int   subLevel;
+const int     maxSubLevel = 10;
 
 float f_lacunarity;
 float f_persistence;
@@ -96,6 +99,25 @@ float CubicInterp (vec4 n, float a)
   float s = n.y;
   return p * a * a * a + q * a * a + r * a + s;
 }
+
+/*
+ * To create offsets of one texel and one half texel in the
+ * texture lookup, we need to know the texture image size.
+ */
+#define ONE 0.00390625
+#define ONEHALF 0.001953125
+// The numbers above are 1/256 and 0.5/256, change accordingly
+// if you change the code to use another texture size.
+
+/*
+ * The interpolation function. This could be a 1D texture lookup
+ * to get some more speed, but it's not the main part of the algorithm.
+ */
+float fade(float t) {
+  // return t*t*(3.0-2.0*t); // Old fade, yields discontinuous second derivative
+  return t*t*t*(t*(t*6.0-15.0)+10.0); // Improved fade, yields C2-continuous noise
+}
+
 // noise helper
 vec4 permute(vec4 x) {return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r) {return 1.79284291400159 - 0.85373472095314 * r;}
@@ -130,8 +152,9 @@ float snoise(vec3 v)
 
 // Gradients
 // ( N*N points uniformly over a square, mapped onto an octahedron.)
-  float n_ = 1.0/7.0; // N=7
-  vec3  ns = n_ * D.wyz - D.xzx;
+  //float n_ = 1.0/7.0; // N=7
+  //vec3  ns = n_ * D.wyz - D.xzx;
+  vec3 ns = vec3(0.2857142857,-0.9285714286,0.1428571429);
 
   vec4 j = p - 49.0 * floor(p * ns.z *ns.z);  //  mod(p,N*N)
 
@@ -172,6 +195,57 @@ float snoise(vec3 v)
   return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), 
                                 dot(p2,x2), dot(p3,x3) ) );
   }
+  
+  /*
+ * 3D classic noise. Slower, but a lot more useful than 2D noise, with texture lookup
+ */
+float noise(vec3 P)
+{
+  vec3 Pi = ONE*floor(P)+ONEHALF; // Integer part, scaled so +1 moves one texel
+                                  // and offset 1/2 texel to sample texel centers
+  vec3 Pf = fract(P);     // Fractional part for interpolation
+
+  // Noise contributions from (x=0, y=0), z=0 and z=1
+  float perm00 = texture2D(permTexture, Pi.xy).a ;
+  vec3  grad000 = texture2D(permTexture, vec2(perm00, Pi.z)).rgb * 4.0 - 1.0;
+  float n000 = dot(grad000, Pf);
+  vec3  grad001 = texture2D(permTexture, vec2(perm00, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n001 = dot(grad001, Pf - vec3(0.0, 0.0, 1.0));
+
+  // Noise contributions from (x=0, y=1), z=0 and z=1
+  float perm01 = texture2D(permTexture, Pi.xy + vec2(0.0, ONE)).a ;
+  vec3  grad010 = texture2D(permTexture, vec2(perm01, Pi.z)).rgb * 4.0 - 1.0;
+  float n010 = dot(grad010, Pf - vec3(0.0, 1.0, 0.0));
+  vec3  grad011 = texture2D(permTexture, vec2(perm01, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n011 = dot(grad011, Pf - vec3(0.0, 1.0, 1.0));
+
+  // Noise contributions from (x=1, y=0), z=0 and z=1
+  float perm10 = texture2D(permTexture, Pi.xy + vec2(ONE, 0.0)).a ;
+  vec3  grad100 = texture2D(permTexture, vec2(perm10, Pi.z)).rgb * 4.0 - 1.0;
+  float n100 = dot(grad100, Pf - vec3(1.0, 0.0, 0.0));
+  vec3  grad101 = texture2D(permTexture, vec2(perm10, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n101 = dot(grad101, Pf - vec3(1.0, 0.0, 1.0));
+
+  // Noise contributions from (x=1, y=1), z=0 and z=1
+  float perm11 = texture2D(permTexture, Pi.xy + vec2(ONE, ONE)).a ;
+  vec3  grad110 = texture2D(permTexture, vec2(perm11, Pi.z)).rgb * 4.0 - 1.0;
+  float n110 = dot(grad110, Pf - vec3(1.0, 1.0, 0.0));
+  vec3  grad111 = texture2D(permTexture, vec2(perm11, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n111 = dot(grad111, Pf - vec3(1.0, 1.0, 1.0));
+
+  // Blend contributions along x
+  vec4 n_x = mix(vec4(n000, n001, n010, n011),
+                 vec4(n100, n101, n110, n111), fade(Pf.x));
+
+  // Blend contributions along y
+  vec2 n_xy = mix(n_x.xy, n_x.zw, fade(Pf.y));
+
+  // Blend contributions along z
+  float n_xyz = mix(n_xy.x, n_xy.y, fade(Pf.z));
+
+  // We're done, return the final noise value.
+  return n_xyz;
+}
 
 // Classic Perlin noise
 float cnoise(vec3 P)
@@ -368,7 +442,7 @@ float sOctaveNoise(vec3 p, float frequenzy, int octaveCount)
 //	cnoise(p*frequenzy);
 	for(int curOctave = 0; curOctave < octaveCount; curOctave++)
 	{
-		value += snoise(p*frequenzy) * curPersistence;
+		value += noise(p*frequenzy) * curPersistence;
 		p *= f_lacunarity;
 		curPersistence *= f_persistence;
 	}
@@ -392,7 +466,7 @@ float sridged(vec3 p, float frequency, int octaveCount)
 
 	for(int curOctave = 0; curOctave < octaveCount; curOctave++)
 	{
-		signal = snoise(p);
+		signal = noise(p);
 
 		// Make the ridges.
 		signal = abs(signal);
@@ -431,7 +505,7 @@ float sbillow(vec3 p, float frequency, int octaveCount)
 //	cnoise(p*frequenzy);
 	for(int curOctave = 0; curOctave < octaveCount; curOctave++)
 	{
-		signal = snoise(p);
+		signal = noise(p);
 		signal = 2.0*abs(signal)-1.0;
 		value += signal * curPersistence;
 		p *= f_lacunarity;
@@ -667,7 +741,9 @@ float BaseContinentDefinition_se(vec3 value)
 	// -1.0 represents the lowest elevations and +1.0 represents the highest
 	// elevations.
 	//
-
+	
+	//return BaseContinentDefinition(value);
+	
 	// 3: [Warped-base-continent-definition module]: This turbulence module
 	//    warps the output value from the intermediate-turbulence module.  This
   	//    turbulence has a higher frequency, but lower power, than the
@@ -685,7 +761,7 @@ float BaseContinentDefinition_se(vec3 value)
   	//    detail to it.
 	vec3 continentDef_tu0 = turbulence(continentDef_tu1, 10, CONTINENT_FREQUENCY * 15.25, CONTINENT_FREQUENCY / 113.75, 13);
 	
-	return BaseContinentDefinition(value);
+	
 	
 	float baseContinentDef_cl = BaseContinentDefinition(value);
 	float baseContinentDef_cl_tu0 = BaseContinentDefinition(continentDef_tu0);
@@ -704,6 +780,7 @@ float BaseContinentDefinition_se(vec3 value)
 	float continentDef_se = select(baseContinentDef_cl, baseContinentDef_cl_tu0,
 				       baseContinentDef_cl, vec2(SEA_LEVEL-0.0375, SEA_LEVEL+1000.0375), 0.0625);
 	return continentDef_se;
+	//*/
 }
 
 float unpackHeight(vec3 color)
@@ -731,8 +808,8 @@ void main( void )
 	float terraceTemp[6];
 	float n = 0;
 
-	f_lacunarity = CONTINENT_LACUNARITY;
-	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
+	
+	//float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
 //n = baseContinentDef_pe0;
 
 	//turbulences must be calculated bevore
@@ -749,6 +826,8 @@ void main( void )
   
 	float continentDef_se = BaseContinentDefinition_se(v_texCoord3D);
 	float continentDef_se_tu = BaseContinentDefinition_se(terrainTypeDef_tu);
+	//float continentDef_se_tu = continentDef_se;
+//n = continentDef_se_tu;
 
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: terrain type definition
@@ -1119,7 +1198,7 @@ void main( void )
 	//    algorithm, small polygonal pits are generated; the edges of the pits
 	//    are joined to the edges of nearby pits.
 	float badlandsSand_vo = svoronoi(v_texCoord3D, 16183.25);//16183.25);
-	badlandsSand_vo = voronoi(v_texCoord3D, 81, 16183.25, 1.0, false);
+	//badlandsSand_vo = voronoi(v_texCoord3D, 81, 16183.25, 1.0, false);
 
 	// 4: [Scaled-dune-detail module]: This scale/bias module shrinks the dune
 	//    details by a large amount.  This is necessary so that the subsequent
@@ -1683,12 +1762,13 @@ void main( void )
     gradient[8] =  GradientColor( 0.75 		 	+ SEA_LEVEL_IN_METRES, vec4(0.5,     1.0,     1.0,     1.0));
     gradient[9] =  GradientColor( 2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     1.0,     1.0));
 
-   	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
-	n = unpackHeight(temp);
+   	//gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
+	//gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0) * (n * 0.5 + 0.5);
+	//n = unpackHeight(temp);
 	gl_FragColor.w = n * 0.5 + 0.5;
-        //gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
+    gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
 	vec4 color = vec4(v_texCoord3D, 1.0);
-	gl_FragColor = vec4(temp, n * 0.5+0.5);
+	//gl_FragColor = vec4(temp, n * 0.5+0.5);
 	//gl_FragColor = color;
 	
 }

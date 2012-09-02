@@ -46,7 +46,7 @@ DHASH ShaderManager::makeShaderHash(const char* vertexShader, const char* fragme
 ShaderProgram* ShaderManager::getShader(const char* vertexShader, const char* fragmentShader)
 {
     if(!mInitalized) return NULL;
-
+    
     DHASH id = makeShaderHash(vertexShader, fragmentShader);
     
     //Schauen ob schon vorhanden
@@ -57,6 +57,7 @@ ShaderProgram* ShaderManager::getShader(const char* vertexShader, const char* fr
         entry->referenzCounter++;
         return entry->shader;
     }
+    DREngineLog.writeToLog("start loading shader (%s, %s)!", vertexShader, fragmentShader);
 
     entry = new ShaderEntry;
     entry->referenzCounter = 0;
@@ -86,7 +87,8 @@ ShaderProgram* ShaderManager::getShader(const char* vertexShader, const char* fr
         LOG_ERROR("Unerwarteter Fehler in ShaderManager::getShader aufgetreten", 0);
     }
     entry->referenzCounter = 1;
-
+    
+    DREngineLog.writeToLog("end loading shader!");
     return entry->shader;
 }
 //! reduziert reference, bei null wird Textur gelöscht und OpenGL Texture in liste eingetragen

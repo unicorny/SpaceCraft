@@ -26,7 +26,7 @@ DRMatrix     SubPlanetSektor::mRotations[] =
  DRMatrix::rotationX(PI/2.0f),
  DRMatrix::rotationX(-PI/2.0f)};
 
-#define MAX_SUB_LEVEL 11
+#define MAX_SUB_LEVEL 2   // 11
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
@@ -133,13 +133,18 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);    
     double horizontCulling = acos(mLastRelativeCameraPosition.getVector3().normalize().dot(mVectorToPlanetCenter))*RADTOGRAD;   
     
-    if(mSubLevel == 1)
+    if(cam->getCurrentSektor() == this && mSubLevel == 1)
     {
-        DRVector3 cam = mLastRelativeCameraPosition.convertTo(KM).getVector3();
-        //printf("\ridle: %f, renderIdle: %f", mIdleSeconds, mNotRenderSeconds);
-        // camera ausgerichtet so das Höhe +y ist
-        cam = cam.transformCoords(DRMatrix::rotationX(-PI/2.0f)*mRotations[mRotationsIndex].invert());
-      //  printf("\r cam: %f %f %f", cam.x, cam.y, cam.z);
+        DRVector3 camDir = cam->getSektorPositionAtSektor(mPlanet).convertTo(KM).getVector3().normalize();
+        // ray - plane intersection, mVectorToPlanetCenter is n and d0
+        float intersection = mVectorToPlanetCenter.dot(mVectorToPlanetCenter) /
+                              camDir.dot(mVectorToPlanetCenter);
+        
+        camDir = camDir.transformCoords(mRotation.invert());
+        camDir = camDir.normalize();
+        camDir *= intersection;
+        
+        printf("\r cam: %f %f %f, intersection: %f", camDir.x, camDir.y, camDir.z, intersection);
     }
     
     if(mIdleSeconds <= 0.0f)
@@ -161,6 +166,8 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         else if(relativePlayerSpeed <= 0.2) maxSubLevel = MAX_SUB_LEVEL-4;
         else if(relativePlayerSpeed <= 2) maxSubLevel = MAX_SUB_LEVEL-5;
         else maxSubLevel = MAX_SUB_LEVEL-6;
+        
+        maxSubLevel = MAX_SUB_LEVEL;
         
         // if child visible and renderer is finished, only than create childs
         //if child visible                           50 Grad                         120 Grad
@@ -218,20 +225,27 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         //removeInactiveChilds(1.0f);
     }
     
-    if(render && render->getRenderNoisePlanetToTexture())
-    {
-        DRReal distance = static_cast<DRReal>(mLastRelativeCameraPosition.length().convertTo(M));
-        if(mIdleSeconds > 0.0f) distance *= 1000.0f;
-        dynamic_cast<RenderSubPlanet*>(mRenderer)->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
-        //if(mNotRenderSeconds > inactiveTime)
-          //  DR_SAVE_DELETE(mRenderer);
-    }
-
     return DR_OK;
 }
 
 DRReturn SubPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
 {
+    RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);
+    DRReal distance = 1.0e18f;
+    
+    for(std::list<Camera*>::const_iterator it = cameras.begin(); it != cameras.end(); it++)
+    {
+        Vector3Unit pos = (*it)->getSektorPositionAtSektor(this);
+        DRReal local_distance = static_cast<DRReal>(pos.length().convertTo(M));
+        if(local_distance < distance) distance = local_distance;
+    }
+    if(render && render->getRenderNoisePlanetToTexture())
+    {
+        if(mIdleSeconds > 0.0f) distance *= 1000.0f;
+        render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
+        //if(mNotRenderSeconds > inactiveTime)
+          //  DR_SAVE_DELETE(mRenderer);
+    }
     return DR_OK;
 }
 
@@ -286,7 +300,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
         shader->setUniform1f("SEA_LEVEL", p->seaLevel);
         shader->setUniform1i("cameraAbove", cam->getCurrentSektor() == this ? 1 : 0);
-        
+             
         shader->setUniform2fv("textureCoordsParam", DRVector2(0.25f)-DRVector2(mID.x, mID.y).normalize()*DRVector2(0.25f).length());
         mRenderer->render(fTime, cam);
         shader->unbind();
