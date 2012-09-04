@@ -1,7 +1,8 @@
 #include "RenderInStepsToTexture.h"
+#include "GlobalRenderer.h"
 
 RenderInStepsToTexture::RenderInStepsToTexture()
-: mTexture(), mStepSize(0), mIndexStepMode(0), mFinished(false), mDistance(-1.0f)
+: mTexture(), mStepSize(0), mIndexStepMode(0), mFinished(false), mDistance(-1.0f), mFileNameToSave("")
 {
     
 }
@@ -55,6 +56,15 @@ DRReturn RenderInStepsToTexture::step()
      if(mCursorIndex > mTextureSize || mCursorIndex < DRVector2i(0))
      {
         mFinished = true;
+        if(mFileNameToSave.size() > 0)
+        {
+            //DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
+            //mTextureRenderer->saveImageToFile(getPathAndFilename().data());
+            DRTextureManager::Instance().saveTexture(mTexture, mFileNameToSave.data(),
+                GlobalRenderer::Instance().getTextureRenderStepSize()*
+                GlobalRenderer::Instance().getTextureRenderStepSize()*16);
+                // */
+        }
         return DR_OK;
      }
     

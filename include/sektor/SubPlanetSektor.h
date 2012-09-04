@@ -39,6 +39,7 @@ public:
     __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
     
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
     
     virtual Sektor* getChild(SektorID childID);
     
@@ -56,6 +57,7 @@ protected:
     float               mPatchScaling;
     DRMatrix            mRotation;
     u8                  mRotationsIndex;
+    
     //! position relative to planet center
     DRVector3           mVectorToPlanetCenter;
     DRVector3           mTextureTranslate;

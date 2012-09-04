@@ -100,7 +100,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
         RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
         parentTexture = parentRenderer->getTexture();
     }
-    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
+    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
     RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
 }
 
@@ -133,20 +133,42 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);    
     double horizontCulling = acos(mLastRelativeCameraPosition.getVector3().normalize().dot(mVectorToPlanetCenter))*RADTOGRAD;   
     
-    if(cam->getCurrentSektor() == this && mSubLevel == 1)
+    if(cam->getCurrentSektor() == this)// && mSubLevel == 1)
     {
         DRVector3 camDir = cam->getSektorPositionAtSektor(mPlanet).convertTo(KM).getVector3().normalize();
         // ray - plane intersection, mVectorToPlanetCenter is n and d0
-        float intersection = mVectorToPlanetCenter.dot(mVectorToPlanetCenter) /
-                              camDir.dot(mVectorToPlanetCenter);
+        // by subplanet I must use translate
         
-        camDir = camDir.transformCoords(mRotation.invert());
-        camDir = camDir.normalize();
+        DRVector3 n = PlanetSektor::mSubPlanets[mRotationsIndex];
+        n *= 1000.0f;
+        // if intersection < 0, camera is on other planet surface
+        float intersection = n.dot(n) /
+                        camDir.dot(n);
+        
+        camDir = camDir.transformCoords(mRotations[mRotationsIndex]).normalize();
         camDir *= intersection;
+
+        //camDir -= mTextureTranslate*n;
+        for(int i = 0; i < 3; i++)
+        {
+            if(fabs(camDir.c[i]-mTextureTranslate.c[i])>mPatchScaling) camDir.c[i] += mTextureTranslate.c[i];
+            else camDir.c[i] -= mTextureTranslate.c[i];
+        }        
+        camDir /= mPatchScaling;
+        camDir *= 0.5f;
+        camDir += 0.5f;
         
-        printf("\r cam: %f %f %f, intersection: %f", camDir.x, camDir.y, camDir.z, intersection);
+        //printf("\r cam: %f %f %f, %f", camDir.x, camDir.y, camDir.z, intersection);
     }
-    
+    if(mSubLevel == 1)
+    {
+        if(!mRenderer) LOG_ERROR("renderer deleted!", DR_ERROR);
+        // set ready count bit 2^sektorNummer
+        if(static_cast<RenderSubPlanet*>(mRenderer)->isFinishLoading())
+        {
+            mPlanet->setReadyCount(static_cast<u8>(powf(2.0f, static_cast<float>(mID.count))));
+        }
+    }
     if(mIdleSeconds <= 0.0f)
     {
         DRVector3 camVector = mLastRelativeCameraPosition.getVector3().normalize();
@@ -276,16 +298,10 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
   * */
     if(mNotRenderSeconds <= 0.0f || !count)
     {
+        if(static_cast<RenderSubPlanet*>(mRenderer)->isErrorOccured())
+            DR_SAVE_DELETE(mRenderer);
         if(!mRenderer)
-        {
-            DRTexturePtr parentTexture;
-            if(mSubLevel > 1 && mParent && mParent->getRenderer())
-            {
-                RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
-                parentTexture = parentRenderer->getTexture();
-            }
-            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
-        }
+            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
         ShaderProgram* shader = mRenderer->getShaderProgram();
@@ -369,6 +385,15 @@ bool SubPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
     }*/
     return true;  
 }
+
+bool SubPlanetSektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
+{
+    if(mSubLevel > 0 &&
+       mPlanet->getTheta() >= mSubLevelBorder[mSubLevel-1].x)
+        return false;
+    return true;
+}
+
 
 Sektor* SubPlanetSektor::getChild(SektorID childID)
 {

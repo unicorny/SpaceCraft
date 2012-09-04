@@ -9,7 +9,8 @@ SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1, 0),SektorID(1,0,0, 1),S
                                         SektorID(-1,0,0, 3),SektorID(0,1,0, 4),SektorID(0,-1,0, 5)};// left, top, bottom
 
 PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
-: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f)
+: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f),
+  mReadyCount(0)
 {
     mType = PLANET;
     
@@ -154,11 +155,13 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
-    if(isObjectInSektor(mLastRelativeCameraPosition))
+    //if(isObjectInSektor(mLastRelativeCameraPosition))
+    if(mTheta <= 75.0f)
     {                
         for(u32 i = 0; i < 6; i++)
         {
-            //horizont culling
+            getChild(mSubPlanets[i]*static_cast<short>(1000));            
+            /*//horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
             double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))*RADTOGRAD-45.0;            
             //printf("\r %d, angle: %f (%f Grad) ", i, angle, angle*RADTOGRAD);
@@ -166,6 +169,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             {
                 getChild(mSubPlanets[i]*static_cast<short>(1000));            
             }
+            //*/
             //else
                 //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
         }
@@ -252,9 +256,13 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
-    if(!isObjectInSektor(mLastRelativeCameraPosition))
+    //if(!isObjectInSektor(mLastRelativeCameraPosition))
+    if(isSectorVisibleFromPosition(mLastRelativeCameraPosition)
+       && (mTheta >= 70.0f || mReadyCount != 63))
     {
         mNotRenderSeconds = 0.0f;
+        if(static_cast<RenderPlanet*>(mRenderer)->isErrorOccured())
+            DR_SAVE_DELETE(mRenderer);
         if(!mRenderer)
             mRenderer = new RenderPlanet(mID, getSektorPathName(), &mPlanetNoiseParameters);
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
@@ -279,6 +287,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
         shader->setUniformMatrix("modelview", mMatrix);
         shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix().transpose());
         DRGrafikError("PlanetSektor::render");
+        
         
         DRReturn ret = mRenderer->render(fTime, cam);
         shader->unbind();
@@ -366,9 +375,9 @@ bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
 {    
     Unit l = positionInSektor.length();
 
-    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.5 Grad, using ebene
-    //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
-    return theta <=70.0f;
+    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes
+    printf("\rtheta: %f, distance: %f", theta, static_cast<double>(l.convertTo(KM)));
+    return theta <=89.822667f;
     /*
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;
     radiusSquare *= radiusSquare;
@@ -376,6 +385,14 @@ bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
     //return Vector3Unit(positionInParentSektor.convertTo(AE) - mSektorPosition).lengthSq() <= radiusSquare;    
     return positionInSektor.convertTo(AE).lengthSq() <= radiusSquare;    
      * */
+}
+bool PlanetSektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
+{
+    Unit l = positionInSektor.length();
+
+    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes
+    //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
+    return theta <=89.94f;
 }
 
 //*************************************************************************************************

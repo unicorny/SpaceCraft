@@ -15,9 +15,11 @@ public:
     //! erstellt eine neue Textur mit denselben Einstellungen, jedoch wird die texturgröße geändert
     DRReturn reinit(DRTexturePtr texture);
     // render with current step, add step
+    //! save image to file after finish render, if filname was set
     DRReturn step();
     
     DRReturn saveImageToFile(const char* path);
+    __inline__ void setFilenameToSave(DRString path) {mFileNameToSave = path;}
     
     // called every step
     virtual DRReturn renderStuff() = 0;        
@@ -50,6 +52,7 @@ private:
     bool        mFinished;
     
     DRReal       mDistance; //distance to viewer, for priority list
+    DRString     mFileNameToSave;
 };
 
 typedef DRResourcePtr<RenderInStepsToTexture> RenderInStepsToTexturePtr;

@@ -3,7 +3,6 @@
 
 // 'time' contains seconds since the program was linked.
 uniform sampler2D texture;
-uniform int      textureLoaded;
 uniform float SEA_LEVEL_IN_METRES;
 uniform int		cameraAbove;
 
@@ -74,32 +73,26 @@ vec3 packHeight(float height)
 
 void main()
 {
-	if(textureLoaded == 0)
-	{
-		gl_FragColor = gl_Color;
-	}
-	else
-	{
-		GradientColor gradient[10];
-		
-		gradient[0] =  GradientColor(-2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     0.0,     1.0));
-		gradient[1] =  GradientColor(-0.03125 	  	+ SEA_LEVEL_IN_METRES, vec4(0.02353, 0.22745, 0.49804, 1.0));
-		gradient[2] =  GradientColor(-0.0001220703 	+ SEA_LEVEL_IN_METRES, vec4(0.05490, 0.43922, 0.75294, 1.0));
-		gradient[3] =  GradientColor( 0.0 			+ SEA_LEVEL_IN_METRES, vec4(0.27451, 0.47059, 0.23529, 1.0));
-		gradient[4] =  GradientColor( 0.125 		+ SEA_LEVEL_IN_METRES, vec4(0.43137, 0.54902, 0.29412, 1.0));
-		gradient[5] =  GradientColor( 0.25 			+ SEA_LEVEL_IN_METRES, vec4(0.62745, 0.54902, 0.43529, 1.0));
-		gradient[6] =  GradientColor( 0.375 		+ SEA_LEVEL_IN_METRES, vec4(0.72157, 0.63921, 0.55294, 1.0));
-		gradient[7] =  GradientColor( 0.5 			+ SEA_LEVEL_IN_METRES, vec4(1.0));
-		gradient[8] =  GradientColor( 0.75 		 	+ SEA_LEVEL_IN_METRES, vec4(0.5,     1.0,     1.0,     1.0));
-		gradient[9] =  GradientColor( 2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     1.0,     1.0));
+	
+	GradientColor gradient[10];
+	
+	gradient[0] =  GradientColor(-2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     0.0,     1.0));
+	gradient[1] =  GradientColor(-0.03125 	  	+ SEA_LEVEL_IN_METRES, vec4(0.02353, 0.22745, 0.49804, 1.0));
+	gradient[2] =  GradientColor(-0.0001220703 	+ SEA_LEVEL_IN_METRES, vec4(0.05490, 0.43922, 0.75294, 1.0));
+	gradient[3] =  GradientColor( 0.0 			+ SEA_LEVEL_IN_METRES, vec4(0.27451, 0.47059, 0.23529, 1.0));
+	gradient[4] =  GradientColor( 0.125 		+ SEA_LEVEL_IN_METRES, vec4(0.43137, 0.54902, 0.29412, 1.0));
+	gradient[5] =  GradientColor( 0.25 			+ SEA_LEVEL_IN_METRES, vec4(0.62745, 0.54902, 0.43529, 1.0));
+	gradient[6] =  GradientColor( 0.375 		+ SEA_LEVEL_IN_METRES, vec4(0.72157, 0.63921, 0.55294, 1.0));
+	gradient[7] =  GradientColor( 0.5 			+ SEA_LEVEL_IN_METRES, vec4(1.0));
+	gradient[8] =  GradientColor( 0.75 		 	+ SEA_LEVEL_IN_METRES, vec4(0.5,     1.0,     1.0,     1.0));
+	gradient[9] =  GradientColor( 2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     1.0,     1.0));
 
-		float n = unpackHeight(texture2D(texture, gl_TexCoord[0].xy).xyz*2.0-1.0);
-		gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
-		if(cameraAbove > 0)
-			gl_FragColor.g += 0.1;
-		gl_FragColor.w = n * 0.5 + 0.5;
-		
-		//gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
-	}
+	float n = unpackHeight(texture2D(texture, gl_TexCoord[0].xy).xyz*2.0-1.0);
+	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
+	if(cameraAbove > 0)
+		gl_FragColor.g += 0.1;
+	gl_FragColor.w = n * 0.5 + 0.5;
+	
+	//gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
 	
 }

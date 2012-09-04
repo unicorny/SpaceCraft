@@ -34,7 +34,8 @@ DRReturn Sektor::move(float fTime, Camera* cam)
     else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     if(mParent)
     {
-        if(!isObjectInSektor(mLastRelativeCameraPosition))    
+        //if(!isObjectInSektor(mLastRelativeCameraPosition))    
+        if(!isSectorVisibleFromPosition(mLastRelativeCameraPosition))
             mIdleSeconds += fTime;
         else
             mIdleSeconds = 0.0f;
@@ -246,8 +247,14 @@ const char* Sektor::getSektorTypeName(SektorType type)
 bool Sektor::isObjectInSektor(Vector3Unit positionInSektor)
 {
     //return Vector3Unit(positionInSektor - mSektorPosition).lengthSq() <= mRadius*mRadius;
+    return positionInSektor.lengthSq() <= mRadius;
+}
+
+bool Sektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
+{
     return positionInSektor.lengthSq() <= mRadius*mRadius;
 }
+
 
 void Sektor::getSektorPath(std::vector<SektorID>& storage) const
 {

@@ -126,8 +126,12 @@ public:
      */
     DRReturn updateVisibilityAll(const std::list<Camera*>& cameras, bool rootUpdated = false);
     
-    // is the position inside the current sektor/ is the current sektor visible from that position
+    // is the position inside/above the current sektor
+    // in future maybe with bounding box/sphere
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    
+    // is the sector visible from current position
+    virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
     
     static const char* getSektorTypeName(SektorType type);
     virtual void printTypeInfos(const char* name);

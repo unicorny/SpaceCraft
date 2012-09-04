@@ -111,6 +111,7 @@ DRReturn GlobalRenderer::renderTasks()
 
 DRReturn GlobalRenderer::setupFrameBuffer(DRTexturePtr texture)
 {
+    if(!texture) LOG_ERROR("Zero-Pointer", DR_ERROR);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
     //create texture
     //bind to the new texture ID
