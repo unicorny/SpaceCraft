@@ -53,6 +53,10 @@ public:
 	__inline__ GLuint getGrafikMemoryTexture() {return mGrafikMemTexture;}
 	__inline__ GLuint getGrafikMemoryGeometrie() {return mGrafikMemGeometrie;}
 	__inline__ GLuint getGrafikMemory() {return mGrafikMemGeometrie+mGrafikMemTexture;}
+
+	__inline__ void addEbenenCount(uint index) {if(mEbeneCount.size() <= index) mEbeneCount.resize(index+1); mEbeneCount[index]++;}
+	__inline__ void removeEbenenCount(uint index) {mEbeneCount[index]--;}
+	__inline__ std::vector<int>* getEbenenCount() {return &mEbeneCount;}
     
 private:
     GlobalRenderer();
@@ -80,6 +84,7 @@ private:
 	//statistic reserved memory in Bytes
 	GLuint								mGrafikMemTexture;
 	GLuint								mGrafikMemGeometrie;
+	std::vector<int>					mEbeneCount;
 };
 
 

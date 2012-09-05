@@ -56,3 +56,8 @@ DRReturn SolarSystemSektor::render(float fTime, Camera* cam)
     //mMatrix = cam->getKameraMatrixRotation();
     return DR_OK;
 }
+
+DRReturn SolarSystemSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
+    return DR_OK;
+}

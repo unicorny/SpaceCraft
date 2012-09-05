@@ -66,6 +66,11 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
  }
     
    
+ DRReturn SubPatchPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
+ {
+     return DR_OK;
+ }
+ 
  DRReturn SubPatchPlanetSektor::render(float fTime, Camera* cam)
  {
      if(mIdleSeconds > 0.0f) return DR_OK;

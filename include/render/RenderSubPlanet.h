@@ -7,14 +7,14 @@ class RenderSubPlanet : public RenderPlanet
 {
 public:
     //! \param boxSide 
-    RenderSubPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture);
+    RenderSubPlanet(SektorID seed, DRVector3 translate, float patchScaling,
+                    const DRMatrix& rotation, DRString texturePath, 
+                    const PlanetNoiseParameter* planetNoiseParameter);
 
     virtual ~RenderSubPlanet();
     
     virtual DRReturn render(float fTime, Camera* cam);
-    
-    
-    
+       
 protected:
     DRGeometrieHeightfield*     mGeometrieGrid;
     

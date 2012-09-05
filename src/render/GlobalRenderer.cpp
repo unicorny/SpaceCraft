@@ -3,7 +3,7 @@
 GlobalRenderer::GlobalRenderer()
 : m_bInitialized(false), mQuadratic(NULL), mFrameBufferID(0),
   mTextureRenderStepSize(0), mTextureRenderMaxResolution(0),
-  mGrafikMemTexture(0), mGrafikMemGeometrie(0)
+  mGrafikMemTexture(0), mGrafikMemGeometrie(0), mEbeneCount(5,0)
 {
     
 }
@@ -111,6 +111,7 @@ DRReturn GlobalRenderer::renderTasks()
 
 DRReturn GlobalRenderer::setupFrameBuffer(DRTexturePtr texture)
 {
+    if(!texture) LOG_ERROR("Zero-Pointer", DR_ERROR);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
     //create texture
     //bind to the new texture ID

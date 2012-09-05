@@ -25,6 +25,7 @@ struct ControlMode
 Player g_Player;
 RenderBlockLoader g_RenderBlockLoader;
 Camera* g_cam = NULL;
+std::list<Camera*> g_Cameras;
 DRFont* g_Font = NULL;
 DRTexturePtr g_tex;
 DRTexturePtr g_terrain;
@@ -173,7 +174,13 @@ void test()
 void sizeOfClasses()
 {
     DREngineLog.writeToLog("--------  Klassen-Objekt groessen (in Bytes): -----------");
-	
+    DREngineLog.writeToLog("char: %d", sizeof(char));
+    DREngineLog.writeToLog("short: %d", sizeof(short));
+	DREngineLog.writeToLog("int: %d", sizeof(int));
+    DREngineLog.writeToLog("long: %d", sizeof(long));
+    DREngineLog.writeToLog("void*: %d", sizeof(void*));
+    DREngineLog.writeToLog("float: %d", sizeof(float));
+    DREngineLog.writeToLog("double: %d", sizeof(double));
     
     DREngineLog.writeToLog("Camera: %d", sizeof(Camera));
     DREngineLog.writeToLog("DRGeometrieIcoSphere: %d", sizeof(DRGeometrieIcoSphere));
@@ -183,6 +190,7 @@ void sizeOfClasses()
     DREngineLog.writeToLog("DRTexture: %d", sizeof(DRTexture));
 	DREngineLog.writeToLog("DRTextureManager: %d", sizeof(DRTextureManager));
     DREngineLog.writeToLog("DRVector3: %d", sizeof(DRVector3));
+    DREngineLog.writeToLog("HeightMapTexture: %d", sizeof(HeightMapTexture));
     DREngineLog.writeToLog("PlanetSektor: %d", sizeof(PlanetSektor));
     DREngineLog.writeToLog("RenderSektor: %d", sizeof(RenderSektor));
     DREngineLog.writeToLog("RenderPlanet: %d", sizeof(RenderPlanet));
@@ -192,8 +200,61 @@ void sizeOfClasses()
     DREngineLog.writeToLog("Sektor: %d", sizeof(Sektor));
     DREngineLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
     DREngineLog.writeToLog("Unit: %d", sizeof(Unit));
+    DREngineLog.writeToLog("UnitTypes: %d", sizeof(UnitTypes));
     DREngineLog.writeToLog("Vector3Unit: %d", sizeof(Vector3Unit));
     DREngineLog.writeToLog("------- Klassen-Objekt groessen Ende ----------");
+}
+
+void initPermTexture(/*GLuint *texID*/)
+{
+  char *pixels;
+  int i,j;
+
+  int perm[256]= {151,160,137,91,90,15,
+  131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
+  190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
+  88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
+  77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,
+  102,143,54, 65,25,63,161, 1,216,80,73,209,76,132,187,208, 89,18,169,200,196,
+  135,130,116,188,159,86,164,100,109,198,173,186, 3,64,52,217,226,250,124,123,
+  5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,
+  223,183,170,213,119,248,152, 2,44,154,163, 70,221,153,101,155,167, 43,172,9,
+  129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
+  251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
+  49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
+  138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180};
+
+  int grad3[16][3] = {{0,1,1},{0,1,-1},{0,-1,1},{0,-1,-1},
+                     {1,0,1},{1,0,-1},{-1,0,1},{-1,0,-1},
+                     {1,1,0},{1,-1,0},{-1,1,0},{-1,-1,0}, // 12 cube edges
+                     {1,0,-1},{-1,0,-1},{0,-1,1},{0,1,1}}; // 4 more to make 16
+
+  //glGenTextures(1, texID); // Generate a unique texture ID
+  //glBindTexture(GL_TEXTURE_2D, *texID); // Bind the texture to texture unit 0
+
+  pixels = (char*)malloc( 256*256*4 );
+  for(i = 0; i<256; i++)
+    for(j = 0; j<256; j++) {
+      int offset = (i*256+j)*4;
+      char value = perm[(j+perm[i]) & 0xFF];
+      pixels[offset] = grad3[value & 0x0F][0] * 64 + 64;   // Gradient x
+      pixels[offset+1] = grad3[value & 0x0F][1] * 64 + 64; // Gradient y
+      pixels[offset+2] = grad3[value & 0x0F][2] * 64 + 64; // Gradient z
+      pixels[offset+3] = value;                     // Permuted index
+    }
+  DRIImage* image = DRIImage::newImage();
+  image->setImageFormat(-1);
+  image->setSize(DRVector2i(256));
+  image->setPixel(reinterpret_cast<u8*>(pixels));
+  image->saveIntoFile("data/permTexture.tga");
+  DRIImage::deleteImage(image);
+  /*/
+  // GLFW texture loading functions won't work here - we need GL_NEAREST lookup.
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, 256, 256, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+  */
+  free(pixels);
 }
 
 DRReturn load()
@@ -235,6 +296,8 @@ DRReturn load()
 
     DREngineLog.writeToLog("CPU-Count: %d", g_CPU_Count);   
     
+    
+    
   //  glShadeModel(GL_SMOOTH);
   //  glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
    // glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
@@ -271,6 +334,8 @@ DRReturn load()
     //glEnable(GL_LIGHTING);
     glDisable(GL_FOG);
     
+    initPermTexture();
+    
 	if(GlobalRenderer::getSingleton().init("data/config.ini"))
 		LOG_ERROR("error by init GlobalRenderer", DR_ERROR);
     
@@ -282,6 +347,7 @@ DRReturn load()
     if(g_Player.init())
         LOG_ERROR("Fehler bei Player::init", DR_ERROR);
     g_cam = g_Player.getCamera();
+    g_Cameras.push_back(g_cam);
        
     if(g_RenderBlockLoader.init())
         LOG_ERROR("Fehler bei RenderBloockLoader::init", DR_ERROR);
@@ -295,6 +361,7 @@ DRReturn load()
 
 void ende()
 {
+    g_Cameras.pop_back();
     g_Player.exit();
     g_tex.release();    
     DR_SAVE_DELETE(g_Font);
@@ -368,6 +435,8 @@ DRReturn move(float fTime)
     if(fTime == 0.0f) fTime = 0.00166f;
 
     //if(g_Player.getSektor()->moveAll(fTime, g_cam))
+    if(g_Player.getSektor()->updateVisibilityAll(g_Cameras))
+        LOG_ERROR("Fehler bei update Visibility in sektors", DR_ERROR);
     if(g_Player.getSektor()->moveAll(fTime, g_Player.getCamera()))
         LOG_ERROR("Fehler bei move sektor", DR_ERROR);
 

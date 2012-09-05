@@ -11,16 +11,27 @@ DRVector3 SubPlanetSektor::mSubLevelBorder[] =
  DRVector3(20.0f, 100.0f, 0.45f), // 3
  DRVector3(15.0f, 100.0f, 0.30f), // 4
  DRVector3(10.0f,  99.0f, 0.1f), // 5
- DRVector3(8.0f,  95.0f, 0.04f), // 6
- DRVector3(6.0f,   94.0f, 0.02f)}; // 7
+ DRVector3(8.0f,   95.0f, 0.04f), // 6
+ DRVector3(6.0f,   95.0f, 0.03f),// 7
+ DRVector3(4.0f,   94.0f, 0.01f), // 8
+ DRVector3(2.0f,   93.0f, 0.009f), // 9
+ DRVector3(1.0f,   92.0f, 0.0035f)}; // 10
 //*/
 
-#define MAX_SUB_LEVEL 8
+DRMatrix     SubPlanetSektor::mRotations[] = 
+{DRMatrix::identity(),
+ DRMatrix::rotationY(PI/2.0f),
+ DRMatrix::rotationY(PI),
+ DRMatrix::rotationY(-PI/2.0f),
+ DRMatrix::rotationX(PI/2.0f),
+ DRMatrix::rotationX(-PI/2.0f)};
+
+#define MAX_SUB_LEVEL 2   // 11
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
 : Sektor(Vector3Unit(0.0), radius, id, parent), mSubLevel(subLevel), mPlanet(planet),
-  mPatchScaling(patchScaling), mVectorToPlanetCenter(DRVector3(0.0f)),
+  mPatchScaling(patchScaling), mRotationsIndex(0), mVectorToPlanetCenter(DRVector3(0.0f)),
   mTextureTranslate(0.0f, 0.0f, 1.0f)
 {
     mType = SUB_PLANET;  
@@ -29,30 +40,18 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     if(!mParent || !mPlanet)
         LOG_ERROR_VOID("no parent, no planet, nothing");
     
+    GlobalRenderer::Instance().addEbenenCount(subLevel);
+    
     //printf("[SubPlanetSektor::SubPlanetSektor] patchScaling: %f\n", mPatchScaling);
     if(mSubLevel == 1)
     {
         mVectorToPlanetCenter = childID.normalize();
         mSektorPosition = Vector3Unit(mVectorToPlanetCenter, KM)*mRadius;
-        
-        //berechnen der Rotationsmatrix für die Texturgenerierung
-        DRVector3 centerPosition = mVectorToPlanetCenter; 
-        DRVector3 startAxis(0.00001f, 0.00001f, 1.0f);
-
-        DRVector3 rotationAxis = startAxis.cross(centerPosition).normalize();//startAxis.cross(centerPosition).normalize();
-        float rotationAngle = startAxis.dot(centerPosition);//startAxis.dot(centerPosition);
-
-        Eigen::Affine3f affine;
-        affine = Eigen::AngleAxisf(acosf(rotationAngle), Eigen::Vector3f(rotationAxis));
-                //*Eigen::AngleAxisf(acosf(5.0f*GRADTORAD*faktor), Eigen::Vector3f(0.0f, 0.0f, 1.0f));
-
-        mRotation = DRMatrix(affine.data());
-        //printf("[SubPlanetSektor::SubPlanetSektor] center: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z);
     }
     else
     {
         SubPlanetSektor* parentSektor = dynamic_cast<SubPlanetSektor*>(mParent);
-        mRotation = parentSektor->getRotation();
+        mRotationsIndex = parentSektor->getRotationsIndex();
         //Vector3Unit parentVector = mParent->getRadius() * parentSektor->getVectorToPlanet();
         //mVectorToPlanetCenter = (parentVector+mSektorPosition).getVector3().normalize();
         //mVectorToPlanetCenter
@@ -61,11 +60,31 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
 		//printf("[SubPlanetSektor::SubPlanetSektor] id: %f %f %f\n", childID.x, childID.y, childID.z);
         //printf("[SubPlanetSektor::SubPlanetSektor] )
         mTextureTranslate = parentSektor->getTextureTranslate() + childID;
-        mVectorToPlanetCenter = mTextureTranslate.transformCoords(mRotation).normalize();
+        mVectorToPlanetCenter = mTextureTranslate.transformCoords(mRotations[mRotationsIndex]).normalize();
         
         //mTextureTranslate = parentSektor->getTextureTranslate() + childPos;
         
         mSektorPosition = (mRadius * mVectorToPlanetCenter) - (mRadius * parentSektor->getVectorToPlanet());
+    }
+
+    //berechnen der Rotationsmatrix für die Texturgenerierung, bzw. Transformation der Observer
+    DRVector3 centerPosition = mVectorToPlanetCenter; 
+    DRVector3 startAxis(0.00001f, 0.00001f, 1.0f);
+
+    DRVector3 rotationAxis = startAxis.cross(centerPosition).normalize();//startAxis.cross(centerPosition).normalize();
+    float rotationAngle = startAxis.dot(centerPosition);//startAxis.dot(centerPosition);
+
+    Eigen::Affine3f affine;
+    affine = Eigen::AngleAxisf(acosf(rotationAngle), Eigen::Vector3f(rotationAxis));
+            //*Eigen::AngleAxisf(acosf(5.0f*GRADTORAD*faktor), Eigen::Vector3f(0.0f, 0.0f, 1.0f));
+
+    mRotation = DRMatrix(affine.data());
+
+    if(mSubLevel == 1)
+    {
+        mRotationsIndex = static_cast<u8>(mID.count);
+        mRotations[mRotationsIndex] = mRotation;
+        //printf("[SubPlanetSektor::SubPlanetSektor] center: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z);
     }
     /*printf("[SubPlanetSektor::SubPlanetSektor] mVectorToPlanetCenter: %f %f %f\n", mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
     printf("[SubPlanetSektor::SubPlanetSektor] mTextureTranslate: %f %f %f\n", mTextureTranslate.x, mTextureTranslate.y, mTextureTranslate.z);
@@ -81,11 +100,13 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
         RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
         parentTexture = parentRenderer->getTexture();
     }
-    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
+    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+    RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
 }
 
 SubPlanetSektor::~SubPlanetSektor()
 {
+    GlobalRenderer::Instance().removeEbenenCount(mSubLevel);
     for(int i = 0; i < 4; i++)
     {
         if(mNeighbors[i])
@@ -112,13 +133,42 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);    
     double horizontCulling = acos(mLastRelativeCameraPosition.getVector3().normalize().dot(mVectorToPlanetCenter))*RADTOGRAD;   
     
+    if(cam->getCurrentSektor() == this)// && mSubLevel == 1)
+    {
+        DRVector3 camDir = cam->getSektorPositionAtSektor(mPlanet).convertTo(KM).getVector3().normalize();
+        // ray - plane intersection, mVectorToPlanetCenter is n and d0
+        // by subplanet I must use translate
+        
+        DRVector3 n = PlanetSektor::mSubPlanets[mRotationsIndex];
+        n *= 1000.0f;
+        // if intersection < 0, camera is on other planet surface
+        float intersection = n.dot(n) /
+                        camDir.dot(n);
+        
+        camDir = camDir.transformCoords(mRotations[mRotationsIndex]).normalize();
+        camDir *= intersection;
+
+        //camDir -= mTextureTranslate*n;
+        for(int i = 0; i < 3; i++)
+        {
+            if(fabs(camDir.c[i]-mTextureTranslate.c[i])>mPatchScaling) camDir.c[i] += mTextureTranslate.c[i];
+            else camDir.c[i] -= mTextureTranslate.c[i];
+        }        
+        camDir /= mPatchScaling;
+        camDir *= 0.5f;
+        camDir += 0.5f;
+        
+        //printf("\r cam: %f %f %f, %f", camDir.x, camDir.y, camDir.z, intersection);
+    }
     if(mSubLevel == 1)
     {
-        DRVector3 cam = mLastRelativeCameraPosition.convertTo(KM).getVector3();
-        //printf("\r cam: %f %f %f", cam.x, cam.y, cam.z);
-        //printf("\ridle: %f, renderIdle: %f", mIdleSeconds, mNotRenderSeconds);
+        if(!mRenderer) LOG_ERROR("renderer deleted!", DR_ERROR);
+        // set ready count bit 2^sektorNummer
+        if(static_cast<RenderSubPlanet*>(mRenderer)->isFinishLoading())
+        {
+            mPlanet->setReadyCount(static_cast<u8>(powf(2.0f, static_cast<float>(mID.count))));
+        }
     }
-    
     if(mIdleSeconds <= 0.0f)
     {
         DRVector3 camVector = mLastRelativeCameraPosition.getVector3().normalize();
@@ -139,6 +189,9 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         else if(relativePlayerSpeed <= 2) maxSubLevel = MAX_SUB_LEVEL-5;
         else maxSubLevel = MAX_SUB_LEVEL-6;
         
+        maxSubLevel = MAX_SUB_LEVEL;
+        
+        // if child visible and renderer is finished, only than create childs
         //if child visible                           50 Grad                         120 Grad
         if(mSubLevel > 0 && mSubLevel < maxSubLevel &&
             mPlanet->getTheta() <= mSubLevelBorder[mSubLevel].x
@@ -191,17 +244,30 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     {
         mNotRenderSeconds += fTime;
         removeInactiveChilds(inactiveTime);
+        //removeInactiveChilds(1.0f);
     }
     
+    return DR_OK;
+}
+
+DRReturn SubPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
+    RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);
+    DRReal distance = 1.0e18f;
+    
+    for(std::list<Camera*>::const_iterator it = cameras.begin(); it != cameras.end(); it++)
+    {
+        Vector3Unit pos = (*it)->getSektorPositionAtSektor(this);
+        DRReal local_distance = static_cast<DRReal>(pos.length().convertTo(M));
+        if(local_distance < distance) distance = local_distance;
+    }
     if(render && render->getRenderNoisePlanetToTexture())
     {
-        DRReal distance = static_cast<DRReal>(mLastRelativeCameraPosition.length().convertTo(M));
         if(mIdleSeconds > 0.0f) distance *= 1000.0f;
-        dynamic_cast<RenderSubPlanet*>(mRenderer)->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
+        render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
         //if(mNotRenderSeconds > inactiveTime)
           //  DR_SAVE_DELETE(mRenderer);
     }
-
     return DR_OK;
 }
 
@@ -222,18 +288,20 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         if(it->second->isVisible())
             count++;
 	}
+ /*   if(mSubLevel == 2)
+    {
+        DRVector3 childPos(mID.x, mID.y, mID.z);
+        childPos /= 1000.0f;
+        childPos = childPos.transformNormal(mRotation);
+        printf("\rchildPos: %f %f %f", childPos.x, childPos.y, childPos.z);
+    }
+  * */
     if(mNotRenderSeconds <= 0.0f || !count)
     {
+        if(static_cast<RenderSubPlanet*>(mRenderer)->isErrorOccured())
+            DR_SAVE_DELETE(mRenderer);
         if(!mRenderer)
-        {
-            DRTexturePtr parentTexture;
-            if(mSubLevel > 1 && mParent && mParent->getRenderer())
-            {
-                RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
-                parentTexture = parentRenderer->getTexture();
-            }
-            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters(), parentTexture);
-        }
+            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
         ShaderProgram* shader = mRenderer->getShaderProgram();
@@ -247,7 +315,8 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
         shader->setUniform1f("SEA_LEVEL", p->seaLevel);
-        
+        shader->setUniform1i("cameraAbove", cam->getCurrentSektor() == this ? 1 : 0);
+             
         shader->setUniform2fv("textureCoordsParam", DRVector2(0.25f)-DRVector2(mID.x, mID.y).normalize()*DRVector2(0.25f).length());
         mRenderer->render(fTime, cam);
         shader->unbind();
@@ -316,6 +385,15 @@ bool SubPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
     }*/
     return true;  
 }
+
+bool SubPlanetSektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
+{
+    if(mSubLevel > 0 &&
+       mPlanet->getTheta() >= mSubLevelBorder[mSubLevel-1].x)
+        return false;
+    return true;
+}
+
 
 Sektor* SubPlanetSektor::getChild(SektorID childID)
 {

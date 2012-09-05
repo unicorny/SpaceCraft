@@ -118,7 +118,7 @@ const float PI = 3.1415926535f;
 #include "DRVideoConfig.h"
 #include "DRTexture.h"
 #include "DRSaveTexture.h"
-#include "DRTextureManager.h"
+
 #include "DRGeometrie.h"
 #include "DRGeometrieSphere.h"
 #include "DRGeometrieIcoSphere.h"
@@ -164,6 +164,8 @@ ENGINE2_API extern DRGameStateManager* g_pGameStateManager;
 #define LOG_ERROR_SDL_VOID() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2){ LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__); return;}}
 #define LOG_WARNING_SDL() {const char* pcErrorSDL = SDL_GetError(); if(strlen(pcErrorSDL) > 2) LOG_SDL_INTERN(pcErrorSDL, DRRemoveDir(__FILE__), __LINE__, __FUNCTION__);}
 
+#include "DRThread.h"
+#include "DRTextureManager.h"
 
 /**	Engine Funktionen
 	Verschieden Init-Funktionen und anderes

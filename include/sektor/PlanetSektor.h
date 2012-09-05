@@ -66,6 +66,13 @@ struct PlanetNoiseParameter
     };
 };
 
+#define READY_COUNT_BIT_1 1
+#define READY_COUNT_BIT_2 2
+#define READY_COUNT_BIT_3 4
+#define READY_COUNT_BIT_4 8
+#define READY_COUNT_BIT_5 16
+#define READY_COUNT_BIT_6 32
+
 class PlanetSektor : public Sektor
 {
 public:
@@ -85,21 +92,32 @@ public:
      */
     virtual DRReturn move(float fTime, Camera* cam);
     
+    /*! \brief update visibility of sectors for all active cameras
+     *  \param cameras list with all active cameras, which currently observe at least one sektor
+     */
+    virtual DRReturn updateVisibility(const std::list<Camera*>& cameras);
+    
+    // all orbital objects are inside of the planet sector
     virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
     
     // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet
     virtual Sektor* getChild(SektorID childID);
     __inline__ GLint getShaderProgram() {return mSphericalShaderForSubPlanet->getProgram();}
     __inline__ double getTheta() {return mTheta;}
     __inline__ const PlanetNoiseParameter* getPlanetNoiseParameters() const {return &mPlanetNoiseParameters;}
+    
+    static SektorID mSubPlanets[];
+    void setReadyCount(u8 readyCountBit) {mReadyCount |= readyCountBit;}
       
 protected:
     ShaderProgram*              mSphericalShaderForSubPlanet;
     double                      mTheta;
     PlanetNoiseParameter        mPlanetNoiseParameters;
+    u8                          mReadyCount;
         
 private:
-    static SektorID mSubPlanets[];
+    
     
 };
 

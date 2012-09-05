@@ -5,11 +5,12 @@
 #include "SubPlanetSektor.h"
 
 
-SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1),SektorID(1,0,0),SektorID(0,0, 1),// front, right, back
-                                        SektorID(-1,0,0),SektorID(0,1,0),SektorID(0,-1,0)};// left, top, bottom
+SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1, 0),SektorID(1,0,0, 1),SektorID(0,0, 1, 2),// front, right, back
+                                        SektorID(-1,0,0, 3),SektorID(0,1,0, 4),SektorID(0,-1,0, 5)};// left, top, bottom
 
 PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
-: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f)
+: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f),
+  mReadyCount(0)
 {
     mType = PLANET;
     
@@ -138,24 +139,29 @@ PlanetSektor::~PlanetSektor()
 
 DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
-    RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
-    //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
-    else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
-    Unit distance = mLastRelativeCameraPosition.length()-mRadius;
-    distance = distance.convertTo(KM);       
     
-//    mLastRelativeCameraPosition.print("cameraPos");
-    printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
+    //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    Sektor::move(fTime, cam);
+    //if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
+    //else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+   // mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
+    
+    std::vector<int>* ebene = GlobalRenderer::Instance().getEbenenCount();
+	char buffer[256]; memset(buffer, 0, 256);
+    
+    for(uint i = 1; i < ebene->size(); i++)
+        sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
+    //printf("\r%s", buffer);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
-    if(isObjectInSektor(mLastRelativeCameraPosition))
+    //if(isObjectInSektor(mLastRelativeCameraPosition))
+    if(mTheta <= 75.0f)
     {                
         for(u32 i = 0; i < 6; i++)
         {
-            //horizont culling
+            getChild(mSubPlanets[i]*static_cast<short>(1000));            
+            /*//horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
             double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))*RADTOGRAD-45.0;            
             //printf("\r %d, angle: %f (%f Grad) ", i, angle, angle*RADTOGRAD);
@@ -163,6 +169,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             {
                 getChild(mSubPlanets[i]*static_cast<short>(1000));            
             }
+            //*/
             //else
                 //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
         }
@@ -172,15 +179,43 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
         //removeInactiveChilds(1.0f);
     }
     removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
-    if(mRenderer)
+    
+    return DR_OK;
+}
+
+DRReturn PlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
+    mTheta = 360.0f;
+    RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
+    DRReal distance = 100000.0f;
+        
+    for(std::list<Camera*>::const_iterator it = cameras.begin(); it != cameras.end(); it++)
     {
-        // set player distance to renderer for sort
-        if(render->getRenderNoisePlanetToTexture())
-            render->getRenderNoisePlanetToTexture()->setCurrentDistance(static_cast<DRReal>(mLastRelativeCameraPosition.length().convertTo(M)));
-        // remove renderer, if we didn't need him
-        if(mNotRenderSeconds >= GlobalRenderer::Instance().getTimeForInactiveChilds())
-            DR_SAVE_DELETE(mRenderer);
+        float local_theta = acos(mRadius/(*it)->getSektorPositionAtSektor(this).length())*RADTOGRAD;
+        if(local_theta < mTheta)
+            mTheta = local_theta;
+        Vector3Unit pos = (*it)->getSektorPositionAtSektor(this);
+        DRReal local_distance = static_cast<DRReal>(pos.length().convertTo(M));
+        if(local_distance < distance) distance = local_distance;
+        
+        if(it == cameras.begin())
+        {
+            Unit distance = pos.length()-mRadius;
+            distance = distance.convertTo(KM);       
+            //printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
+        }
     }
+       
+    if(render && render->getRenderNoisePlanetToTexture())
+    {
+        if(mIdleSeconds > 0.0f) distance *= 1000.0f;
+        render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
+        // delete only, if childs have there own textures ready
+        /*if(mNotRenderSeconds > GlobalRenderer::Instance().getTimeForInactiveChilds())
+            DR_SAVE_DELETE(mRenderer);*/
+    }
+    
+    
     return DR_OK;
 }
 
@@ -221,9 +256,13 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
-    if(!isObjectInSektor(mLastRelativeCameraPosition))
+    //if(!isObjectInSektor(mLastRelativeCameraPosition))
+    if(isSectorVisibleFromPosition(mLastRelativeCameraPosition)
+       && (mTheta >= 70.0f || mReadyCount != 63))
     {
         mNotRenderSeconds = 0.0f;
+        if(static_cast<RenderPlanet*>(mRenderer)->isErrorOccured())
+            DR_SAVE_DELETE(mRenderer);
         if(!mRenderer)
             mRenderer = new RenderPlanet(mID, getSektorPathName(), &mPlanetNoiseParameters);
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
@@ -248,6 +287,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
         shader->setUniformMatrix("modelview", mMatrix);
         shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix().transpose());
         DRGrafikError("PlanetSektor::render");
+        
         
         DRReturn ret = mRenderer->render(fTime, cam);
         shader->unbind();
@@ -335,9 +375,9 @@ bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
 {    
     Unit l = positionInSektor.length();
 
-    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.5 Grad, using ebene
-    //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
-    return theta <=70.0f;
+    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes
+    printf("\rtheta: %f, distance: %f", theta, static_cast<double>(l.convertTo(KM)));
+    return theta <=89.822667f;
     /*
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;
     radiusSquare *= radiusSquare;
@@ -345,6 +385,14 @@ bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
     //return Vector3Unit(positionInParentSektor.convertTo(AE) - mSektorPosition).lengthSq() <= radiusSquare;    
     return positionInSektor.convertTo(AE).lengthSq() <= radiusSquare;    
      * */
+}
+bool PlanetSektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
+{
+    Unit l = positionInSektor.length();
+
+    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes
+    //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
+    return theta <=89.94f;
 }
 
 //*************************************************************************************************

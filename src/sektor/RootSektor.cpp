@@ -23,6 +23,11 @@ DRReturn RootSektor::move(float fTime, Camera* cam)
     return DR_OK;
 }
 
+DRReturn RootSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
+    return DR_OK;
+}
+
 DRReturn RootSektor::render(float fTime, Camera* cam)
 {
 	GlobalRenderer& gr = GlobalRenderer::Instance();

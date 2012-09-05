@@ -51,6 +51,7 @@ public:
 
     ResourceType * operator->() const { return static_cast<ResourceType *>(mResourceHolder->mResource); }
     ResourceType & operator*() const { return *(static_cast<ResourceType *>(mResourceHolder->mResource)); }
+    operator ResourceType*() {return mResourceHolder ? static_cast<ResourceType *>(mResourceHolder->mResource) : NULL;} 
 
     bool operator==(DRResourcePtr<ResourceType> res) const;
     bool operator!=(DRResourcePtr<ResourceType> res) const { return !operator==(res); }

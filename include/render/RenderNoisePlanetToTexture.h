@@ -29,6 +29,7 @@ private:
     float         mPatchScaling;
     DRVector3     mTranslate;
     DRMatrix      mRotation;
+    DRTexturePtr mPermTexture;
     
     
 };

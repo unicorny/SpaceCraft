@@ -34,7 +34,8 @@ DRReturn Sektor::move(float fTime, Camera* cam)
     else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
     if(mParent)
     {
-        if(!isObjectInSektor(mLastRelativeCameraPosition))    
+        //if(!isObjectInSektor(mLastRelativeCameraPosition))    
+        if(!isSectorVisibleFromPosition(mLastRelativeCameraPosition))
             mIdleSeconds += fTime;
         else
             mIdleSeconds = 0.0f;
@@ -121,11 +122,35 @@ DRReturn Sektor::moveAll(float fTime, Camera* cam, bool rootMoved/* = false*/)
     return DR_ERROR;
 }
 
+DRReturn Sektor::updateVisibilityAll(const std::list<Camera*>& cameras, bool rootUpdated/* = false*/)
+{
+    if(!rootUpdated && mParent) return mParent->updateVisibilityAll(cameras, false);
+    else if(!mParent || rootUpdated) 
+    {
+        DRReturn ret = DR_OK;
+
+        if(!mParent) ret = updateVisibility(cameras);
+        for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
+        {
+            Sektor* temp = it->second;     
+            ret = temp->updateVisibility(cameras);
+            if(ret) LOG_ERROR("Fehler bei move", DR_ERROR);
+            
+            for(std::list<Camera*>::const_iterator it2 = cameras.begin(); it2 != cameras.end(); it2++)
+                temp->updateCameraSektor(*it2);
+
+            ret = temp->updateVisibilityAll(cameras, true);
+            if(ret) LOG_ERROR("Fehler bei move all", DR_ERROR);
+        }
+        return ret;
+    }
+    return DR_ERROR;
+}
+
 void Sektor::updateCameraSektor(Camera* cam)
 {
     if(!cam) return;
-    Vector3Unit pos = mLastRelativeCameraPosition; //cam->getSektorPositionAtSektor(this);
-	if(pos.length() <= 0.0) pos = cam->getSektorPositionAtSektor(this);
+    Vector3Unit pos = cam->getSektorPositionAtSektor(this);
     
     //update camera position
     if(isObjectInSektor(pos)) // down
@@ -222,8 +247,14 @@ const char* Sektor::getSektorTypeName(SektorType type)
 bool Sektor::isObjectInSektor(Vector3Unit positionInSektor)
 {
     //return Vector3Unit(positionInSektor - mSektorPosition).lengthSq() <= mRadius*mRadius;
+    return positionInSektor.lengthSq() <= mRadius;
+}
+
+bool Sektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
+{
     return positionInSektor.lengthSq() <= mRadius*mRadius;
 }
+
 
 void Sektor::getSektorPath(std::vector<SektorID>& storage) const
 {
