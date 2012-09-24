@@ -11,14 +11,13 @@ public:
     ~RenderInStepsToTexture();
     
     // reset values, set step size
-    DRReturn init(int stepSize, DRReal clippingBorder[4], DRTexturePtr texture);
-    //! erstellt eine neue Textur mit denselben Einstellungen, jedoch wird die texturgröße geändert
+    DRReturn init(int stepSize, DRTexturePtr texture);
+    //! render with same setup, but other texture as render-target
     DRReturn reinit(DRTexturePtr texture);
     // render with current step, add step
     //! save image to file after finish render, if filname was set
     DRReturn step();
     
-    DRReturn saveImageToFile(const char* path);
     __inline__ void setFilenameToSave(DRString path) {mFileNameToSave = path;}
     
     // called every step
@@ -38,7 +37,6 @@ public:
     }
     
 protected:
-    float       mClippingBorder[4]; //left, rigt, bottom, top
     DRVector2i  mTextureSize;    
     DRTexturePtr  mTexture;
     DRMatrix	mProjectionMatrix;

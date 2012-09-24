@@ -44,13 +44,13 @@ public:
     //! Warning. not testet yet!
     DRTexturePtr getTexture(DRVector2i size, GLuint format, DRColor* colors);
     
-    void saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
-    void saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture);
+    DRSaveTexture* saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
+    DRSaveTexture* saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture);
     
     //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
     //GLuint    getGLTextureMemory(GLuint width, GLuint height, GLuint format);
     //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
-    void      freeTexture(GLuint textureID);
+    void      freeTexture(DRTextureBufferPtr textureID);
     
     
     // update timeout, release lange nicht verwendete Texturen
@@ -64,19 +64,19 @@ private:
     __inline__ void addGrafikMemTexture(GLuint addValue) {mGrafikMemTexture += addValue;}
     __inline__ void removeGrafikMemTexture(GLuint subtractValue) {mGrafikMemTexture -= subtractValue;}
     void calculateGrafikMemTexture();
-    GLuint _getTexture(DRVector2i size, GLuint format);
+    DRTextureBufferPtr _getTexture(DRVector2i size, GLuint format);
 
    
     //! daten für alte Einträge, dessen Speicher noch Verwendung finden könnte
     struct TextureMemoryEntry
     {
         TextureMemoryEntry(DRVector2i _size, GLint _format)
-                : textureID(0), size(_size), format(_format) {}
+                : textureID(), size(_size), format(_format) {}
         TextureMemoryEntry() 
-                : textureID(0), size(0, 0), format(0) {}
+                : textureID(), size(0, 0), format(0) {}
         void print() {printf("width: %d, height: %d, format: %d", size.x, size.y, format);}
         void clear();
-        GLuint textureID;
+        DRTextureBufferPtr textureID;
         DRVector2i size;
         GLint format;
         float  timeout; //Speicher wird freigegeben, wenn null erreicht,  0 kein timeout

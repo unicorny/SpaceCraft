@@ -32,12 +32,9 @@ DRReturn GlobalRenderer::init(const char* configFilename)
     return DR_OK;
 }
 
-void GlobalRenderer::addRenderTask(RenderInStepsToTexturePtr newRenderTask, bool preview/* = false*/)
+void GlobalRenderer::addRenderTask(RenderInStepsToTexturePtr newRenderTask)
 {
-    if(preview)
-        mPreviewRenderTasks.push_back(newRenderTask);
-    else
-        mRenderTasks.push_back(newRenderTask);
+    mRenderTasks.push_back(newRenderTask);
 }
 void GlobalRenderer::removeRenderTask(RenderInStepsToTexturePtr renderTaskToDelete)
 {
@@ -75,30 +72,10 @@ DRReturn GlobalRenderer::renderTaskFromQueue(std::list<RenderInStepsToTexturePtr
 DRReturn GlobalRenderer::renderTasks()
 {
     Uint32 start = SDL_GetTicks();
-    static bool bswitch = true;
     
     // procceed mRenderTasks
-    if(mPreviewRenderTasks.empty())
-    {
-        if(renderTaskFromQueue(&mRenderTasks))
-            LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
-    }
-    else
-    {
-        if(bswitch)
-        {
-            // procceed mPreviewRenderTasks
-           if(renderTaskFromQueue(&mPreviewRenderTasks)) 
-                LOG_ERROR("Fehler bei mPreviewRenderTasks", DR_ERROR);
-        }
-        else
-        {
-            // procceed mRenderTasks
-            if(renderTaskFromQueue(&mRenderTasks))
-                LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
-        }
-        bswitch = !bswitch;             
-    }
+    if(renderTaskFromQueue(&mRenderTasks))
+        LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
     
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);   
     glMatrixMode(GL_TEXTURE);
@@ -144,7 +121,6 @@ void GlobalRenderer::exit()
 			static_cast<double>(mGrafikMemTexture)/(1024.0*1024.0));
 	}
 	mRenderTasks.clear();
-	mPreviewRenderTasks.clear();
     m_bInitialized = false;    
 }
 

@@ -136,7 +136,6 @@ DRReturn RenderNoisePlanetToTexture::init(int stepSize, DRVector3 translate, flo
     mPatchScaling = patchScaling;
     mTranslate = translate;
     mRotation = rotation;
-    float clippingPlanes[4] = {1.0f, -1.0f, 1.0f, -1.0f};
     
-    return RenderInStepsToTexture::init(stepSize, clippingPlanes, texture);    
+    return RenderInStepsToTexture::init(stepSize, texture);    
 }

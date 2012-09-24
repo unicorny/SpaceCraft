@@ -66,7 +66,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
         mTextureRenderer->setFilenameToSave(getPathAndFilename());
         getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mTexture, rotation);    
         
-        GlobalRenderer::Instance().addRenderTask(mTextureRenderer, false);
+        GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
         mInitalized = 1;
         
         //mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    

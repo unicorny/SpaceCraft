@@ -37,7 +37,7 @@ public:
     
     //! put task onto stack, call it if it is on top, until it is finished, than remove task from stack
     //! memory will not be touched!!
-    void addRenderTask(RenderInStepsToTexturePtr newRenderTask, bool preview = false);
+    void addRenderTask(RenderInStepsToTexturePtr newRenderTask);
     void removeRenderTask(RenderInStepsToTexturePtr renderTaskToDelete);
     
     // render current task
@@ -71,7 +71,6 @@ private:
     //Render To texture
     GLuint                              mFrameBufferID;
     std::list<RenderInStepsToTexturePtr> mRenderTasks;
-    std::list<RenderInStepsToTexturePtr> mPreviewRenderTasks;
     DRHashList                          mDeleted;
     
     // Config

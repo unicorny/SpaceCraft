@@ -72,7 +72,7 @@ void HeightMapTexture::copyPixelData(u8* data, DRVector2i size)
 // ----------------------------------------------------------------------------------
 
 HeightMapLoader::HeightMapLoader(DRTexturePtr source, int stepSize, HeightMapTexture* parent)
-: DRSaveTexture("", stepSize), mParent(parent)
+: DRSaveTexture("", source->getTextureBuffer(), stepSize), mParent(parent)
 {
     DRTextureManager::Instance().saveTexture(source, this);    
 }
