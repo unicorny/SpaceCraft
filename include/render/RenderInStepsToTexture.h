@@ -1,9 +1,9 @@
 #ifndef __SC_RENDER_IN_STEPS_TO_TEXTURE__
 #define __SC_RENDER_IN_STEPS_TO_TEXTURE__
 
-#include "main.h"
+#include "RenderToTexture.h"
 
-class RenderInStepsToTexture: public DRIResource
+class RenderInStepsToTexture: public RenderToTexture
 {
 public:
     // frame buffer, will be called in init and in step
@@ -18,13 +18,13 @@ public:
     //! save image to file after finish render, if filname was set
     DRReturn step();
     
-    __inline__ void setFilenameToSave(DRString path) {mFileNameToSave = path;}
+  //  __inline__ void setFilenameToSave(DRString path) {mFileNameToSave = path;}
     
     // called every step
-    virtual DRReturn renderStuff() = 0;        
+   // virtual DRReturn renderStuff() = 0;        
     
-    __inline__ bool isFinished() {return mFinished;}
-    __inline__ DRTexturePtr getTextur() {return mTexture;}
+    __inline__ bool isFinished() {return mFinished == 1;}
+    //__inline__ DRTexturePtr getTextur() {return mTexture;}
     
     virtual const char* getResourceType() const {return "RenderInStepsToTexture";}
     
@@ -37,9 +37,9 @@ public:
     }
     
 protected:
-    DRVector2i  mTextureSize;    
-    DRTexturePtr  mTexture;
-    DRMatrix	mProjectionMatrix;
+    //DRVector2i  mTextureSize;    
+    //DRTexturePtr  mTexture;
+    //DRMatrix	mProjectionMatrix;
     
 private:
     DRVector2i  mCursorIndex;
@@ -47,10 +47,10 @@ private:
     u8          mIndexStepMode; 
     short       mCursorMaxCount;
     short       mCursorCurrentCount;
-    bool        mFinished;
+    //bool        mFinished;
     
     DRReal       mDistance; //distance to viewer, for priority list
-    DRString     mFileNameToSave;
+  //  DRString     mFileNameToSave;
 };
 
 typedef DRResourcePtr<RenderInStepsToTexture> RenderInStepsToTexturePtr;

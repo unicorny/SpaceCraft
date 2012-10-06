@@ -20,21 +20,24 @@ DRReturn RenderToTexture::init(DRTexturePtr texture)
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
         
     mTexture = texture;
-    mFinished = false;
+    mFinished = 0;
     
     return DR_OK;
 }
 
 DRReturn RenderToTexture::step()
 {
-     if(mFinished == 1 && mFileNameToSave.size() > 0)
+     if(mFinished == 1)
      {
-        //DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
-        //mTextureRenderer->saveImageToFile(getPathAndFilename().data());
-        DRTextureManager::Instance().saveTexture(mTexture, mFileNameToSave.data(),
-            GlobalRenderer::Instance().getTextureRenderStepSize()*
-            GlobalRenderer::Instance().getTextureRenderStepSize()*16);
-            // */
+        if(mFileNameToSave.size() > 0)
+        {
+            //DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
+            //mTextureRenderer->saveImageToFile(getPathAndFilename().data());
+            DRTextureManager::Instance().saveTexture(mTexture, mFileNameToSave.data(),
+                GlobalRenderer::Instance().getTextureRenderStepSize()*
+                GlobalRenderer::Instance().getTextureRenderStepSize()*16);
+                // */
+        }
         mFinished++;
         return DR_OK;
      }

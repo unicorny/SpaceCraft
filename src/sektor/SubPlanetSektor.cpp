@@ -94,14 +94,8 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
      */
  
     //mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
-    DRTexturePtr parentTexture;
-    if(mSubLevel > 1 && mParent && mParent->getRenderer())
-    {
-        RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
-        parentTexture = parentRenderer->getTexture();
-    }
     mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
-    RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
+    //RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
 }
 
 SubPlanetSektor::~SubPlanetSektor()

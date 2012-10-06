@@ -1,8 +1,8 @@
 #include "RenderInStepsToTexture.h"
 #include "GlobalRenderer.h"
 
-RenderInStepsToTexture::RenderInStepsToTexture()
-: mTexture(), mStepSize(0), mIndexStepMode(0), mFinished(false), mDistance(-1.0f), mFileNameToSave("")
+RenderInStepsToTexture::RenderInStepsToTexture() 
+: RenderToTexture(), mStepSize(0), mIndexStepMode(0), mDistance(-1.0f)
 {
     
 }
@@ -14,10 +14,8 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
 
 DRReturn RenderInStepsToTexture::init(int stepSize, DRTexturePtr texture)
 {
-	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-    mTextureSize = texture->getResolution();
-	if(mTextureSize.x <= 0 || mTextureSize.y <= 0)
-		LOG_ERROR("textureSize is invalid", DR_ERROR);
+    if(RenderToTexture::init(texture)) 
+        LOG_ERROR("error by init render to texture", DR_ERROR);
         
     mStepSize = stepSize;
     //mTextureSize = textureSize;
@@ -25,27 +23,21 @@ DRReturn RenderInStepsToTexture::init(int stepSize, DRTexturePtr texture)
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
     mCursorCurrentCount = 0;
-    mTexture = texture;
-    mFinished = false;
     
     return DR_OK;
 }
 
 DRReturn RenderInStepsToTexture::reinit(DRTexturePtr texture)
 {
-    if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-        mTextureSize = texture->getResolution();
-    if(mTextureSize.x <= 0 || mTextureSize.y <= 0)
-		LOG_ERROR("textureSize is invalid", DR_ERROR);
+    if(RenderToTexture::init(texture)) 
+        LOG_ERROR("error by init render to texture", DR_ERROR);
     
    // mTextureSize *= textureSizeScalar;
  //   mTextureSize = textureSize;
-    mTexture = texture;
     mCursorIndex = mTextureSize/2 - DRVector2i(static_cast<int>(mStepSize)/2);
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
     mCursorCurrentCount = 0;
-    mFinished = false;
     
     return DR_OK;
 }
@@ -54,7 +46,7 @@ DRReturn RenderInStepsToTexture::step()
 {
      if(mCursorIndex > mTextureSize || mCursorIndex < DRVector2i(0))
      {
-        mFinished = true;
+        mFinished = 1;
         if(mFileNameToSave.size() > 0)
         {
             //DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());

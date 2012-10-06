@@ -32,10 +32,11 @@ protected:
     DRVector2i  mTextureSize;    
     DRTexturePtr  mTexture;
     DRMatrix	mProjectionMatrix;
+    u8           mFinished;
+    DRString     mFileNameToSave;
     
 private:
-     u8           mFinished;
-     DRString     mFileNameToSave;
+     
 };
 
 typedef DRResourcePtr<RenderToTexture> RenderToTexturePtr;

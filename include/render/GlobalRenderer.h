@@ -36,7 +36,6 @@ public:
     __inline__ void   setTimeForInactiveChild(float time) {mTimeForInactiveChilds = time;}
     
     //! put task onto stack, call it if it is on top, until it is finished, than remove task from stack
-    //! memory will not be touched!!
     void addRenderTask(RenderInStepsToTexturePtr newRenderTask);
     void removeRenderTask(RenderInStepsToTexturePtr renderTaskToDelete);
     
@@ -74,16 +73,16 @@ private:
     DRHashList                          mDeleted;
     
     // Config
-    GLuint                               mTextureRenderStepSize;
-    GLuint                               mTextureRenderMaxResolution;
+    GLuint                              mTextureRenderStepSize;
+    GLuint                              mTextureRenderMaxResolution;
     
     //dynamic config
     float                               mTimeForInactiveChilds;
 
-	//statistic reserved memory in Bytes
-	GLuint								mGrafikMemTexture;
-	GLuint								mGrafikMemGeometrie;
-	std::vector<int>					mEbeneCount;
+    //statistic reserved memory in Bytes
+    GLuint				mGrafikMemTexture;
+    GLuint				mGrafikMemGeometrie;
+    std::vector<int>			mEbeneCount;
 };
 
 
