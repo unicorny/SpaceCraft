@@ -17,7 +17,11 @@ DRReturn RenderToTexture::init(DRTexturePtr texture)
 	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
     mTextureSize = texture->getResolution();
 	if(mTextureSize.x <= 0 || mTextureSize.y <= 0)
+    {
+        texture->setErrorByLoading();
+        DREngineLog.writeToLog("textureSize: %f %f", mTextureSize.x, mTextureSize.y);
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
+    }
         
     mTexture = texture;
     mFinished = 0;
@@ -41,6 +45,7 @@ DRReturn RenderToTexture::step()
         mFinished++;
         return DR_OK;
      }
+    
     
     //mFrameBuffer->bindToRender();
     

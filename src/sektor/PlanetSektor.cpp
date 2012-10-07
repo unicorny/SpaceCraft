@@ -155,6 +155,10 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
+    RenderPlanet* renderer = static_cast<RenderPlanet*>(mRenderer);
+    if(!renderer->isFinishLoading())
+        renderer->generateTexture();
+    
     //if(isObjectInSektor(mLastRelativeCameraPosition))
     if(mTheta <= 75.0f)
     {                
@@ -257,6 +261,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
     //if(!isObjectInSektor(mLastRelativeCameraPosition))
+    printf(" readyCount: %d",(int)mReadyCount);
     if(isSectorVisibleFromPosition(mLastRelativeCameraPosition)
        && (mTheta >= 70.0f || mReadyCount != 63))
     {

@@ -4,13 +4,13 @@
 #include "PlanetSektor.h"
 
 RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(const char* vertexShaderName, const char* fragmentShaderName, const PlanetNoiseParameter* noiseParameter)
-: RenderInStepsToTexture(), mShader(NULL), mRenderSphere(NULL), mNoiseParameter(noiseParameter)
+: RenderInStepsToTexture(), mShader(NULL), mRenderGrid(NULL), mNoiseParameter(noiseParameter)
 {
     if(!vertexShaderName || !fragmentShaderName)
         LOG_ERROR_VOID("Fehler kein Shader");
 	
     mShader = ShaderManager::Instance().getShader(vertexShaderName, fragmentShaderName);    
-    mRenderSphere = DRGeometrieManager::Instance().getGrid(50, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP);
+    mRenderGrid = DRGeometrieManager::Instance().getGrid(50, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP);
     mPermTexture = DRTextureManager::Instance().getTexture("data/permTexture.tga", false, GL_NEAREST, GL_NEAREST);       
 }
 
@@ -125,7 +125,7 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
 	mShader->setUniformMatrix("texture", mRotation);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    mRenderSphere->render();    
+    mRenderGrid->render();    
     
     mShader->unbind();
     return DR_OK;

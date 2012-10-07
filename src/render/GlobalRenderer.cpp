@@ -32,16 +32,19 @@ DRReturn GlobalRenderer::init(const char* configFilename)
     return DR_OK;
 }
 
-void GlobalRenderer::addRenderTask(RenderInStepsToTexturePtr newRenderTask)
+void GlobalRenderer::addRenderTask(RenderToTexturePtr newRenderTask, bool fast/* = false*/)
 {
-    mRenderTasks.push_back(newRenderTask);
+    if(fast)
+        mFastRenderTasks.push_back(newRenderTask);
+    else
+        mRenderTasks.push_back(newRenderTask);
 }
-void GlobalRenderer::removeRenderTask(RenderInStepsToTexturePtr renderTaskToDelete)
+void GlobalRenderer::removeRenderTask(RenderToTexturePtr renderTaskToDelete)
 {
     mDeleted.addByHash(reinterpret_cast<DHASH>(renderTaskToDelete.getResourcePtrHolder()->mResource), reinterpret_cast<void*>(1));
 }
 
-DRReturn GlobalRenderer::renderTaskFromQueue(std::list<RenderInStepsToTexturePtr>* list)
+DRReturn GlobalRenderer::renderTaskFromQueue(std::list<RenderToTexturePtr>* list)
 {
     list->sort();
     //remove already deleted objects (which can be find in mDeleted List)
@@ -52,14 +55,14 @@ DRReturn GlobalRenderer::renderTaskFromQueue(std::list<RenderInStepsToTexturePtr
         mDeleted.removeByHash(reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource));
         list->pop_front();
     }
-    RenderInStepsToTexturePtr current;
+    
+    RenderToTexturePtr current;
     //procceed list
     if(!list->empty())
     {
         current = list->front();
-		DHASH hash = reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource);
-        
-        if(setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
+		//DHASH hash = reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource);
+        if(!current || setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
             LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
         if(current->step()) LOG_ERROR("Fehler bei Step", DR_ERROR);
     
@@ -73,6 +76,15 @@ DRReturn GlobalRenderer::renderTasks()
 {
     Uint32 start = SDL_GetTicks();
     
+    
+    // procceed faster render Tasks
+    while(mFastRenderTasks.size())
+    {
+        if(renderTaskFromQueue(&mFastRenderTasks))
+            LOG_ERROR("Fehler bei mFastRenderTasks", DR_ERROR);
+    }
+    //*/
+    
     // procceed mRenderTasks
     if(renderTaskFromQueue(&mRenderTasks))
         LOG_ERROR("Fehler bei mRenderTasks", DR_ERROR);
@@ -81,7 +93,7 @@ DRReturn GlobalRenderer::renderTasks()
     glMatrixMode(GL_TEXTURE);
     glLoadIdentity();
     glEnable(GL_DEPTH_TEST);
-    
+        
     //printf("\r time used: %f", static_cast<float>(SDL_GetTicks()-start)/1000.0f);
     return DR_OK;
 }

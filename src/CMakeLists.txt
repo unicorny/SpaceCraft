@@ -8,6 +8,7 @@ SET(spaceCraftSrc main Player sektor/Sektor Server Camera render/RenderBlockLoad
 				  sektor/SubPlanetSektor render/RenderSubPlanet DRGeometrieHeightfield 
 				  DRGeometrieManager render/RenderInStepsToTexture render/RenderNoisePlanetToTexture ShaderManager
 				  render/RenderSubPatchPlanet sektor/SubPatchPlanetSektor Observer HeightMapTexture render/RenderToTexture 
+				  render/RenderTextureToTexture
 				  )
 #IF(WIN32)
 SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/sektor/Sektor.h ../include/Server.h
@@ -22,6 +23,7 @@ SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../incl
 								   ../include/render/RenderNoisePlanetToTexture.h ../include/ShaderManager.h 
 								   ../include/render/RenderSubPatchPlanet.h ../include/sektor/SubPatchPlanetSektor.h
 								   ../include/Observer.h ../include/HeightMapTexture.h ../include/render/RenderToTexture.h
+								   ../include/render/RenderTextureToTexture.h
 								   )
 #ENDIF(WIN32)
 

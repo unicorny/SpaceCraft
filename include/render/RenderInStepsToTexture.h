@@ -11,19 +11,19 @@ public:
     ~RenderInStepsToTexture();
     
     // reset values, set step size
-    DRReturn init(int stepSize, DRTexturePtr texture);
+    virtual DRReturn init(int stepSize, DRTexturePtr texture);
     //! render with same setup, but other texture as render-target
     DRReturn reinit(DRTexturePtr texture);
     // render with current step, add step
     //! save image to file after finish render, if filname was set
-    DRReturn step();
+    virtual DRReturn step();
     
   //  __inline__ void setFilenameToSave(DRString path) {mFileNameToSave = path;}
     
     // called every step
    // virtual DRReturn renderStuff() = 0;        
     
-    __inline__ bool isFinished() {return mFinished == 1;}
+    virtual bool isFinished() {return mFinished == 1;}
     //__inline__ DRTexturePtr getTextur() {return mTexture;}
     
     virtual const char* getResourceType() const {return "RenderInStepsToTexture";}
@@ -53,6 +53,6 @@ private:
   //  DRString     mFileNameToSave;
 };
 
-typedef DRResourcePtr<RenderInStepsToTexture> RenderInStepsToTexturePtr;
+//typedef DRResourcePtr<RenderInStepsToTexture> RenderInStepsToTexturePtr;
 
 #endif //__SC_RENDER_IN_STEPS_TO_TEXTURE__

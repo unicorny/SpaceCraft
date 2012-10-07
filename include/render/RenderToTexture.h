@@ -11,12 +11,12 @@ public:
     ~RenderToTexture();
     
     // reset values, set step size
-    DRReturn init(DRTexturePtr texture);
+    virtual DRReturn init(DRTexturePtr texture);
 
     // render with current step, add step
-    DRReturn step();
+    virtual DRReturn step();
     
-     __inline__ bool isFinished() {return mFinished == 2;}
+     virtual bool isFinished() {return mFinished == 2;}
     
     // called every step
     virtual DRReturn renderStuff() = 0;        
@@ -27,6 +27,11 @@ public:
     
     __inline__ void setFilenameToSave(DRString path) {mFileNameToSave = path;}    
     
+    virtual bool less_than(DRIResource& b) const
+    {
+        //printf("[RenderInStepsToTexture::operator <]\n");
+        return this->mTexture->getId() < dynamic_cast<RenderToTexture&>(b).getTextur()->getId();
+    }
     
 protected:
     DRVector2i  mTextureSize;    
