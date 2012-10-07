@@ -24,6 +24,9 @@ public:
     
     void load(DRTexturePtr source);
     
+    __inline__ float getMaxHeight() {return mMaxHeight;}
+    __inline__ float getMaxGradient() {return mMaxGradient;}
+    
 protected:
     void copyPixelData(u8* data, DRVector2i size);
     float*          mPixelHeightData;

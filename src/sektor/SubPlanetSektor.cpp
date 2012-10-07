@@ -189,6 +189,10 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         
         maxSubLevel = MAX_SUB_LEVEL;
         
+        // new Conditions:
+        // getChild if (camera is above this sector AND theta 
+        //              AND Kamera high above heighest point AND max gradient)
+        
         // if child visible and renderer is finished, only than create childs
         //if child visible                           50 Grad                         120 Grad
         if(mSubLevel > 0 && mSubLevel < maxSubLevel &&
