@@ -14,7 +14,7 @@ public:
     ~RenderNoisePlanetToTexture();
     
     //__inline__ void update(float patchScaling) {mPatchScaling = patchScaling;}
-    DRReturn init(int stepSize, DRVector3 translate, float patchScaling, DRTexturePtr texture, const DRMatrix& rotation = DRMatrix::identity());
+    virtual DRReturn init(int stepSize, DRVector3 translate, float patchScaling, DRTexturePtr texture, const DRMatrix& rotation = DRMatrix::identity());
     
     virtual DRReturn renderStuff();
     
@@ -24,7 +24,7 @@ public:
 protected:
 private:
     ShaderProgram* mShader;
-    DRGeometrieHeightfield* mRenderSphere;
+    DRGeometrieHeightfield* mRenderGrid;
     const PlanetNoiseParameter*      mNoiseParameter;
     float         mPatchScaling;
     DRVector3     mTranslate;

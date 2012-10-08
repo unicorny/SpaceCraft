@@ -36,9 +36,8 @@ public:
     __inline__ void   setTimeForInactiveChild(float time) {mTimeForInactiveChilds = time;}
     
     //! put task onto stack, call it if it is on top, until it is finished, than remove task from stack
-    //! memory will not be touched!!
-    void addRenderTask(RenderInStepsToTexturePtr newRenderTask, bool preview = false);
-    void removeRenderTask(RenderInStepsToTexturePtr renderTaskToDelete);
+    void addRenderTask(RenderToTexturePtr newRenderTask, bool fast = false);
+    void removeRenderTask(RenderToTexturePtr renderTaskToDelete);
     
     // render current task
     DRReturn renderTasks();
@@ -62,7 +61,7 @@ private:
     GlobalRenderer();
     DRReturn setupFrameBuffer(DRTexturePtr texture);
     static const char* getFrameBufferEnumName(GLenum name);
-    DRReturn renderTaskFromQueue(std::list<RenderInStepsToTexturePtr>* list);
+    DRReturn renderTaskFromQueue(std::list<RenderToTexturePtr>* list);
     
     bool				m_bInitialized;
     GLUquadricObj*                      mQuadratic; 
@@ -70,21 +69,21 @@ private:
     
     //Render To texture
     GLuint                              mFrameBufferID;
-    std::list<RenderInStepsToTexturePtr> mRenderTasks;
-    std::list<RenderInStepsToTexturePtr> mPreviewRenderTasks;
+    std::list<RenderToTexturePtr>       mRenderTasks;
+    std::list<RenderToTexturePtr>       mFastRenderTasks;
     DRHashList                          mDeleted;
     
     // Config
-    GLuint                               mTextureRenderStepSize;
-    GLuint                               mTextureRenderMaxResolution;
+    GLuint                              mTextureRenderStepSize;
+    GLuint                              mTextureRenderMaxResolution;
     
     //dynamic config
     float                               mTimeForInactiveChilds;
 
-	//statistic reserved memory in Bytes
-	GLuint								mGrafikMemTexture;
-	GLuint								mGrafikMemGeometrie;
-	std::vector<int>					mEbeneCount;
+    //statistic reserved memory in Bytes
+    GLuint				mGrafikMemTexture;
+    GLuint				mGrafikMemGeometrie;
+    std::vector<int>			mEbeneCount;
 };
 
 

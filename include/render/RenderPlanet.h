@@ -27,9 +27,10 @@ public:
     __inline__ DRTexturePtr getTexture() {return mTexture;}
     __inline__ HeightMapTexture* getHeightMap() {return mHeightMap;}
     
-    __inline__ bool isFinishLoading() {return (mTexture->isLoadingFinished() || 
-                                              (mTextureRenderer.getResourcePtrHolder() && mTextureRenderer->isFinished()));}
+    __inline__ bool isFinishLoading() {return 4 == mInitalized;}
     __inline__ bool isErrorOccured() {return -1 == mInitalized;}
+    
+    DRReturn generateTexture();
     
 protected:
     RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
@@ -37,11 +38,13 @@ protected:
                   const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
                   const PlanetNoiseParameter* planetNoiseParameter);
     
-    DRReturn generateAndBindTexture();
+    DRReturn bindTexture();
+    DRReturn generateFinalTexture();
     DRString getPathAndFilename();
         
-    RenderInStepsToTexturePtr   mTextureRenderer;
+    RenderToTexturePtr          mTextureRenderer;
     float                       mSeaLevelInMetres;
+    DRTexturePtr                mHeightTexture;
     DRTexturePtr                mTexture;
     short                       mInitalized; // 0 = nothing, 1  = preview, 2 = rendered, 3 = load texture, 4 = texture loading finish, -1 fehler
     DRString                    mTexturePath;    

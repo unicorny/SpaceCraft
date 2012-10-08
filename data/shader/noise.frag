@@ -1768,7 +1768,7 @@ void main( void )
 	gl_FragColor.w = n * 0.5 + 0.5;
     gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
 	vec4 color = vec4(v_texCoord3D, 1.0);
-	//gl_FragColor = vec4(temp, n * 0.5+0.5);
+	gl_FragColor = vec4(temp, n * 0.5+0.5);
 	//gl_FragColor = color;
 	
 }

@@ -37,9 +37,9 @@ void HeightMapTexture::copyPixelData(u8* data, DRVector2i size)
     {
         for(uint x = 0; x < size.x; x++)
         {
-            int i = x+y*size.x;
-            int ix = x-1+y*size.x;
-            int iy = x+(y-1)*size.x;
+            uint i = x+y*size.x;
+            uint ix = x-1+y*size.x;
+            uint iy = x+(y-1)*size.x;
             float red = static_cast<float>(data[i*4+2]);
             float green = static_cast<float>(data[i*4+1]);
             float blue = static_cast<float>(data[i*4]);
@@ -62,7 +62,7 @@ void HeightMapTexture::copyPixelData(u8* data, DRVector2i size)
             
         }
     }
-    //DREngineLog.writeToLog("[HeightMapTexture::copyPixelData]: maxHeight: %f, maxGradient: %f", mMaxHeight, mMaxGradient);
+    DREngineLog.writeToLog("[HeightMapTexture::copyPixelData]: maxHeight: %f, maxGradient: %f", mMaxHeight, mMaxGradient);
     
     SDL_LockMutex(mPixelCopyMutex); LOG_WARNING_SDL();    
     mState++;
@@ -72,7 +72,7 @@ void HeightMapTexture::copyPixelData(u8* data, DRVector2i size)
 // ----------------------------------------------------------------------------------
 
 HeightMapLoader::HeightMapLoader(DRTexturePtr source, int stepSize, HeightMapTexture* parent)
-: DRSaveTexture("", stepSize), mParent(parent)
+: DRSaveTexture("", source->getTextureBuffer(), stepSize), mParent(parent)
 {
     DRTextureManager::Instance().saveTexture(source, this);    
 }

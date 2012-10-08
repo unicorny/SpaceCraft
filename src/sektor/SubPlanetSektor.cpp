@@ -26,7 +26,7 @@ DRMatrix     SubPlanetSektor::mRotations[] =
  DRMatrix::rotationX(PI/2.0f),
  DRMatrix::rotationX(-PI/2.0f)};
 
-#define MAX_SUB_LEVEL 2   // 11
+#define MAX_SUB_LEVEL 10   // 11
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
@@ -94,14 +94,8 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
      */
  
     //mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
-    DRTexturePtr parentTexture;
-    if(mSubLevel > 1 && mParent && mParent->getRenderer())
-    {
-        RenderSubPlanet* parentRenderer = static_cast<RenderSubPlanet*>(mParent->getRenderer());
-        parentTexture = parentRenderer->getTexture();
-    }
     mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
-    RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
+    //RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
 }
 
 SubPlanetSektor::~SubPlanetSektor()
@@ -160,15 +154,19 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         
         //printf("\r cam: %f %f %f, %f", camDir.x, camDir.y, camDir.z, intersection);
     }
-    if(mSubLevel == 1)
+
+    if(!mRenderer) LOG_ERROR("renderer deleted!", DR_ERROR);
+    RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
+    // set ready count bit 2^sektorNummer
+    if(!renderer->isFinishLoading())
     {
-        if(!mRenderer) LOG_ERROR("renderer deleted!", DR_ERROR);
-        // set ready count bit 2^sektorNummer
-        if(static_cast<RenderSubPlanet*>(mRenderer)->isFinishLoading())
-        {
-            mPlanet->setReadyCount(static_cast<u8>(powf(2.0f, static_cast<float>(mID.count))));
-        }
+        renderer->generateTexture();            
     }
+    else if(mSubLevel == 1)
+    {
+        mPlanet->setReadyCount(static_cast<u8>(powf(2.0f, static_cast<float>(mID.count))));
+    }
+
     if(mIdleSeconds <= 0.0f)
     {
         DRVector3 camVector = mLastRelativeCameraPosition.getVector3().normalize();
@@ -190,6 +188,10 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         else maxSubLevel = MAX_SUB_LEVEL-6;
         
         maxSubLevel = MAX_SUB_LEVEL;
+        
+        // new Conditions:
+        // getChild if (camera is above this sector AND theta 
+        //              AND Kamera high above heighest point AND max gradient)
         
         // if child visible and renderer is finished, only than create childs
         //if child visible                           50 Grad                         120 Grad
