@@ -29,7 +29,7 @@
 class ENGINE2_API DRSaveTexture
 {
 public:
-    DRSaveTexture(const char* savingPath, GLuint stepSize = 16384);
+    DRSaveTexture(const char* savingPath, DRTextureBufferPtr textureBuffer, GLuint stepSize = 16384);
     // no openGL funtion called
     ~DRSaveTexture();
     // create a pbo buffer with currently bind texture
@@ -44,6 +44,7 @@ public:
     
 protected:
     GLuint      mPboSaveID;// OpenGL Pixel Buffer Object to save texture
+    DRTextureBufferPtr mTextureBuffer;
     short	mSavingState; //
     GLuint	mSavingCursor;
     u8* 	mSavingBuffer;
