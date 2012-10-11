@@ -115,7 +115,7 @@ Vector3Unit Camera::getSektorPositionAtSektor(const Sektor* targetSektor)
     //DRLog.writeToLog("[Camera::getSektorPositionAtSektor]: targetSektor: %s, currentSektor: %s", targetSektor->getSektorPathName().data(), cur->getSektorPathName().data());
     
     //find break index, last position where both sektor the same
-    int breakIndex = 0;
+    uint breakIndex = 0;
     while(breakIndex+1 < sektorPath.size() &&
 		  breakIndex+1 < mSektorPath.size() &&
 		  sektorPath[breakIndex+1] == mSektorPath[breakIndex+1])

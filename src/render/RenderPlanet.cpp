@@ -66,17 +66,13 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
         }
         if(!mHeightTexture) LOG_ERROR("Zero-Pointer texture", DR_ERROR);
                 
-        
+        mTextureRenderer = RenderToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
+        mTextureRenderer->setFilenameToSave(getPathAndFilename());
+        getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mHeightTexture, rotation);    
+        GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
         mInitalized = 1;
         //mTextureRenderer->init(stepSize, theta, 1.0f-cameraDistance, mPreviewTextur, rotation);    
-    }
-    
-    mTextureRenderer = RenderToTexturePtr(new RenderNoisePlanetToTexture(vertexShader, fragmentShader, planetNoiseParameter));
-    mTextureRenderer->setFilenameToSave(getPathAndFilename());
-    getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mHeightTexture, rotation);    
-    
-    if(1 == mInitalized)
-        GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
+    }   
     
     return DR_OK;
 }
@@ -112,6 +108,8 @@ DRReturn RenderPlanet::generateTexture()
             mTextureRenderer.release();
             mInitalized++;
             mTexture->setFinishRender();
+            if(!mTexture->isLoadingFinished())
+                LOG_ERROR("texture wasn't empty", DR_ERROR);
         }
 	}
 	if(2 == mInitalized && mHeightTexture->isLoadingFinished())// && mTextureRenderer->isFinished())
@@ -124,12 +122,9 @@ DRReturn RenderPlanet::generateTexture()
     }    
 	if(mHeightTexture && mHeightTexture->isLoadingError())
 	{
-		int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
-		mHeightTexture = DRTextureManager::Instance().getTexture(DRVector2i(size), 4);
-        getRenderNoisePlanetToTexture()->reinit(mHeightTexture);
-            //TexturePtr(new Texture(size, size, GL_UNSIGNED_BYTE, 4));
-        GlobalRenderer::Instance().addRenderTask(mTextureRenderer);
-		mInitalized = 1;
+        // remove corrupt texture file
+        remove(mHeightTexture->getTextureFilename().data());
+        mInitalized = -1;
 	}
         
     if(DRGrafikError("[RenderPlanet::generateTexture]")) return DR_ERROR;

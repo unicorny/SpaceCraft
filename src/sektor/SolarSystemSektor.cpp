@@ -46,6 +46,7 @@ DRReturn SolarSystemSektor::move(float fTime, Camera* cam)
         Sektor* temp = mChilds.begin()->second;
         DREngineLog.writeToLog("new Game, set camera");
         cam->lookAt(temp->getPosition().getVector3());
+        return DR_NOT_ERROR;
     }
     
     return DR_OK;

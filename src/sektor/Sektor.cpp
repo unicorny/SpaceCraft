@@ -195,7 +195,7 @@ Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 
     getSektorPath(sektorPath);
     if(path[path.size()-1] == mID && sektorPath.size() == path.size()) return this;
     
-    if(thisIndex+1 >= path.size()) LOG_ERROR("thisIndex+1 >= path.size()", NULL);
+    if(thisIndex+1 >= static_cast<int>(path.size())) LOG_ERROR("thisIndex+1 >= path.size()", NULL);
     Sektor* child = getChild(path[++thisIndex]);
     if(!child)
     {

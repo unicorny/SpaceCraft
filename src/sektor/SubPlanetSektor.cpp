@@ -155,8 +155,13 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         //printf("\r cam: %f %f %f, %f", camDir.x, camDir.y, camDir.z, intersection);
     }
 
-    if(!mRenderer) LOG_ERROR("renderer deleted!", DR_ERROR);
     RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
+    if(renderer->isErrorOccured())
+        DR_SAVE_DELETE(mRenderer);
+    if(!mRenderer)
+        mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+    if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
+    renderer = static_cast<RenderSubPlanet*>(mRenderer);
     // set ready count bit 2^sektorNummer
     if(!renderer->isFinishLoading())
     {
@@ -301,7 +306,10 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     if(mNotRenderSeconds <= 0.0f || !count)
     {
         if(static_cast<RenderSubPlanet*>(mRenderer)->isErrorOccured())
+        {
+            LOG_WARNING("Renderer deleted, because an error!");
             DR_SAVE_DELETE(mRenderer);
+        }
         if(!mRenderer)
             mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);

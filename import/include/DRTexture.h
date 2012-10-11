@@ -54,25 +54,26 @@ public:
 	__inline__ bool isTextureEmpty() {return mLoadingState == 3;}
 	__inline__ bool isLoadingError() {return mLoadingState == -1;}
 	__inline__ void setErrorByLoading() {mLoadingState = -1;}
-        __inline__ void setFinishRender() {if(mLoadingState == 3) mLoadingState = 2;}
+    __inline__ void setFinishRender() {if(mLoadingState == 3) mLoadingState = 2;}
 
 	void bind();
 	__inline__ static void unbind() {glBindTexture(GL_TEXTURE_2D, 0);}
 
 	//Parameter
 	void setWrappingMode(GLint mode);
-        void setFilter(GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
+    void setFilter(GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
 	DRVector2i getResolution();
+    __inline__ DRString getTextureFilename() {return mFilename;}
         
-        virtual const char* getResourceType() const {return "Texture";}
-        virtual bool less_than(DRIResource& tex) const
-        {
-            return mTexturID <  dynamic_cast<DRTexture&>(tex).mTexturID;
-        }
+    virtual const char* getResourceType() const {return "Texture";}
+    virtual bool less_than(DRIResource& tex) const
+    {
+        return mTexturID <  dynamic_cast<DRTexture&>(tex).mTexturID;
+    }
 
 	//Debug
 	__inline__ GLuint getId() {return *mTexturID;}
-        __inline__ DRTextureBufferPtr getTextureBuffer() {return mTexturID;}
+    __inline__ DRTextureBufferPtr getTextureBuffer() {return mTexturID;}
 
 protected:
         DRTexture(const char* filename);

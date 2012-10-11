@@ -181,8 +181,10 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     else
     {
         //removeInactiveChilds(1.0f);
+        removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
+        if(mChilds.size() < 6) mReadyCount = 0;
     }
-    removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
+    
     
     return DR_OK;
 }
