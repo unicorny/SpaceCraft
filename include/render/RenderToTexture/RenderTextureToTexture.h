@@ -9,7 +9,7 @@ class RenderTextureToTexture : public RenderToTexture
 public:
      // frame buffer, will be called in init and in step
     RenderTextureToTexture();
-    ~RenderTextureToTexture();
+    virtual ~RenderTextureToTexture();
     
     // reset values, set step size
     virtual DRReturn init(DRTexturePtr targetTexture, DRTexturePtr sourceTexture, ShaderProgram* shader);

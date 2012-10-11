@@ -19,4 +19,5 @@ void main()
 	v_texCoord3D = vec3(r*cos(lon), sin(lat), r*sin(lon));
 	
 	gl_FrontColor  = gl_Color;	
+	gl_TexCoord[0].xy = -gl_Vertex.xy*0.5+0.5;
 }

@@ -10,26 +10,35 @@ struct PlanetNoiseParameter;
 class RenderNoisePlanetToTexture : public RenderInStepsToTexture
 {
 public:
-    RenderNoisePlanetToTexture(const char* vertexShaderName, const char* fragmentShaderName, const PlanetNoiseParameter* noiseParameter);
-    ~RenderNoisePlanetToTexture();
+    RenderNoisePlanetToTexture(ShaderProgramParameter shader[4], const PlanetNoiseParameter* noiseParameter);
+    virtual ~RenderNoisePlanetToTexture();
     
     //__inline__ void update(float patchScaling) {mPatchScaling = patchScaling;}
     virtual DRReturn init(int stepSize, DRVector3 translate, float patchScaling, DRTexturePtr texture, const DRMatrix& rotation = DRMatrix::identity());
     
+    virtual DRReturn reinit(DRTexturePtr texture);
     virtual DRReturn renderStuff();
+    virtual DRReturn step();
+    
+    virtual void setFilenameToSave(DRString path);
     
     __inline__ const DRMatrix& getRotationsMatrix() {return mRotation;}
     __inline__ float getPatchScaling() {return mPatchScaling;}
         
 protected:
 private:
-    ShaderProgram* mShader;
+    ShaderProgramPtr mShader[4];
+    u8             mShaderCursor;
     DRGeometrieHeightfield* mRenderGrid;
     const PlanetNoiseParameter*      mNoiseParameter;
     float         mPatchScaling;
     DRVector3     mTranslate;
     DRMatrix      mRotation;
-    DRTexturePtr mPermTexture;
+    DRTexturePtr  mPermTexture;
+    DRTexturePtr  maTextures[4];
+    
+    //debugging
+    DRString        mFilename;
     
     
 };

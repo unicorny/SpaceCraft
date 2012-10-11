@@ -47,10 +47,7 @@ public:
     DRSaveTexture* saveTexture(DRTexturePtr texture, const char* path, GLuint stepSize = 16384);
     DRSaveTexture* saveTexture(DRTexturePtr texture, DRSaveTexture* saveTexture);
     
-    //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
-    //GLuint    getGLTextureMemory(GLuint width, GLuint height, GLuint format);
-    //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
-    void      freeTexture(DRTextureBufferPtr textureID);
+   
     
     
     // update timeout, release lange nicht verwendete Texturen
@@ -65,6 +62,11 @@ private:
     __inline__ void removeGrafikMemTexture(GLuint subtractValue) {mGrafikMemTexture -= subtractValue;}
     void calculateGrafikMemTexture();
     DRTextureBufferPtr _getTexture(DRVector2i size, GLuint format);
+    
+     //! schaut nach ob solche eine Texture in der Liste steckt, wenn nicht wird eine neue erstellt
+    //GLuint    getGLTextureMemory(GLuint width, GLuint height, GLuint format);
+    //! packt die Textur in die Liste, falls noch jemand den Speicher benötigt
+    void      freeTexture(DRTextureBufferPtr textureID);
 
    
     //! daten für alte Einträge, dessen Speicher noch Verwendung finden könnte

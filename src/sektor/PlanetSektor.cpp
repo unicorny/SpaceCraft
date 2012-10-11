@@ -132,7 +132,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
 
 PlanetSektor::~PlanetSektor()
 {
-    ShaderManager::Instance().releaseShader("sphere.vert", "sphere.frag");
+    //ShaderManager::Instance().releaseShader("sphere.vert", "sphere.frag");
     mSphericalShaderForSubPlanet = NULL;
     DR_SAVE_DELETE(mRenderer);
 }

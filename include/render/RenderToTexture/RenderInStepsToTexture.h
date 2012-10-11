@@ -8,12 +8,12 @@ class RenderInStepsToTexture: public RenderToTexture
 public:
     // frame buffer, will be called in init and in step
     RenderInStepsToTexture();
-    ~RenderInStepsToTexture();
+    virtual ~RenderInStepsToTexture();
     
     // reset values, set step size
     virtual DRReturn init(int stepSize, DRTexturePtr texture);
     //! render with same setup, but other texture as render-target
-    DRReturn reinit(DRTexturePtr texture);
+    virtual DRReturn reinit(DRTexturePtr texture);
     // render with current step, add step
     //! save image to file after finish render, if filname was set
     virtual DRReturn step();

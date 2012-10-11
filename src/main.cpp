@@ -9,6 +9,7 @@
 
 // for test only
 #include "RenderNoisePlanetToTexture.h"
+#include "RenderTextureToTexture.h"
 #include "RenderSubPlanet.h"
 #include "SubPlanetSektor.h"
 
@@ -197,6 +198,7 @@ void sizeOfClasses()
     DREngineLog.writeToLog("RenderSubPlanet: %d", sizeof(RenderSubPlanet));
     DREngineLog.writeToLog("RenderInStepsToTexture: %d", sizeof(RenderInStepsToTexture));
     DREngineLog.writeToLog("RenderNoisePlanetToTexture: %d", sizeof(RenderNoisePlanetToTexture));
+    DREngineLog.writeToLog("RenderTextureToTexture: %d", sizeof(RenderTextureToTexture));
     DREngineLog.writeToLog("Sektor: %d", sizeof(Sektor));
     DREngineLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
     DREngineLog.writeToLog("Unit: %d", sizeof(Unit));

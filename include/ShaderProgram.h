@@ -10,7 +10,21 @@
 
 #include "main.h"
 
-class ShaderProgram
+struct ShaderProgramParameter
+{
+    ShaderProgramParameter() {};
+    ShaderProgramParameter(const char* _vertexShaderName, const char* _fragmentShaderName)
+    : vertexShaderName(_vertexShaderName), fragmentShaderName(_fragmentShaderName)
+    {
+        
+    }
+        
+    DRString vertexShaderName;
+    DRString fragmentShaderName;
+    
+};
+
+class ShaderProgram : public DRIResource
 {
 public:
     ShaderProgram(DHASH id = 0);
@@ -32,6 +46,12 @@ public:
     __inline__ GLuint getProgram() {return mProgram;}
     __inline__ DHASH getID() {return mId;}
     
+    virtual const char* getResourceType() const {return "ShaderProgram";}
+    virtual bool less_than(DRIResource& shader) const
+    {
+        return mId <  dynamic_cast<ShaderProgram&>(shader).mId;
+    }
+    
 protected:
     unsigned char* readShaderFile(const char *filename);
     
@@ -40,6 +60,8 @@ protected:
     GLuint mFragmentShader;
     GLuint mProgram;
 };
+
+typedef DRResourcePtr<ShaderProgram> ShaderProgramPtr;
 
 #endif	/* __SC_SHADER_H */
 

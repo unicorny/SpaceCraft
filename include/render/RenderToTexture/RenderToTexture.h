@@ -8,7 +8,7 @@ class RenderToTexture : public DRIResource
 public:
      // frame buffer, will be called in init and in step
     RenderToTexture();
-    ~RenderToTexture();
+    virtual ~RenderToTexture();
     
     // reset values, set step size
     virtual DRReturn init(DRTexturePtr texture);
@@ -16,7 +16,7 @@ public:
     // render with current step, add step
     virtual DRReturn step();
     
-     virtual bool isFinished() {return mFinished == 2;}
+    virtual bool isFinished() {return mFinished == 2;}
     
     // called every step
     virtual DRReturn renderStuff() = 0;        
@@ -25,7 +25,7 @@ public:
     
     virtual const char* getResourceType() const {return "RenderToTexture";}
     
-    __inline__ void setFilenameToSave(DRString path) {mFileNameToSave = path;}    
+    virtual void setFilenameToSave(DRString path) {mFileNameToSave = path;}    
     
     virtual bool less_than(DRIResource& b) const
     {

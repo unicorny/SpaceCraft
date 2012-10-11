@@ -35,7 +35,7 @@ public:
 protected:
     RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
     DRReturn init(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, 
-                  const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
+                  ShaderProgramParameter shader[4], int textureSize, DRString texturePath,
                   const PlanetNoiseParameter* planetNoiseParameter);
     
     DRReturn bindTexture();

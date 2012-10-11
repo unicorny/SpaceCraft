@@ -16,7 +16,7 @@ public:
 	__inline__ ShaderProgram* getShaderProgram() {return mShader;}
 protected:    
     int                         mDetailLevel;
-	ShaderProgram*				mShader;
+	ShaderProgramPtr				mShader;
     
 private:
 };
