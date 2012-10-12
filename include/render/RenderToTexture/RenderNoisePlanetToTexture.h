@@ -10,7 +10,7 @@ struct PlanetNoiseParameter;
 class RenderNoisePlanetToTexture : public RenderInStepsToTexture
 {
 public:
-    RenderNoisePlanetToTexture(ShaderProgramParameter shader[4], const PlanetNoiseParameter* noiseParameter);
+    RenderNoisePlanetToTexture(ShaderProgramParameter shader[5], const PlanetNoiseParameter* noiseParameter);
     virtual ~RenderNoisePlanetToTexture();
     
     //__inline__ void update(float patchScaling) {mPatchScaling = patchScaling;}
@@ -27,7 +27,7 @@ public:
         
 protected:
 private:
-    ShaderProgramPtr mShader[4];
+    ShaderProgramPtr mShader[5];
     u8             mShaderCursor;
     DRGeometrieHeightfield* mRenderGrid;
     const PlanetNoiseParameter*      mNoiseParameter;
@@ -35,7 +35,7 @@ private:
     DRVector3     mTranslate;
     DRMatrix      mRotation;
     DRTexturePtr  mPermTexture;
-    DRTexturePtr  maTextures[4];
+    DRTexturePtr  maTextures[5];
     
     //debugging
     DRString        mFilename;

@@ -10,11 +10,12 @@ RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNois
 : RenderSektor(), mTextureRenderer(), mSeaLevelInMetres(0.0f), mTexture(), mInitalized(0), mHeightMap(NULL)
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
-    ShaderProgramParameter shader[4];
+    ShaderProgramParameter shader[5];
     shader[0] = ShaderProgramParameter("noise.vert", "PlanetContinentalNoise.frag");
     shader[1] = ShaderProgramParameter("noise.vert", "PlanetTerrainTypeNoise.frag");
     shader[2] = ShaderProgramParameter("noise.vert", "PlanetBadlandSands.frag");
-    shader[3] = ShaderProgramParameter("noise.vert", "PlanetNoiseFinal.frag");
+    shader[3] = ShaderProgramParameter("noise.vert", "PlanetWithoutRiver.frag");
+    shader[4] = ShaderProgramParameter("noise.vert", "PlanetNoiseFinal.frag");
     init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), shader,
          size, texturePath, planetNoiseParameter);
 }
@@ -27,11 +28,12 @@ RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
-    ShaderProgramParameter shader[4];
+    ShaderProgramParameter shader[5];
     shader[0] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetContinentalNoise.frag");
     shader[1] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetTerrainTypeNoise.frag");
     shader[2] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetBadlandSands.frag");
-    shader[3] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetNoiseFinal.frag");
+    shader[3] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetWithoutRiver.frag");
+    shader[4] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetNoiseFinal.frag");
     init(seed, translate, patchScaling, rotation, shader,
          size, texturePath, planetNoiseParameter);
 }

@@ -38,8 +38,8 @@ DRReturn ShaderProgram::init(const char* vertexShaderFile, const char* fragmentS
     GLint vertexCompiled;
     GLint fragmentCompiled;
     GLint shadersLinked;
-    char str[4096]; // For error messages from the GLSL compiler and linker
-    memset(str, 0, 4096);
+    char str[8192]; // For error messages from the GLSL compiler and linker
+    memset(str, 0, 8192);
 
     // Create the vertex shader.
     mVertexShader = glCreateShader(GL_VERTEX_SHADER);

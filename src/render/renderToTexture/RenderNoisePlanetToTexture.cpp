@@ -4,10 +4,10 @@
 #include "PlanetSektor.h"
 
 
-RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(ShaderProgramParameter shader[4], const PlanetNoiseParameter* noiseParameter)
+RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(ShaderProgramParameter shader[5], const PlanetNoiseParameter* noiseParameter)
 : RenderInStepsToTexture(), mShaderCursor(0), mRenderGrid(NULL), mNoiseParameter(noiseParameter)
 {
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < 5; i++)
         mShader[i] = ShaderManager::Instance().getShader(&shader[i]);    
     mRenderGrid = DRGeometrieManager::Instance().getGrid(50, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP);
     mPermTexture = DRTextureManager::Instance().getTexture("data/permTexture.tga", false, GL_NEAREST, GL_NEAREST);       
@@ -42,6 +42,16 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
         glActiveTexture(GL_TEXTURE3);
         maTextures[2]->bind();
         mShader[mShaderCursor]->setUniform1i("texture2", 3);
+    }
+    else if(4 == mShaderCursor)
+    {
+        glActiveTexture(GL_TEXTURE0);
+        mPermTexture->bind();
+        mShader[mShaderCursor]->setUniform1i("permTexture", 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        maTextures[3]->bind();
+        mShader[mShaderCursor]->setUniform1i("texture0", 1);
     }
     else
     {
@@ -150,7 +160,7 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     mRenderGrid->render();    
     
     mShader[mShaderCursor]->unbind();
-    if(3 == mShaderCursor)
+    if(3 == mShaderCursor || 4 == mShaderCursor)
     {
         glBindTexture(GL_TEXTURE_2D, 0);
         glActiveTexture(GL_TEXTURE3);
@@ -176,7 +186,7 @@ DRReturn RenderNoisePlanetToTexture::init(int stepSize, DRVector3 translate, flo
     mTranslate = translate;
     mRotation = rotation;
     maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
-    maTextures[3] = texture;
+    maTextures[4] = texture;
     return RenderInStepsToTexture::init(stepSize, maTextures[0]);    
 }
 
@@ -184,17 +194,17 @@ DRReturn RenderNoisePlanetToTexture::reinit(DRTexturePtr texture)
 {
     mShaderCursor = 0;
     maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
-    maTextures[3] = texture;
+    maTextures[4] = texture;
     return RenderInStepsToTexture::reinit(maTextures[0]);
 }
 
 DRReturn RenderNoisePlanetToTexture::step()
 {
     DRReturn ret = RenderInStepsToTexture::step();
-    if(mShaderCursor < 3 && isFinished())
+    if(mShaderCursor < 4 && isFinished())
     {
         mShaderCursor++;
-        if(mShaderCursor < 3)
+        if(mShaderCursor < 4)
             maTextures[mShaderCursor] = DRTextureManager::Instance().getTexture(maTextures[mShaderCursor-1]->getResolution(), 4);
 
         RenderToTexture::setFilenameToSave(mFilename);
