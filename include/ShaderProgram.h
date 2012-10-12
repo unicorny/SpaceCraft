@@ -24,13 +24,41 @@ struct ShaderProgramParameter
     
 };
 
+
+class Shader : public DRIResource
+{
+public:
+    Shader(DHASH id = 0);
+    ~Shader();
+    
+    DRReturn init(const char* shaderFile, GLenum shaderType);
+    __inline__ GLuint getShader() {return mShaderID;}
+    __inline__ DHASH getID() {return mID;}
+    
+    virtual const char* getResourceType() const {return "Shader";}
+    virtual bool less_than(DRIResource& shader) const
+    {
+        return mID <  dynamic_cast<Shader&>(shader).mID;
+    }
+    
+    operator GLuint() {return mShaderID;}
+protected:
+    unsigned char* readShaderFile(const char *filename);
+    
+private:
+    DHASH mID;
+    GLuint mShaderID;
+};
+
+typedef DRResourcePtr<Shader> ShaderPtr;
+
 class ShaderProgram : public DRIResource
 {
 public:
     ShaderProgram(DHASH id = 0);
     ~ShaderProgram();
     
-    DRReturn init(const char* vertexShaderFile, const char* fragmentShaderFile);
+    DRReturn init(ShaderPtr vertexShader, ShaderPtr fragmentShader);
     void bind() const;
     static void unbind();
 	void setUniform3fv(const char* name, const DRVector3& data);
@@ -53,11 +81,9 @@ public:
     }
     
 protected:
-    unsigned char* readShaderFile(const char *filename);
-    
     DHASH  mId;
-    GLuint mVertexShader;
-    GLuint mFragmentShader;
+    ShaderPtr mVertexShader;
+    ShaderPtr mFragmentShader;
     GLuint mProgram;
 };
 

@@ -14,7 +14,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
 {
     mType = PLANET;
     
-    mSphericalShaderForSubPlanet = ShaderManager::Instance().getShader("sphere.vert", "sphere.frag");
+    mSphericalShaderForSubPlanet = ShaderManager::Instance().getShaderProgram("sphere.vert", "sphere.frag");
         
     noise::module::Perlin p;
     if(id.count) p.SetSeed(id.count);

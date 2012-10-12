@@ -46,7 +46,7 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
     GlobalRenderer& gb = GlobalRenderer::Instance();
     DRTextureManager& tx = DRTextureManager::Instance();
 	//mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
-    mShader = ShaderManager::Instance().getShader("simple.vert", "simpleUnpack.frag");
+    mShader = ShaderManager::Instance().getShaderProgram("simple.vert", "simpleUnpack.frag");
     mSeaLevelInMetres = planetNoiseParameter->seaLevelInMetres;
     int textureStepSize = gb.getTextureRenderStepSize();
     mHeightMap = new HeightMapTexture(textureStepSize*textureStepSize*16);
@@ -161,7 +161,7 @@ DRReturn RenderPlanet::generateFinalTexture()
     mTextureRenderer.release();            
     RenderTextureToTexture* textureRenderer = new RenderTextureToTexture;
     mTextureRenderer = RenderToTexturePtr(textureRenderer);
-    textureRenderer->init(mTexture, mHeightTexture, ShaderManager::Instance().getShader("simpleRenderToTexture.vert", "gradientColor.frag"));
+    textureRenderer->init(mTexture, mHeightTexture, ShaderManager::Instance().getShaderProgram("simpleRenderToTexture.vert", "gradientColor.frag"));
     textureRenderer->setFilenameToSave(DRString(mTexturePath+DRString("planet_color.png")));
     GlobalRenderer::Instance().addRenderTask(mTextureRenderer, true);
     //mTexture->setFinishRender();

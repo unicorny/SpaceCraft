@@ -8,7 +8,7 @@ RenderNoisePlanetToTexture::RenderNoisePlanetToTexture(ShaderProgramParameter sh
 : RenderInStepsToTexture(), mShaderCursor(0), mRenderGrid(NULL), mNoiseParameter(noiseParameter)
 {
     for(int i = 0; i < 5; i++)
-        mShader[i] = ShaderManager::Instance().getShader(&shader[i]);    
+        mShader[i] = ShaderManager::Instance().getShaderProgram(&shader[i]);    
     mRenderGrid = DRGeometrieManager::Instance().getGrid(50, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP);
     mPermTexture = DRTextureManager::Instance().getTexture("data/permTexture.tga", false, GL_NEAREST, GL_NEAREST);       
 }

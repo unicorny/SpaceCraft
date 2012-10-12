@@ -20,18 +20,20 @@ public:
     void exit();
     
     //! lädt oder return instance auf Textur
-    ShaderProgramPtr getShader(const char* vertexShader, const char* fragmentShader);
-    ShaderProgramPtr getShader(ShaderProgramParameter* shaderParameter);
-       
+    ShaderProgramPtr getShaderProgram(const char* vertexShader, const char* fragmentShader);
+    ShaderProgramPtr getShaderProgram(ShaderProgramParameter* shaderParameter);       
     
+    ShaderPtr getShader(const char* shaderName, GLenum shaderType);
 private:
     ShaderManager();
             
     DHASH makeShaderHash(const char* vertexShader, const char* fragmentShader);    
     
     //DRHashList mShaderEntrys;
-    std::map<DHASH, ShaderProgramPtr>               mShaderEntrys;
+    std::map<DHASH, ShaderProgramPtr>               mShaderProgramEntrys;
     typedef std::pair<DHASH, ShaderProgramPtr>      SHADER_PROGRAM_ENTRY;
+    std::map<DHASH, ShaderPtr>                      mShaderEntrys;
+    typedef std::pair<DHASH, ShaderPtr>             SHADER_ENTRY;
     bool                                            mInitalized;
 };
 
