@@ -205,7 +205,11 @@ DRReturn RenderNoisePlanetToTexture::step()
     {
         mShaderCursor++;
         if(mShaderCursor < 4)
+        {
+            DREngineLog.writeToLog("[RenderNoisePlanetToTexture::step] load new texture: %d", mShaderCursor);
             maTextures[mShaderCursor] = DRTextureManager::Instance().getTexture(maTextures[mShaderCursor-1]->getResolution(), 4);
+            DREngineLog.writeToLog("[RenderNoisePlanetToTexture::step] end load ");
+        }
 
         RenderToTexture::setFilenameToSave(mFilename);
         

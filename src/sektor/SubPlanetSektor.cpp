@@ -165,11 +165,13 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     // set ready count bit 2^sektorNummer
     if(!renderer->isFinishLoading())
     {
-        renderer->generateTexture();            
+        renderer->generateTexture();       
+        return DR_OK;
     }
     else if(mSubLevel == 1)
     {
         mPlanet->setReadyCount(static_cast<u8>(powf(2.0f, static_cast<float>(mID.count))));
+        if(!mPlanet->isReady()) return DR_OK;
     }
 
     if(mIdleSeconds <= 0.0f)

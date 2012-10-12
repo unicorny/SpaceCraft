@@ -232,6 +232,8 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 #else
 	Uint8 *keystate = SDL_GetKeyState(NULL);
 #endif
+    RenderPlanet* renderer = static_cast<RenderPlanet*>(mRenderer);
+    if(!renderer->isFinishLoading()) return DR_NOT_ERROR;
     
     //if(isObjectInSektor(cam->getSektorPosition())) return DR_OK;
 	//Unit distance1 = Vector3Unit(mSektorPosition - cam->getSektorPosition()).length();
