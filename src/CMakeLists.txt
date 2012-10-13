@@ -13,8 +13,9 @@ SET(spaceCraftSrc main
 				  ShaderProgram
 				  DRGeometrieManager
 				  DRGeometrieHeightfield
-				  HeightMapTexture
+				  SektorObject
 				  Observer
+				  HeightMapTexture
 				  
 				  sektor/Sektor
 				  sektor/RootSektor
@@ -50,6 +51,7 @@ SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h
 								   ../include/DRGeometrieHeightfield.h 
 								   ../include/DRGeometrieManager.h 
 								   ../include/ShaderManager.h 
+								   ../include/SektorObject
 								   ../include/Observer.h 
 								   ../include/HeightMapTexture.h 
 								   

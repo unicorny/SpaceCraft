@@ -3,6 +3,7 @@
 #include "GlobalRenderer.h"
 #include "noise/noise.h"
 #include "SubPlanetSektor.h"
+#include "Camera.h"
 
 
 SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1, 0),SektorID(1,0,0, 1),SektorID(0,0, 1, 2),// front, right, back
@@ -259,13 +260,13 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     //glTranslatef(pos.x, pos.y, pos.z);
     //glScaled(radius2, radius2, radius2);
 	
-    mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(radius2))) * DRMatrix::translation(pos) * cam->getKameraMatrixRotation();
+    mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(radius2))) * DRMatrix::translation(pos) * cam->getCameraMatrixRotation();
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
     //if(!isObjectInSektor(mLastRelativeCameraPosition))
-    printf(" readyCount: %d",(int)mReadyCount);
+    //printf(" readyCount: %d",(int)mReadyCount);
     if(isSectorVisibleFromPosition(mLastRelativeCameraPosition)
        && (mTheta >= 70.0f || mReadyCount != 63))
     {
@@ -380,12 +381,13 @@ Sektor* PlanetSektor::getChild(SektorID childID)
     return mChilds[childID];
 }
 
-bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
+bool PlanetSektor::isObjectInSektor(SektorObject* sektorObject)
 {    
-    Unit l = positionInSektor.length();
+    
+    Unit l = sektorObject->getSektorPositionAtSektor(this).length();
 
     double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes
-    printf("\rtheta: %f, distance: %f", theta, static_cast<double>(l.convertTo(KM)));
+    //printf("\rtheta: %f, distance: %f", theta, static_cast<double>(l.convertTo(KM)));
     return theta <=89.822667f;
     /*
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;

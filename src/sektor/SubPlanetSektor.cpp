@@ -2,6 +2,7 @@
 #include "GlobalRenderer.h"
 #include "SubPatchPlanetSektor.h"
 #include "Player.h"
+#include "Camera.h"
 #include "main.h"
 
 DRVector3 SubPlanetSektor::mSubLevelBorder[] = 
@@ -147,12 +148,13 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         {
             if(fabs(camDir.c[i]-mTextureTranslate.c[i])>mPatchScaling) camDir.c[i] += mTextureTranslate.c[i];
             else camDir.c[i] -= mTextureTranslate.c[i];
-        }        
+        }
+        //*/
         camDir /= mPatchScaling;
-        camDir *= 0.5f;
-        camDir += 0.5f;
+  //      camDir *= 0.5f;
+    //    camDir += 0.5f;
         
-        //printf("\r cam: %f %f %f, %f", camDir.x, camDir.y, camDir.z, intersection);
+       // printf("\r cam: %f %f %f, %f, %d", camDir.x, camDir.y, camDir.z, intersection, mSubLevel);
     }
 
     RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
@@ -316,7 +318,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
             mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
-        ShaderProgram* shader = mRenderer->getShaderProgram();
+        ShaderProgramPtr shader = mRenderer->getShaderProgram();
         const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();
         if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
         shader->bind();
@@ -339,62 +341,39 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     return DR_OK;
 }
 
-bool SubPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
+bool SubPlanetSektor::isObjectInSektor(SektorObject* sektorObject)
 {    
     if(mSubLevel > 0 &&
-       mPlanet->getTheta() >= mSubLevelBorder[mSubLevel-1].x) return false;
-    /*if(mSubLevel == 1 && mPlanet->getTheta() >= 70.0f ||
-       mSubLevel == 2 && mPlanet->getTheta() >= 50.0f ||
-       mSubLevel == 3 && mPlanet->getTheta() >= 30.0f ||
-       mSubLevel == 4 && mPlanet->getTheta() >= 15.0f) return false;
-     */
-    //double theta = (mRadius/positionInSektor.length());
-    //if(mSubLevel == 3)
-	//	printf("\r theta: %f (%f Grad)", theta, theta*RADTOGRAD);
-    //if(theta <= 0.5109/*0.3060*/) return false;
+       mPlanet->getTheta() > mSubLevelBorder[mSubLevel-1].x) return false;
     
+    Vector3Unit positionInSektor = sektorObject->getSektorPositionAtSektor(this);
+    Vector3Unit positionOnPlanet = sektorObject->getSektorPositionAtSektor(mPlanet);
     DRVector3 posInSektorNorm = positionInSektor.getVector3().normalize();
     float h  = 1.0f-sqrtf(1.0f-0.5f/powf(2.0f, static_cast<float>(mSubLevel-1)));
     posInSektorNorm += mVectorToPlanetCenter*h;
     //DRVector3 sektorPosNorm = mSektorPosition.getVector3().normalize();
     float d = posInSektorNorm.dot(mVectorToPlanetCenter);
     double angle = acos(posInSektorNorm.dot(mVectorToPlanetCenter))*RADTOGRAD;   
-    
-   /* printf("\r angle: %f (dot: %f), idle: %f, sektorPos: %f, %f, %f, posInSektor: %f, %f, %f", angle*RADTOGRAD, d, mIdleSeconds, 
-                                                                                         sektorPosNorm.x, sektorPosNorm.y, sektorPosNorm.z,
-                                                                                         posInSektorNorm.x, posInSektorNorm.y, posInSektorNorm.z);
-    * 
-    //*/ 
-    //if(mSubLevel > 1 && mPlanet->getTheta() < 45.0)
-        //angle -= (45.0-mPlanet->getTheta()/2.0);
-    
-  //  if(mSubLevel == 2)
-		//printf("\r theta: %f, angle: %f ", mPlanet->getTheta(), angle);
-    
-    //angle = horizontCulling
-    if(angle > mSubLevelBorder[mSubLevel-1].y) return false;
-    /*if(mSubLevel == 1)
+
+    DRVector3 camDir = positionOnPlanet.convertTo(KM).getVector3().normalize();
+    DRVector3 n = PlanetSektor::mSubPlanets[mRotationsIndex];
+    n *= 1000.0f;
+    // if intersection < 0, camera is on other planet surface
+    float intersection = n.dot(n) /
+                    camDir.dot(n);
+    if(intersection < 0) return false;
+
+    camDir = camDir.transformCoords(mRotations[mRotationsIndex]).normalize();
+    camDir *= intersection;
+
+    for(int i = 0; i < 2; i++)
     {
-        if(angle > 125.0)
+        if(fabs(camDir.c[i]-mTextureTranslate.c[i]) > mPatchScaling)
             return false;
     }
-    else if(mSubLevel == 2)
-    {
-        //printf("\r angle: %f Grad", angle);
-        if(angle > 110.0)
-            return false;        
-    }
-    else if(mSubLevel == 3)
-    {
-        if(angle > 100.0)
-            return false;
-       //printf("\r angle: %f Grad", angle);
-    }
-    else if(mSubLevel == 4)
-    {
-        if(angle > 90.0)
-            return false;
-    }*/
+    //if(sektorObject->getCurrentSektor() == this)
+      //  printf("\r cam: %f %f %f, %f, %d", camDir.x, camDir.y, camDir.z, intersection, mSubLevel);
+        
     return true;  
 }
 

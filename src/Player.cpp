@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "SolarSystemSektor.h"
 #include "time.h"
+#include "Camera.h"
 
 Player::Player()
 : mServerID(0), mSektorID(0), mCamera(NULL), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL),

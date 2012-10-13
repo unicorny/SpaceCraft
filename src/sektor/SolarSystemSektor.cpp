@@ -1,5 +1,6 @@
 #include "SolarSystemSektor.h"
 #include "noise/noise.h"
+#include "Camera.h"
 
 SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
 : Sektor(position, radius, id, parent)

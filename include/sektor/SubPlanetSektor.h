@@ -38,7 +38,7 @@ public:
     
     __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
     
-    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual bool isObjectInSektor(SektorObject* sektorObject);
     virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
     
     virtual Sektor* getChild(SektorID childID);

@@ -10,3 +10,11 @@ const char* Observer::ObserverTypeName(ObserverType type)
     }
     return "-error-";
 }
+
+void Observer::setCurrentSektor(Sektor* current)
+{
+    if(mCurrentSektor) mCurrentSektor->removeObserver(DRMakeStringHash("Camera"));
+    if(current)
+		current->addObserver(DRMakeStringHash("Observer"), this);
+    mCurrentSektor = current;
+}

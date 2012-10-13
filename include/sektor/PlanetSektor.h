@@ -98,7 +98,7 @@ public:
     virtual DRReturn updateVisibility(const std::list<Camera*>& cameras);
     
     // all orbital objects are inside of the planet sector
-    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual bool isObjectInSektor(SektorObject* sektorObject);
     virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
     
     // abgeleitet von basis klasse, wird u.a. für die Zuordnung der Kamere verwendet

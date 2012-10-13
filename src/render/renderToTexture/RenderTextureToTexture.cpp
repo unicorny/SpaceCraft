@@ -21,6 +21,7 @@ DRReturn RenderTextureToTexture::init(DRTexturePtr targetTexture, DRTexturePtr s
 
     mSourceTexture = sourceTexture;
     mShader = shader;
+    return DR_OK;
 }
 
 DRReturn RenderTextureToTexture::renderStuff()

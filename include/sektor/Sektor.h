@@ -2,8 +2,12 @@
 #define __SC_SEKTOR_
 
 #include "Vector3Unit.h"
-#include "Camera.h"
+//#include "Camera.h"
 #include "RenderSektor.h"
+
+class Observer;
+class Camera;
+class SektorObject;
 
 struct SektorID
 {
@@ -127,8 +131,9 @@ public:
     DRReturn updateVisibilityAll(const std::list<Camera*>& cameras, bool rootUpdated = false);
     
     // is the position inside/above the current sektor
+    // is the object inside/above the sector?
     // in future maybe with bounding box/sphere
-    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    virtual bool isObjectInSektor(SektorObject* sektorObject);
     
     // is the sector visible from current position
     virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);

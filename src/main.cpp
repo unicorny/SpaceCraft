@@ -488,7 +488,7 @@ DRReturn render(float fTime)
 
     glLoadIdentity();                    // Reset (init) the modelview matrix
     DRVector3 translate(0.0f);
-    g_cam->setKameraMatrix();
+    g_cam->setCameraMatrix();
     glEnable(GL_DEPTH_TEST);             // Enables depth test
         
     //light

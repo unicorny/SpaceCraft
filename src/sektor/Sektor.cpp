@@ -1,4 +1,5 @@
 #include "Sektor.h"
+#include "Camera.h"
 
 Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent) 
 : mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
@@ -153,7 +154,7 @@ void Sektor::updateCameraSektor(Camera* cam)
     Vector3Unit pos = cam->getSektorPositionAtSektor(this);
     
     //update camera position
-    if(isObjectInSektor(pos)) // down
+    if(isObjectInSektor(cam)) // down
     {
         if(cam->getCurrentSektor() != this && cam->getSektorPathSize() < mSektorPath.size())
         {
@@ -244,10 +245,11 @@ const char* Sektor::getSektorTypeName(SektorType type)
     return "- return -";
 }
 
-bool Sektor::isObjectInSektor(Vector3Unit positionInSektor)
+bool Sektor::isObjectInSektor(SektorObject* sektorObject)
 {
     //return Vector3Unit(positionInSektor - mSektorPosition).lengthSq() <= mRadius*mRadius;
-    return positionInSektor.lengthSq() <= mRadius;
+    //return positionInSektor.lengthSq() <= mRadius;
+    return sektorObject->getSektorPositionAtSektor(this).lengthSq() <= mRadius;
 }
 
 bool Sektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)

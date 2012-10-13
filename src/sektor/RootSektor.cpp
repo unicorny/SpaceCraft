@@ -1,5 +1,6 @@
 #include "RootSektor.h"
 #include "GlobalRenderer.h"
+#include "Camera.h"
 
 RootSektor::RootSektor(SektorID id)
 : Sektor(Vector3Unit(0.0), Unit(0.0, M), id, NULL)
