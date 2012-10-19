@@ -62,7 +62,7 @@ void HeightMapTexture::copyPixelData(u8* data, DRVector2i size)
             
         }
     }
-    DREngineLog.writeToLog("[HeightMapTexture::copyPixelData]: maxHeight: %f, maxGradient: %f", mMaxHeight, mMaxGradient);
+    //DREngineLog.writeToLog("[HeightMapTexture::copyPixelData]: maxHeight: %f, maxGradient: %f", mMaxHeight, mMaxGradient);
     
     SDL_LockMutex(mPixelCopyMutex); LOG_WARNING_SDL();    
     mState++;

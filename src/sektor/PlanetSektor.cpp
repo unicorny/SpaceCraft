@@ -6,8 +6,15 @@
 #include "Camera.h"
 
 
-SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1, 0),SektorID(1,0,0, 1),SektorID(0,0, 1, 2),// front, right, back
-                                        SektorID(-1,0,0, 3),SektorID(0,1,0, 4),SektorID(0,-1,0, 5)};// left, top, bottom
+SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1000, 0),SektorID(1000,0,0, 1),SektorID(0,0, 1000, 2),// front, right, back
+                                        SektorID(-1000,0,0, 3),SektorID(0,1000,0, 4),SektorID(0,-1000,0, 5)};// left, top, bottom
+                                            // left, up, right, down
+int      PlanetSektor::mSubPlanetNeighborIndices[] = {3, 4, 1, 5, // 0, front
+                                                      0, 4, 2, 5, // 1, right
+                                                      1, 4, 3, 5, // 2, back
+                                                      2, 4, 0, 5, // 3, right
+                                                      3, 2, 1, 0, // 4, top
+                                                      3, 0, 1, 2}; // 5, bottom     
 
 PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
 : Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f),
@@ -165,7 +172,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     {                
         for(u32 i = 0; i < 6; i++)
         {
-            getChild(mSubPlanets[i]*static_cast<short>(1000));            
+            getChild(mSubPlanets[i]);            
             /*//horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
             double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))*RADTOGRAD-45.0;            
@@ -177,6 +184,17 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             //*/
             //else
                 //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
+        }
+        //set neighbor pointers
+        for(u32 iChild = 0; iChild < 6; iChild++)
+        {
+            if(mChilds.find(mSubPlanets[iChild]) == mChilds.end())
+                    LOG_ERROR("sub planet missing", DR_ERROR);
+            SubPlanetSektor* child = static_cast<SubPlanetSektor*>(mChilds[mSubPlanets[iChild]]);
+            for(u32 i = 0; i < 4; i++)
+            {
+                child->setNeighbor(i, static_cast<SubPlanetSektor*>(getChild(mSubPlanets[mSubPlanetNeighborIndices[iChild*4+i]])));
+            }
         }
     }
     else
@@ -339,51 +357,13 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         SubPlanetSektor* temp = new SubPlanetSektor(mRadius, childID, this, this, 1.0f, 1);
         
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
-
-        //Set neighbor pointer
-        for(int i = 0; i < 6; i++)
-        {
-            SubPlanetSektor* n = NULL;
-            if(i >= 1 && i <= 3) // right, back, left
-            {
-                if(mChilds.find(mSubPlanets[i-1]) != mChilds.end())
-                {
-                    n = dynamic_cast<SubPlanetSektor*>(mChilds[mSubPlanets[i-1]]);
-                    if(temp == n) continue;
-                    temp->setNeighbor(NEIGHBOR_LEFT, n);//left                    
-                    n->setNeighbor(NEIGHBOR_RIGHT, temp);//right 
-                }
-            }
-            else if(4 == i || 5 == i)//top, bottom
-            {
-                for(u8 j = 0; j < 4; j++)
-                {
-                    if(mChilds.find(mSubPlanets[j]) != mChilds.end())
-                    {
-                        n = dynamic_cast<SubPlanetSektor*>(mChilds[mSubPlanets[j]]);
-                        if(temp == n) continue;
-                        if(4 == i)
-                        {
-                            temp->setNeighbor(3-j, n);                    
-                            n->setNeighbor(NEIGHBOR_UP, temp);
-                        }
-                        else
-                        {
-                            temp->setNeighbor(j, n);                    
-                            n->setNeighbor(NEIGHBOR_DOWN, temp); 
-                        }
-                    }
-                }
-            }
-        }
     }
     
     return mChilds[childID];
 }
 
 bool PlanetSektor::isObjectInSektor(SektorObject* sektorObject)
-{    
-    
+{       
     Unit l = sektorObject->getSektorPositionAtSektor(this).length();
 
     double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes

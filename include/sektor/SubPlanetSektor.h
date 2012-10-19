@@ -37,6 +37,8 @@ public:
     virtual DRReturn render(float fTime, Camera* cam);
     
     __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
+    __inline__ void setNeighbor(u8 index, Sektor* sektor) {if(sektor->isType(SUB_PLANET)) setNeighbor(index, static_cast<SubPlanetSektor*>(sektor));}
+    __inline__ SubPlanetSektor* getNeighbor(u8 index) {if(index >= 4) return NULL; return mNeighbors[index];}
     
     virtual bool isObjectInSektor(SektorObject* sektorObject);
     virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
@@ -45,11 +47,14 @@ public:
     
     const DRMatrix& getRotation() const {return mRotation;}
     u8 getRotationsIndex() const {return mRotationsIndex;}
-    __inline__ DRVector3 getVectorToPlanet() {return mVectorToPlanetCenter;}
-    __inline__ DRVector3 getTextureTranslate() {return mTextureTranslate;}
+    __inline__ const DRVector3& getVectorToPlanet() const {return mVectorToPlanetCenter;}
+    __inline__ const DRVector3& getTextureTranslate() const {return mTextureTranslate;}
     
-    virtual void printTypeInfos(const char* name);
+    virtual void printTypeInfos(const char* name) const;
     
+    __inline__ bool isCameraAbove() {return 1 == mCameraAbove;}
+    __inline__ bool isCameraAboveNeighbor() {return 2 == mCameraAbove;}
+        
 protected:
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
@@ -57,13 +62,16 @@ protected:
     float               mPatchScaling;
     DRMatrix            mRotation;
     u8                  mRotationsIndex;
+    u8                  mCameraAbove;
     
+   
     //! position relative to planet center
     DRVector3           mVectorToPlanetCenter;
     DRVector3           mTextureTranslate;
     
     static DRVector3    mSubLevelBorder[];
     static DRMatrix     mRotations[];
+    static int          mNeighborIndices[];
     
     // temporäre variablen      
     //double              mHorizontCulling;

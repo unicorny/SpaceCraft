@@ -200,6 +200,7 @@ void sizeOfClasses()
     DREngineLog.writeToLog("RenderNoisePlanetToTexture: %d", sizeof(RenderNoisePlanetToTexture));
     DREngineLog.writeToLog("RenderTextureToTexture: %d", sizeof(RenderTextureToTexture));
     DREngineLog.writeToLog("Sektor: %d", sizeof(Sektor));
+    DREngineLog.writeToLog("SektorObject: %d", sizeof(SektorObject));
     DREngineLog.writeToLog("SubPlanetSektor: %d", sizeof(SubPlanetSektor));
     DREngineLog.writeToLog("Unit: %d", sizeof(Unit));
     DREngineLog.writeToLog("UnitTypes: %d", sizeof(UnitTypes));

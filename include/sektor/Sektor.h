@@ -141,6 +141,7 @@ public:
     static const char* getSektorTypeName(SektorType type);
     virtual void printTypeInfos(const char* name);
     __inline__ SektorType getType() const {return mType;} 
+    __inline bool isType(SektorType type) const {return type == mType;}
     __inline__ SektorID getID() const {return mID;}
     
     //! inline getter and setter

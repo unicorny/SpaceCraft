@@ -108,10 +108,14 @@ public:
     __inline__ const PlanetNoiseParameter* getPlanetNoiseParameters() const {return &mPlanetNoiseParameters;}
     
     static SektorID mSubPlanets[];
+    
     __inline__ void setReadyCount(u8 readyCountBit) {mReadyCount |= readyCountBit;}
     __inline__ bool isReady() {return 63 == mReadyCount ? true : false;}
       
 protected:
+    
+    static int      mSubPlanetNeighborIndices[];
+    
     ShaderProgram*              mSphericalShaderForSubPlanet;
     double                      mTheta;
     PlanetNoiseParameter        mPlanetNoiseParameters;

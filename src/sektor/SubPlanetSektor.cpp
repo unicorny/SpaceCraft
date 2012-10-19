@@ -29,10 +29,12 @@ DRMatrix     SubPlanetSektor::mRotations[] =
 
 #define MAX_SUB_LEVEL 10   // 11
 
+int          SubPlanetSektor::mNeighborIndices[] = {2, 1, 3, 0, 0, 3, 1, 2};
+
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
 : Sektor(Vector3Unit(0.0), radius, id, parent), mSubLevel(subLevel), mPlanet(planet),
-  mPatchScaling(patchScaling), mRotationsIndex(0), mVectorToPlanetCenter(DRVector3(0.0f)),
+  mPatchScaling(patchScaling), mRotationsIndex(0), mCameraAbove(0), mVectorToPlanetCenter(DRVector3(0.0f)),
   mTextureTranslate(0.0f, 0.0f, 1.0f)
 {
     mType = SUB_PLANET;  
@@ -135,7 +137,6 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         // by subplanet I must use translate
         
         DRVector3 n = PlanetSektor::mSubPlanets[mRotationsIndex];
-        n *= 1000.0f;
         // if intersection < 0, camera is on other planet surface
         float intersection = n.dot(n) /
                         camDir.dot(n);
@@ -245,6 +246,31 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
 				//printf("\r angle: %f, theta: %f", angle, mPlanet->getTheta());
             }
             //if(!count) mNotRenderSeconds = 0.0f; 
+            //Set neighbor pointer
+            if(mSubLevel > 1)
+            {
+                short bitMask = 0x0011011010011100;
+                for(u32 iChild = 0; iChild < 4; iChild++)
+                {
+                    if(mChilds.find(childId[iChild]) == mChilds.end()) 
+                        LOG_ERROR("a subPlanetChild is missing", DR_ERROR);
+                    SubPlanetSektor* child = static_cast<SubPlanetSektor*>(mChilds[childId[iChild]]);
+                    for(u32 i = 0; i < 4; i++)
+                    {
+                        u32 cursor = iChild*2+i;
+                        if(i > 1) cursor-=2;
+                        if(bitMask & static_cast<int>(powf(2.0f, static_cast<float>(iChild*4+i))))
+                        {
+                            if(!getNeighbor(i)) continue;
+                            child->setNeighbor(i, getNeighbor(i)->getChild(childId[mNeighborIndices[cursor]]));
+                        }
+                        else
+                        {
+                            child->setNeighbor(i, getChild(childId[mNeighborIndices[cursor]]));
+                        }
+                    }
+                }
+            }
         }
         else
         {
@@ -257,6 +283,27 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         removeInactiveChilds(inactiveTime);
         //removeInactiveChilds(1.0f);
     }
+    //check if cam is over a direct neighbor
+    if(!mCameraAbove)
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            if(mNeighbors[i])
+            {
+                if(mNeighbors[i]->isCameraAbove())
+                {
+                    mCameraAbove = 2;
+                    break;
+                }
+                else if(mNeighbors[i]->isCameraAboveNeighbor())
+                {
+                    mCameraAbove = 3;
+                    break;
+                }
+            }
+            
+        }
+    }
     
     return DR_OK;
 }
@@ -266,11 +313,15 @@ DRReturn SubPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
     RenderSubPlanet* render = dynamic_cast<RenderSubPlanet*>(mRenderer);
     DRReal distance = 1.0e18f;
     
+    mCameraAbove = 0;
     for(std::list<Camera*>::const_iterator it = cameras.begin(); it != cameras.end(); it++)
     {
         Vector3Unit pos = (*it)->getSektorPositionAtSektor(this);
         DRReal local_distance = static_cast<DRReal>(pos.length().convertTo(M));
         if(local_distance < distance) distance = local_distance;
+        // is camera above sector
+        if(isObjectInSektor(*it))
+            mCameraAbove = 1;
     }
     if(render && render->getRenderNoisePlanetToTexture())
     {
@@ -329,7 +380,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
         shader->setUniform1f("SEA_LEVEL", p->seaLevel);
-        shader->setUniform1i("cameraAbove", cam->getCurrentSektor() == this ? 1 : 0);
+        shader->setUniform1i("cameraAbove", static_cast<int>(mCameraAbove));
              
         shader->setUniform2fv("textureCoordsParam", DRVector2(0.25f)-DRVector2(mID.x, mID.y).normalize()*DRVector2(0.25f).length());
         mRenderer->render(fTime, cam);
@@ -357,13 +408,12 @@ bool SubPlanetSektor::isObjectInSektor(SektorObject* sektorObject)
 
     DRVector3 camDir = positionOnPlanet.convertTo(KM).getVector3().normalize();
     DRVector3 n = PlanetSektor::mSubPlanets[mRotationsIndex];
-    n *= 1000.0f;
     // if intersection < 0, camera is on other planet surface
     float intersection = n.dot(n) /
                     camDir.dot(n);
     if(intersection < 0) return false;
 
-    camDir = camDir.transformCoords(mRotations[mRotationsIndex]).normalize();
+    camDir = camDir.transformCoords(mRotations[mRotationsIndex].invert()).normalize();
     camDir *= intersection;
 
     for(int i = 0; i < 2; i++)
@@ -371,8 +421,8 @@ bool SubPlanetSektor::isObjectInSektor(SektorObject* sektorObject)
         if(fabs(camDir.c[i]-mTextureTranslate.c[i]) > mPatchScaling)
             return false;
     }
-    //if(sektorObject->getCurrentSektor() == this)
-      //  printf("\r cam: %f %f %f, %f, %d", camDir.x, camDir.y, camDir.z, intersection, mSubLevel);
+    if(sektorObject->getCurrentSektor() == this)
+        printf("\r cam: %f %f %f, %f, %d, camAbove: %d", camDir.x, camDir.y, camDir.z, intersection, mSubLevel, mCameraAbove);
         
     return true;  
 }
@@ -402,17 +452,13 @@ Sektor* SubPlanetSektor::getChild(SektorID childID)
         SubPlanetSektor* temp = new SubPlanetSektor(mRadius, childID, this, mPlanet, newPatchScale, mSubLevel + 1);
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
 
-        //Set neighbor pointer
-        for(int i = 0; i < 4; i++)
-        {
-            
-        }
+        
     }
     //*/
     return mChilds[childID];
 }
 
-void SubPlanetSektor::printTypeInfos(const char* name)
+void SubPlanetSektor::printTypeInfos(const char* name) const
 {
     printf("%s SubPlanetSektor, subLevel: %d, id: %d %d %d\n", name, mSubLevel, mID.x, mID.y, mID.z);
 }
