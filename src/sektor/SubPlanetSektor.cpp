@@ -30,6 +30,12 @@ DRMatrix     SubPlanetSektor::mRotations[] =
 #define MAX_SUB_LEVEL 10   // 11
 
 int          SubPlanetSektor::mNeighborIndices[] = {2, 1, 3, 0, 0, 3, 1, 2};
+int          SubPlanetSektor::mNeighborSpecialIndices[] = {3, 3, 1, 1, 2, 2, 0, 0, 
+                                                           3, 0, 1, 1, 0, 1, 0, 1,
+                                                           2, 1, 3, 0, 0, 3, 2, 1,
+                                                           2, 3, 3, 2, 2, 2, 3, 0,
+                                                           0, 3, 2, 0, 2, 2, 2, 0,
+                                                           3, 1, 1, 1, 1, 3, 0, 3};
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
@@ -97,8 +103,19 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
      */
  
     //mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
-    mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+    //mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
     //RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
+}
+
+float SubPlanetSektor::calculateDistanceToNeighbor(Sektor* neighbor)
+{
+    if(!neighbor || !neighbor->isType(SUB_PLANET))
+        return FLT_MAX;
+    SubPlanetSektor* n = static_cast<SubPlanetSektor*>(neighbor);
+    DRVector3 ownDir = mVectorToPlanetCenter;//.transformNormal(mRotations[mRotationsIndex]);
+    DRVector3 otherDir = n->mVectorToPlanetCenter;//.transformNormal(mRotations[n->mRotationsIndex]);
+
+    return DRVector3(ownDir - otherDir).lengthSq();
 }
 
 SubPlanetSektor::~SubPlanetSektor()
@@ -108,7 +125,7 @@ SubPlanetSektor::~SubPlanetSektor()
     {
         if(mNeighbors[i])
         {
-            if(mNeighbors[i] == this) LOG_ERROR_VOID("nachbarpointer zeigt auf sich selbst!");
+            if(mNeighbors[i] == this) LOG_WARNING("nachbarpointer zeigt auf sich selbst!");
             for(int j = 0; j < 4; j++)
             {
                 if(mNeighbors[i]->mNeighbors[j] == this)
@@ -159,7 +176,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     }
 
     RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
-    if(renderer->isErrorOccured())
+    if(renderer && renderer->isErrorOccured())
         DR_SAVE_DELETE(mRenderer);
     if(!mRenderer)
         mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
@@ -219,10 +236,10 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
             s16 value = 500;
             
             //sub sektoren erstellen
-            SektorID childId[4] = {SektorID( value,  value, 0),
-                                   SektorID( value, -value, 0),
-                                   SektorID(-value,  value, 0),
-                                   SektorID(-value, -value, 0)};
+            SektorID childId[4] = {SektorID( value,  value, 0, 0),
+                                   SektorID( value, -value, 0, 1),
+                                   SektorID(-value,  value, 0, 2),
+                                   SektorID(-value, -value, 0, 3)};
             for(int i = 0; i < 4; i++)
             {
                 /*DRVector3 planetVector = DRVector3(mTextureTranslate + childId[i]).transformCoords(mRotation).normalize();
@@ -247,22 +264,39 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
             }
             //if(!count) mNotRenderSeconds = 0.0f; 
             //Set neighbor pointer
-            if(mSubLevel > 1)
+        //    if(mSubLevel > 1)
             {
-                short bitMask = 0x0011011010011100;
-                for(u32 iChild = 0; iChild < 4; iChild++)
+                // binär: 1001 1100 0011 0110;
+                u16 bitMask = 1+8+16+32+1024+2048+8192+16384;
+                // iChild: 0, i = 0, i = 3
+                // iChild: 1, i = 0, i = 1
+                // iChild: 2, i = 2, i = 3
+                // iChild: 3, i = 1, i = 2
+                for(u8 iChild = 0; iChild < 4; iChild++)
                 {
                     if(mChilds.find(childId[iChild]) == mChilds.end()) 
                         LOG_ERROR("a subPlanetChild is missing", DR_ERROR);
                     SubPlanetSektor* child = static_cast<SubPlanetSektor*>(mChilds[childId[iChild]]);
-                    for(u32 i = 0; i < 4; i++)
+                    u8 specialCursor = 0;
+                    for(u8 i = 0; i < 4; i++)
                     {
-                        u32 cursor = iChild*2+i;
+                        u8 cursor = iChild*2+i;
                         if(i > 1) cursor-=2;
                         if(bitMask & static_cast<int>(powf(2.0f, static_cast<float>(iChild*4+i))))
                         {
-                            if(!getNeighbor(i)) continue;
-                            child->setNeighbor(i, getNeighbor(i)->getChild(childId[mNeighborIndices[cursor]]));
+                            Sektor* t = NULL;
+                            
+                            int neighborIndex = mNeighborIndices[cursor];
+                            SubPlanetSektor* neighbor = getNeighbor(i) ;
+                            if(neighbor)
+                            {
+                                if(mSubLevel == 1)
+                                    neighborIndex = mNeighborSpecialIndices[mID.count*8+iChild*2+specialCursor];
+                                if(neighbor->getChild(childId[neighborIndex]))
+                                    t = neighbor->getChild(childId[neighborIndex]);
+                            }            
+                            child->setNeighbor(i, t);
+                            specialCursor++;
                         }
                         else
                         {
@@ -283,9 +317,17 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         removeInactiveChilds(inactiveTime);
         //removeInactiveChilds(1.0f);
     }
+    checkNeighbor();
+    
+    
+    return DR_OK;
+}
+void SubPlanetSektor::checkNeighbor(int deep/* = 0;*/)
+{
     //check if cam is over a direct neighbor
     if(!mCameraAbove)
     {
+        u8 count2 = 0;
         for(int i = 0; i < 4; i++)
         {
             if(mNeighbors[i])
@@ -295,17 +337,19 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
                     mCameraAbove = 2;
                     break;
                 }
-                else if(mNeighbors[i]->isCameraAboveNeighbor())
+                else if(!deep && mNeighbors[i]->isCameraAboveNeighbor(deep))
                 {
-                    mCameraAbove = 3;
-                    break;
+                    count2++;
                 }
             }
-            
         }
+        if(count2 > 1 && !mCameraAbove)
+            mCameraAbove = 3;
     }
-    
-    return DR_OK;
+    else
+    {
+        int ik = 1;
+    }
 }
 
 DRReturn SubPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
@@ -396,7 +440,7 @@ bool SubPlanetSektor::isObjectInSektor(SektorObject* sektorObject)
 {    
     if(mSubLevel > 0 &&
        mPlanet->getTheta() > mSubLevelBorder[mSubLevel-1].x) return false;
-    
+        
     Vector3Unit positionInSektor = sektorObject->getSektorPositionAtSektor(this);
     Vector3Unit positionOnPlanet = sektorObject->getSektorPositionAtSektor(mPlanet);
     DRVector3 posInSektorNorm = positionInSektor.getVector3().normalize();
@@ -451,7 +495,6 @@ Sektor* SubPlanetSektor::getChild(SektorID childID)
         //906 ist zu groß (lücken links und rechts)
         SubPlanetSektor* temp = new SubPlanetSektor(mRadius, childID, this, mPlanet, newPatchScale, mSubLevel + 1);
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
-
         
     }
     //*/

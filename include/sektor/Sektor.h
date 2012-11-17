@@ -153,7 +153,9 @@ public:
     __inline__ void setParent(Sektor* parent) {mParent = parent;}
     __inline__ Sektor* getParent() const {return mParent;}
     __inline__ bool isVisible() const {return mIdleSeconds > 0.0f ? false : true;}
+    // return child, if it didn't exist, create it
     virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
+    virtual bool existChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return true; return false;};
         
     
     Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);

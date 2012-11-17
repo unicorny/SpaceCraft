@@ -37,7 +37,7 @@ public:
     virtual DRReturn render(float fTime, Camera* cam);
     
     __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
-    __inline__ void setNeighbor(u8 index, Sektor* sektor) {if(sektor->isType(SUB_PLANET)) setNeighbor(index, static_cast<SubPlanetSektor*>(sektor));}
+    __inline__ void setNeighbor(u8 index, Sektor* sektor) {if(index >= 4) return; if(!sektor){ mNeighbors[index] = NULL; return; } if(sektor->isType(SUB_PLANET)) setNeighbor(index, static_cast<SubPlanetSektor*>(sektor));}
     __inline__ SubPlanetSektor* getNeighbor(u8 index) {if(index >= 4) return NULL; return mNeighbors[index];}
     
     virtual bool isObjectInSektor(SektorObject* sektorObject);
@@ -53,9 +53,12 @@ public:
     virtual void printTypeInfos(const char* name) const;
     
     __inline__ bool isCameraAbove() {return 1 == mCameraAbove;}
-    __inline__ bool isCameraAboveNeighbor() {return 2 == mCameraAbove;}
+    __inline__ bool isCameraAboveNeighbor(int deep = 0) {checkNeighbor(deep+1); return 2 == mCameraAbove;}
         
 protected:
+    void checkNeighbor(int deep = 0);
+    float calculateDistanceToNeighbor(Sektor* neighbor);
+
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
     SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
     PlanetSektor*       mPlanet;
@@ -72,6 +75,7 @@ protected:
     static DRVector3    mSubLevelBorder[];
     static DRMatrix     mRotations[];
     static int          mNeighborIndices[];
+    static int          mNeighborSpecialIndices[];
     
     // temporäre variablen      
     //double              mHorizontCulling;

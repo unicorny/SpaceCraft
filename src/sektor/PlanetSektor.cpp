@@ -9,12 +9,12 @@
 SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1000, 0),SektorID(1000,0,0, 1),SektorID(0,0, 1000, 2),// front, right, back
                                         SektorID(-1000,0,0, 3),SektorID(0,1000,0, 4),SektorID(0,-1000,0, 5)};// left, top, bottom
                                             // left, up, right, down
-int      PlanetSektor::mSubPlanetNeighborIndices[] = {3, 4, 1, 5, // 0, front
-                                                      0, 4, 2, 5, // 1, right
-                                                      1, 4, 3, 5, // 2, back
-                                                      2, 4, 0, 5, // 3, right
-                                                      3, 2, 1, 0, // 4, top
-                                                      3, 0, 1, 2}; // 5, bottom     
+int      PlanetSektor::mSubPlanetNeighborIndices[] = {5, 1, 4, 3, // 0, front
+                                                      0, 5, 2, 4, // 1, right
+                                                      1, 5, 3, 4, // 2, back
+                                                      2, 5, 0, 4, // 3, right
+                                                      1, 2, 3, 0, // 4, top
+                                                      1, 0, 3, 2}; // 5, bottom     
 
 PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
 : Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f),

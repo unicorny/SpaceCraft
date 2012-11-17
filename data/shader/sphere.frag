@@ -14,4 +14,6 @@ void main()
 		gl_FragColor.g += 0.4;
 	else if(cameraAbove == 3)
 		gl_FragColor.b += 0.4;
+	else if(cameraAbove == 0)
+		gl_FragColor = vec4(0,0,0,1);
 }
