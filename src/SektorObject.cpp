@@ -2,12 +2,12 @@
 #include "Sektor.h"
 
 SektorObject::SektorObject(const DRVector3& position, Sektor* sektor)
-: DRObjekt(position), mSektorPosition(Unit(0, NONE)), mCurrentSektor(sektor)
+: DRObjekt(position), mSektorPosition(Unit(0, NONE)), mCurrentSektor(sektor), mSektorPath(sektor ? sektor->getSektorPathPtr(): NULL)
 {
 }
 
 SektorObject::SektorObject()
-: DRObjekt(), mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL)
+: DRObjekt(), mSektorPosition(Unit(0, AE)), mCurrentSektor(NULL), mSektorPath(NULL)
 {
     
 }
@@ -46,15 +46,16 @@ void SektorObject::translateRel(const DRVector3& translate)
 void SektorObject::updateSektorPath()
 {
     if(mCurrentSektor)
-        mCurrentSektor->getSektorPath(mSektorPath);
+        mSektorPath = mCurrentSektor->getSektorPathPtr();
     else
         return;
-    std::stringstream s(std::stringstream::in|std::stringstream::out);
+    /*std::stringstream s(std::stringstream::in|std::stringstream::out);
     s << "[Camera::updateSektorPath] Camera Sektor Path ./data/";
-    for (uint i=0; i<mSektorPath.size(); i++)
+    for (uint i=0; i<mSektorPath->size(); i++)
         s << "_" << mSektorPath[i] << "/";
     s << std::endl;
     //DRLog.writeToLog(s.str());
+     * */
 }
 
 Vector3Unit SektorObject::getSektorPositionAtSektor(const Sektor* targetSektor)
@@ -66,16 +67,15 @@ Vector3Unit SektorObject::getSektorPositionAtSektor(const Sektor* targetSektor)
     Vector3Unit newPos = mSektorPosition;
     Sektor* cur = mCurrentSektor;
     
-    std::vector<SektorID> sektorPath;
-    targetSektor->getSektorPath(sektorPath);
+    const std::vector<SektorID>& sektorPath = targetSektor->getSektorPath();
     
     //DRLog.writeToLog("[Camera::getSektorPositionAtSektor]: targetSektor: %s, currentSektor: %s", targetSektor->getSektorPathName().data(), cur->getSektorPathName().data());
     
     //find break index, last position where both sektor the same
     uint breakIndex = 0;
     while(breakIndex+1 < sektorPath.size() &&
-		  breakIndex+1 < mSektorPath.size() &&
-		  sektorPath[breakIndex+1] == mSektorPath[breakIndex+1])
+		  breakIndex+1 < mSektorPath->size() &&
+		  sektorPath[breakIndex+1] == (*mSektorPath)[breakIndex+1])
 		  breakIndex++;
     //DRLog.writeToLog("[Camera::getSektorPositionAtSektor] breakIndex: %d", breakIndex);
     
@@ -83,7 +83,7 @@ Vector3Unit SektorObject::getSektorPositionAtSektor(const Sektor* targetSektor)
     // 1 up
     {
 
-        index = mSektorPath.size()-1;
+        index = mSektorPath->size()-1;
         while(index > breakIndex)
         {
             newPos += cur->getPosition();

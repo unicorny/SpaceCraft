@@ -21,8 +21,9 @@ struct SektorID
     bool operator() (const SektorID& x, const SektorID& y) const {
         return x.id<y.id;
     }
-    operator u64() {return id;}
+    operator u64() const {return id;}
     operator DRVector3() const {return DRVector3(x, y, z)/1000.0f;}
+    
     
     // multipliziert x, y und z coordinate with scalar
     __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar, count);}
@@ -160,10 +161,8 @@ public:
     
     Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);
     
-    //! \brief fill a vector with all sektorID
-    //!
-    //! begin with root sektor (place zero)
-    void getSektorPath(std::vector<SektorID>& storage) const;
+    __inline__ const std::vector<SektorID>& getSektorPath() const {return mSektorPath;}
+    __inline__ std::vector<SektorID>* getSektorPathPtr() {return &mSektorPath;}
     
     DRString getSektorPathName() const;
     
@@ -184,6 +183,11 @@ protected:
     DRReturn callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data);
     
     void setSektorSeed();
+    
+    //! \brief fill a vector with all sektorID
+    //!
+    //! begin with root sektor (place zero)
+    void createSektorPath(std::vector<SektorID>& storage) const;
     
     //! id des sektors, gleichzeitig der seed
     SektorID            mID;

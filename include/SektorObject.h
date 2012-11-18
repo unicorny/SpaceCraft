@@ -25,7 +25,7 @@ public:
     
     
     __inline__ const Sektor* getCurrentSektor() const {return mCurrentSektor;}
-    __inline__ uint getSektorPathSize() const {return mSektorPath.size();}
+    __inline__ uint getSektorPathSize() const {return mSektorPath->size();}
     
     void updateSektorPath();
     
@@ -34,7 +34,7 @@ protected:
     //! the position of object is the distance from the abs position, abs position is local zero-point
     Vector3Unit mSektorPosition;
     Sektor*     mCurrentSektor;
-    std::vector<SektorID> mSektorPath;
+    std::vector<SektorID>* mSektorPath;
     
 };
 

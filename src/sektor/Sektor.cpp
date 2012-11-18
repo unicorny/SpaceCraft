@@ -5,7 +5,7 @@ Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
 : mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
   mIdleSeconds(0.0f), mNotRenderSeconds(0.0f)
 {
-    getSektorPath(mSektorPath);
+    createSektorPath(mSektorPath);
     DRFileManager::addFolderToFileSystem(getSektorPathName().data());
 }
 
@@ -192,9 +192,9 @@ Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 
     if(path.size() == 0) LOG_ERROR("path.size() == 0", NULL);
     if(thisIndex && path[thisIndex] != mID) LOG_ERROR("thisINdex && path[thisIndex] != mID", NULL);
     if(!thisIndex && *path.begin() != mID) LOG_ERROR("!thisIndex && *path.begin() != mID", NULL);
-    std::vector<SektorID> sektorPath;
-    getSektorPath(sektorPath);
-    if(path[path.size()-1] == mID && sektorPath.size() == path.size()) return this;
+    //std::vector<SektorID> sektorPath;
+    //getSektorPath(sektorPath);
+    if(path[path.size()-1] == mID && mSektorPath.size() == path.size()) return this;
     
     if(thisIndex+1 >= static_cast<int>(path.size())) LOG_ERROR("thisIndex+1 >= path.size()", NULL);
     Sektor* child = getChild(path[++thisIndex]);
@@ -215,12 +215,13 @@ DRString Sektor::getSektorPathName() const
 {
     std::stringstream s(std::stringstream::in|std::stringstream::out);
 
-    std::vector<SektorID> path;
-    getSektorPath(path);
-    s << "./data/_" << path[0] << "/";
+    const std::vector<SektorID> path = getSektorPath();
+    SektorID sektorID = path[0];
+    s << "./data/_" << sektorID << "/";
     for(uint i = 1; i < path.size(); i++)
     {
-        s << "_" << path[i] << "/";
+        sektorID = path[i];
+        s << "_" << sektorID << "/";
     }
     return s.str();
 }
@@ -258,12 +259,12 @@ bool Sektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
 }
 
 
-void Sektor::getSektorPath(std::vector<SektorID>& storage) const
+void Sektor::createSektorPath(std::vector<SektorID>& storage) const
 {
     if(!mParent)
         storage.clear();
     else
-        mParent->getSektorPath(storage);
+        mParent->createSektorPath(storage);
     
     storage.push_back(mID);
 }
