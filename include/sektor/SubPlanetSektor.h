@@ -9,6 +9,9 @@
 #include "PlanetSektor.h"
 #include "RenderSubPlanet.h"
 
+class SubPlanetSektor;
+typedef DRSimpleResourcePtr<SubPlanetSektor> SubPlanetSektorPtr;
+
 class SubPlanetSektor : public Sektor
 {
 public:
@@ -36,9 +39,9 @@ public:
      */    
     virtual DRReturn render(float fTime, Camera* cam);
     
-    __inline__ void setNeighbor(u8 index, SubPlanetSektor* neighbor) {if(index >= 4) return; mNeighbors[index] = neighbor;}
-    __inline__ void setNeighbor(u8 index, Sektor* sektor) {if(index >= 4) return; if(!sektor){ mNeighbors[index] = NULL; return; } if(sektor->isType(SUB_PLANET)) setNeighbor(index, static_cast<SubPlanetSektor*>(sektor));}
-    __inline__ SubPlanetSektor* getNeighbor(u8 index) {if(index >= 4) return NULL; return mNeighbors[index];}
+    __inline__ void setNeighbor(u8 index, SubPlanetSektorPtr* neighbor) {if(index >= 4) return; if(mNeighbors[index]) mNeighbors[index]->removeRef();  mNeighbors[index] = neighbor;}
+    __inline__ void setNeighbor(u8 index, Sektor* sektor) {if(index >= 4) return; if(!sektor){ mNeighbors[index] = NULL; return; } if(sektor->isType(SUB_PLANET)) setNeighbor(index, static_cast<SubPlanetSektor*>(sektor)->getMeSave());}
+    __inline__ SubPlanetSektorPtr* getNeighbor(u8 index) {if(index >= 4) return NULL; return mNeighbors[index];}
     
     virtual bool isObjectInSektor(SektorObject* sektorObject);
     virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
@@ -54,13 +57,17 @@ public:
     
     __inline__ bool isCameraAbove() {return 1 == mCameraAbove;}
     __inline__ bool isCameraAboveNeighbor(int deep = 0) {checkNeighbor(deep+1); return 2 == mCameraAbove;}
+
+
+    __inline__ DRSimpleResourcePtr<SubPlanetSektor>* getMeSave() {mThis->addRef(); return mThis;}
         
 protected:
     void checkNeighbor(int deep = 0);
     float calculateDistanceToNeighbor(Sektor* neighbor);
 
+    SubPlanetSektorPtr* mThis;
     int                 mSubLevel;// Level of part of planet, this is a 1/mSubLevel part of the planet
-    SubPlanetSektor*    mNeighbors[4]; //left, up, right, down
+    SubPlanetSektorPtr*    mNeighbors[4]; //left, up, right, down
     PlanetSektor*       mPlanet;
     float               mPatchScaling;
     DRMatrix            mRotation;
@@ -79,8 +86,7 @@ protected:
     
     // temporäre variablen      
     //double              mHorizontCulling;
-private:
-    
+private:   
     
 };
 

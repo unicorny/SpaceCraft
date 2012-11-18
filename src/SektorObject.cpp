@@ -51,7 +51,8 @@ void SektorObject::updateSektorPath()
         return;
     std::stringstream s(std::stringstream::in|std::stringstream::out);
     s << "[Camera::updateSektorPath] Camera Sektor Path ./data/";
-    for (uint i=0; i<mSektorPath.size(); i++) s << "_" << mSektorPath[i] << "/";
+    for (uint i=0; i<mSektorPath.size(); i++)
+        s << "_" << mSektorPath[i] << "/";
     s << std::endl;
     //DRLog.writeToLog(s.str());
 }

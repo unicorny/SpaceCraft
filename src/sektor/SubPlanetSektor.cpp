@@ -39,7 +39,7 @@ int          SubPlanetSektor::mNeighborSpecialIndices[] = {3, 3, 1, 1, 2, 2, 0, 
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
-: Sektor(Vector3Unit(0.0), radius, id, parent), mSubLevel(subLevel), mPlanet(planet),
+: Sektor(Vector3Unit(0.0), radius, id, parent), mThis(new DRSimpleResourcePtr<SubPlanetSektor>(this)), mSubLevel(subLevel), mPlanet(planet),
   mPatchScaling(patchScaling), mRotationsIndex(0), mCameraAbove(0), mVectorToPlanetCenter(DRVector3(0.0f)),
   mTextureTranslate(0.0f, 0.0f, 1.0f)
 {
@@ -120,16 +120,22 @@ float SubPlanetSektor::calculateDistanceToNeighbor(Sektor* neighbor)
 
 SubPlanetSektor::~SubPlanetSektor()
 {
+    mThis->removeRef();
+    *mThis = NULL;
+    mThis = NULL;
     GlobalRenderer::Instance().removeEbenenCount(mSubLevel);
     for(int i = 0; i < 4; i++)
     {
         if(mNeighbors[i])
         {
-            if(mNeighbors[i] == this) LOG_WARNING("nachbarpointer zeigt auf sich selbst!");
-            for(int j = 0; j < 4; j++)
+
+            if(mNeighbors[i]->getRef() <= 1)
             {
-                if(mNeighbors[i]->mNeighbors[j] == this)
-                    mNeighbors[i]->mNeighbors[j] = NULL;
+                DR_SAVE_DELETE(mNeighbors[i]);
+            }
+            else
+            {
+                mNeighbors[i]->removeRef();
             }
         }
     }
@@ -287,14 +293,16 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
                             Sektor* t = NULL;
                             
                             int neighborIndex = mNeighborIndices[cursor];
-                            SubPlanetSektor* neighbor = getNeighbor(i) ;
+                            SubPlanetSektor* neighbor = NULL;
+                            if(getNeighbor(i)&& *getNeighbor(i))
+                                neighbor = *getNeighbor(i);
                             if(neighbor)
                             {
                                 if(mSubLevel == 1)
                                     neighborIndex = mNeighborSpecialIndices[mID.count*8+iChild*2+specialCursor];
                                 if(neighbor->getChild(childId[neighborIndex]))
                                     t = neighbor->getChild(childId[neighborIndex]);
-                            }            
+                            }      
                             child->setNeighbor(i, t);
                             specialCursor++;
                         }
@@ -330,14 +338,14 @@ void SubPlanetSektor::checkNeighbor(int deep/* = 0;*/)
         u8 count2 = 0;
         for(int i = 0; i < 4; i++)
         {
-            if(mNeighbors[i])
+            if(mNeighbors[i] && *mNeighbors[i])
             {
-                if(mNeighbors[i]->isCameraAbove())
+                if((*mNeighbors[i])->isCameraAbove())
                 {
                     mCameraAbove = 2;
                     break;
                 }
-                else if(!deep && mNeighbors[i]->isCameraAboveNeighbor(deep))
+                else if(!deep && (*mNeighbors[i])->isCameraAboveNeighbor(deep))
                 {
                     count2++;
                 }

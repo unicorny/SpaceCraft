@@ -111,7 +111,7 @@ public:
     
     __inline__ void setReadyCount(u8 readyCountBit) {mReadyCount |= readyCountBit;}
     __inline__ bool isReady() {return 63 == mReadyCount ? true : false;}
-      
+
 protected:
     
     static int      mSubPlanetNeighborIndices[];
