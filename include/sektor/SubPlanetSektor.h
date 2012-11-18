@@ -49,7 +49,7 @@ public:
     virtual Sektor* getChild(SektorID childID);
     
     const DRMatrix& getRotation() const {return mRotation;}
-    u8 getRotationsIndex() const {return mRotationsIndex;}
+    u8 getRotationsIndex() const {return mCubeSideIndex;}
     __inline__ const DRVector3& getVectorToPlanet() const {return mVectorToPlanetCenter;}
     __inline__ const DRVector3& getTextureTranslate() const {return mTextureTranslate;}
     
@@ -71,7 +71,7 @@ protected:
     PlanetSektor*       mPlanet;
     float               mPatchScaling;
     DRMatrix            mRotation;
-    u8                  mRotationsIndex;
+    u8                  mCubeSideIndex;
     u8                  mCameraAbove;
     
    

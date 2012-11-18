@@ -40,7 +40,7 @@ int          SubPlanetSektor::mNeighborSpecialIndices[] = {3, 3, 1, 1, 2, 2, 0, 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
 : Sektor(Vector3Unit(0.0), radius, id, parent), mThis(new DRSimpleResourcePtr<SubPlanetSektor>(this)), mSubLevel(subLevel), mPlanet(planet),
-  mPatchScaling(patchScaling), mRotationsIndex(0), mCameraAbove(0), mVectorToPlanetCenter(DRVector3(0.0f)),
+  mPatchScaling(patchScaling), mCubeSideIndex(0), mCameraAbove(0), mVectorToPlanetCenter(DRVector3(0.0f)),
   mTextureTranslate(0.0f, 0.0f, 1.0f)
 {
     mType = SUB_PLANET;  
@@ -60,7 +60,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     else
     {
         SubPlanetSektor* parentSektor = dynamic_cast<SubPlanetSektor*>(mParent);
-        mRotationsIndex = parentSektor->getRotationsIndex();
+        mCubeSideIndex = parentSektor->getRotationsIndex();
         //Vector3Unit parentVector = mParent->getRadius() * parentSektor->getVectorToPlanet();
         //mVectorToPlanetCenter = (parentVector+mSektorPosition).getVector3().normalize();
         //mVectorToPlanetCenter
@@ -69,7 +69,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
 		//printf("[SubPlanetSektor::SubPlanetSektor] id: %f %f %f\n", childID.x, childID.y, childID.z);
         //printf("[SubPlanetSektor::SubPlanetSektor] )
         mTextureTranslate = parentSektor->getTextureTranslate() + childID;
-        mVectorToPlanetCenter = mTextureTranslate.transformCoords(mRotations[mRotationsIndex]).normalize();
+        mVectorToPlanetCenter = mTextureTranslate.transformCoords(mRotations[mCubeSideIndex]).normalize();
         
         //mTextureTranslate = parentSektor->getTextureTranslate() + childPos;
         
@@ -91,8 +91,8 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
 
     if(mSubLevel == 1)
     {
-        mRotationsIndex = static_cast<u8>(mID.count);
-        mRotations[mRotationsIndex] = mRotation;
+        mCubeSideIndex = static_cast<u8>(mID.count);
+        mRotations[mCubeSideIndex] = mRotation;
         //printf("[SubPlanetSektor::SubPlanetSektor] center: %f %f %f\n", centerPosition.x, centerPosition.y, centerPosition.z);
     }
     /*printf("[SubPlanetSektor::SubPlanetSektor] mVectorToPlanetCenter: %f %f %f\n", mVectorToPlanetCenter.x, mVectorToPlanetCenter.y, mVectorToPlanetCenter.z);
@@ -159,12 +159,12 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
         // ray - plane intersection, mVectorToPlanetCenter is n and d0
         // by subplanet I must use translate
         
-        DRVector3 n = PlanetSektor::mSubPlanets[mRotationsIndex];
+        DRVector3 n = PlanetSektor::mSubPlanets[mCubeSideIndex];
         // if intersection < 0, camera is on other planet surface
         float intersection = n.dot(n) /
                         camDir.dot(n);
         
-        camDir = camDir.transformCoords(mRotations[mRotationsIndex]).normalize();
+        camDir = camDir.transformCoords(mRotations[mCubeSideIndex]).normalize();
         camDir *= intersection;
 
         //camDir -= mTextureTranslate*n;
@@ -185,7 +185,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     if(renderer && renderer->isErrorOccured())
         DR_SAVE_DELETE(mRenderer);
     if(!mRenderer)
-        mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+        mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mCubeSideIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
     if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
     renderer = static_cast<RenderSubPlanet*>(mRenderer);
     // set ready count bit 2^sektorNummer
@@ -292,14 +292,18 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
                         {
                             Sektor* t = NULL;
                             
-                            int neighborIndex = mNeighborIndices[cursor];
+                            u8 neighborIndex = mNeighborIndices[cursor];
+                            u8 neighborThisIndex = 0;
                             SubPlanetSektor* neighbor = NULL;
                             if(getNeighbor(i)&& *getNeighbor(i))
                                 neighbor = *getNeighbor(i);
                             if(neighbor)
                             {
-                                if(mSubLevel == 1)
-                                    neighborIndex = mNeighborSpecialIndices[mID.count*8+iChild*2+specialCursor];
+                                for(u8 iNeighbor = 0; iNeighbor < 4; iNeighbor++ )
+                                    if(neighbor->getNeighbor(iNeighbor) && this == *neighbor->getNeighbor(iNeighbor))
+                                        neighborThisIndex = iNeighbor;
+                                if(i-neighborThisIndex != 2 && neighborThisIndex-i != 2)
+                                    neighborIndex = mNeighborSpecialIndices[mCubeSideIndex*8+iChild*2+specialCursor];
                                 if(neighbor->getChild(childId[neighborIndex]))
                                     t = neighbor->getChild(childId[neighborIndex]);
                             }      
@@ -418,7 +422,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
             DR_SAVE_DELETE(mRenderer);
         }
         if(!mRenderer)
-            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mRotationsIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
+            mRenderer = new RenderSubPlanet(mID, mTextureTranslate, mPatchScaling, mRotations[mCubeSideIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
         ShaderProgramPtr shader = mRenderer->getShaderProgram();
@@ -459,13 +463,13 @@ bool SubPlanetSektor::isObjectInSektor(SektorObject* sektorObject)
     double angle = acos(posInSektorNorm.dot(mVectorToPlanetCenter))*RADTOGRAD;   
 
     DRVector3 camDir = positionOnPlanet.convertTo(KM).getVector3().normalize();
-    DRVector3 n = PlanetSektor::mSubPlanets[mRotationsIndex];
+    DRVector3 n = PlanetSektor::mSubPlanets[mCubeSideIndex];
     // if intersection < 0, camera is on other planet surface
     float intersection = n.dot(n) /
                     camDir.dot(n);
     if(intersection < 0) return false;
 
-    camDir = camDir.transformCoords(mRotations[mRotationsIndex].invert()).normalize();
+    camDir = camDir.transformCoords(mRotations[mCubeSideIndex].invert()).normalize();
     camDir *= intersection;
 
     for(int i = 0; i < 2; i++)
