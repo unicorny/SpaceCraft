@@ -39,11 +39,13 @@ int          SubPlanetSektor::mNeighborSpecialIndices[] = {3, 3, 1, 1, 2, 2, 0, 
 
 SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, PlanetSektor* planet,
                     float patchScaling/* = 0.0f*/, int subLevel/* = 6*/)
-: Sektor(Vector3Unit(0.0), radius, id, parent), mThis(new DRSimpleResourcePtr<SubPlanetSektor>(this)), mSubLevel(subLevel), mPlanet(planet),
+: Sektor(Vector3Unit(0.0), radius, id, parent), mThis(NULL), mSubLevel(subLevel), mPlanet(planet),
   mPatchScaling(patchScaling), mCubeSideIndex(0), mCameraAbove(0), mVectorToPlanetCenter(DRVector3(0.0f)),
   mTextureTranslate(0.0f, 0.0f, 1.0f)
 {
     mType = SUB_PLANET;  
+    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
+    mThis = new SubPlanetSektorPtr(this);
     DRVector3 childID = mID;
     memset(mNeighbors, 0, sizeof(SubPlanetSektor*)*4);
     if(!mParent || !mPlanet)
@@ -516,4 +518,24 @@ Sektor* SubPlanetSektor::getChild(SektorID childID)
 void SubPlanetSektor::printTypeInfos(const char* name) const
 {
     printf("%s SubPlanetSektor, subLevel: %d, id: %d %d %d\n", name, mSubLevel, mID.x, mID.y, mID.z);
+}
+
+DRString SubPlanetSektor::getSektorPathName()
+{
+    std::stringstream s(std::stringstream::in|std::stringstream::out);
+
+    const std::vector<SektorID> path = getSektorPath();  
+    SektorID sektorID = path[0];
+    
+    for(uint i = 0; i < path.size(); i++)
+    {
+        sektorID = path[i];
+        if(0 == i)
+            s << "./data/_" << sektorID << "/";
+        else if(i < 3)
+            s << "_" << sektorID << "/";
+        else
+            s << "_" << sektorID.count << "/";
+    }
+    return s.str();
 }

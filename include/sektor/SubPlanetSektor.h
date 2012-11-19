@@ -58,6 +58,7 @@ public:
     __inline__ bool isCameraAbove() {return 1 == mCameraAbove;}
     __inline__ bool isCameraAboveNeighbor(int deep = 0) {checkNeighbor(deep+1); return 2 == mCameraAbove;}
 
+    virtual DRString getSektorPathName();
 
     __inline__ DRSimpleResourcePtr<SubPlanetSektor>* getMeSave() {mThis->addRef(); return mThis;}
         

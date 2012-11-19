@@ -21,6 +21,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
   mReadyCount(0)
 {
     mType = PLANET;
+    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
     
     mSphericalShaderForSubPlanet = ShaderManager::Instance().getShaderProgram("sphere.vert", "sphere.frag");
         

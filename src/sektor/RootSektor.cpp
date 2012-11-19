@@ -6,6 +6,7 @@ RootSektor::RootSektor(SektorID id)
 : Sektor(Vector3Unit(0.0), Unit(0.0, M), id, NULL)
 {
     mType = SEKTOR_ROOT;
+    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
 }
 
 RootSektor::~RootSektor()

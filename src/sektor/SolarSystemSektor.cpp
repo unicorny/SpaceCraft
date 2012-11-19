@@ -6,6 +6,7 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
 : Sektor(position, radius, id, parent)
 {
     mType = SOLAR_SYSTEM;
+    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
     
     //neuen Planeten erstellen
     Vector3Unit planetPosition(DRRandom::rVector3(7000), KM);

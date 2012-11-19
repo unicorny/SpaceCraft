@@ -164,7 +164,7 @@ public:
     __inline__ const std::vector<SektorID>& getSektorPath() const {return mSektorPath;}
     __inline__ std::vector<SektorID>* getSektorPathPtr() {return &mSektorPath;}
     
-    DRString getSektorPathName() const;
+    virtual DRString getSektorPathName();
     
     __inline__ const Vector3Unit& getCameraPosition() {return mLastRelativeCameraPosition;}
     //! Observer
@@ -184,10 +184,11 @@ protected:
     
     void setSektorSeed();
     
+    __inline__ std::vector<SektorID> getSektorPathCopy() const {return mSektorPath;}
     //! \brief fill a vector with all sektorID
     //!
     //! begin with root sektor (place zero)
-    void createSektorPath(std::vector<SektorID>& storage) const;
+    void createSektorPath();
     
     //! id des sektors, gleichzeitig der seed
     SektorID            mID;

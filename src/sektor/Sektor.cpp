@@ -5,9 +5,10 @@ Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
 : mID(id), mType(SEKTOR_NONE), mSektorPosition(position), mRadius(radius), mParent(parent), mRenderer(NULL),
   mIdleSeconds(0.0f), mNotRenderSeconds(0.0f)
 {
-    createSektorPath(mSektorPath);
-    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
+    createSektorPath();
+    
 }
+
 
 Sektor::~Sektor()
 {
@@ -211,7 +212,7 @@ Sektor* Sektor::getSektorByPath(std::vector<SektorID>& path, int thisIndex /* = 
    // return NULL;
 }
 
-DRString Sektor::getSektorPathName() const
+DRString Sektor::getSektorPathName()
 {
     std::stringstream s(std::stringstream::in|std::stringstream::out);
 
@@ -259,14 +260,20 @@ bool Sektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
 }
 
 
-void Sektor::createSektorPath(std::vector<SektorID>& storage) const
+void Sektor::createSektorPath()
 {
     if(!mParent)
-        storage.clear();
+    {
+        mSektorPath.clear();
+    }
     else
-        mParent->createSektorPath(storage);
+    { 
+        if(!mParent->getSektorPath().size())
+            mParent->createSektorPath();
+        mSektorPath = mParent->getSektorPathCopy();
+    }
     
-    storage.push_back(mID);
+    mSektorPath.push_back(mID);
 }
 
 void Sektor::removeInactiveChilds(double idleThreshold/* = 1.0*/)
