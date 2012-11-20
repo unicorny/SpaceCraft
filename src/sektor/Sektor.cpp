@@ -6,7 +6,6 @@ Sektor::Sektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
   mIdleSeconds(0.0f), mNotRenderSeconds(0.0f)
 {
     createSektorPath();
-    
 }
 
 
@@ -136,13 +135,13 @@ DRReturn Sektor::updateVisibilityAll(const std::list<Camera*>& cameras, bool roo
         {
             Sektor* temp = it->second;     
             ret = temp->updateVisibility(cameras);
-            if(ret) LOG_ERROR("Fehler bei move", DR_ERROR);
+            if(ret) LOG_ERROR("Fehler bei updateVisibility", DR_ERROR);
             
             for(std::list<Camera*>::const_iterator it2 = cameras.begin(); it2 != cameras.end(); it2++)
                 temp->updateCameraSektor(*it2);
 
             ret = temp->updateVisibilityAll(cameras, true);
-            if(ret) LOG_ERROR("Fehler bei move all", DR_ERROR);
+            if(ret) LOG_ERROR("Fehler bei updateVisibility all", DR_ERROR);
         }
         return ret;
     }

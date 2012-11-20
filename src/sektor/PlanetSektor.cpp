@@ -136,7 +136,7 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     
     mPlanetNoiseParameters.print(true);
     
-    mRenderer = new RenderPlanet(id, getSektorPathName(), &mPlanetNoiseParameters);
+    mRenderer = new RenderPlanet(getSektorPathName(), &mPlanetNoiseParameters);
 }
 
 PlanetSektor::~PlanetSektor()
@@ -160,7 +160,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     
     for(uint i = 1; i < ebene->size(); i++)
         sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
-    //printf("\r%s", buffer);
+    printf("\r%s", buffer);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
@@ -235,7 +235,7 @@ DRReturn PlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
     if(render && render->getRenderNoisePlanetToTexture())
     {
         if(mIdleSeconds > 0.0f) distance *= 1000.0f;
-        render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
+        render->getRenderNoisePlanetToTexture()->setCurrentDistance(0);
         // delete only, if childs have there own textures ready
         /*if(mNotRenderSeconds > GlobalRenderer::Instance().getTimeForInactiveChilds())
             DR_SAVE_DELETE(mRenderer);*/
@@ -293,7 +293,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
         if(static_cast<RenderPlanet*>(mRenderer)->isErrorOccured())
             DR_SAVE_DELETE(mRenderer);
         if(!mRenderer)
-            mRenderer = new RenderPlanet(mID, getSektorPathName(), &mPlanetNoiseParameters);
+            mRenderer = new RenderPlanet(getSektorPathName(), &mPlanetNoiseParameters);
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
         if(radius2 > 160.0f) mRenderer->setCurrentDetail(10);

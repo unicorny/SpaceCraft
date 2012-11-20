@@ -28,7 +28,7 @@ struct SektorID
     // multipliziert x, y und z coordinate with scalar
     __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar, count);}
     __inline__ SektorID const operator /(short scalar) {return SektorID(x/scalar, y/scalar, z/scalar, count);}
-    
+        
     union
     {
         struct
@@ -156,7 +156,7 @@ public:
     __inline__ bool isVisible() const {return mIdleSeconds > 0.0f ? false : true;}
     // return child, if it didn't exist, create it
     virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
-    virtual bool existChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return true; return false;};
+    virtual bool isChildExist(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return true; return false;};
         
     
     Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);

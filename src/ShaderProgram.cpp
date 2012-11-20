@@ -23,6 +23,7 @@ DRReturn Shader::init(const char* shaderFile, GLenum shaderType)
 
     // Create the shader.
     mShaderID = glCreateShader(shaderType);
+    DREngineLog.writeToLog("shaderID: %d", mShaderID);
 
     unsigned char* shaderAssembly = readShaderFile( shaderFile );
     if(!shaderAssembly)

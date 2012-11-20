@@ -13,8 +13,9 @@ const char* Observer::ObserverTypeName(ObserverType type)
 
 void Observer::setCurrentSektor(Sektor* current)
 {
-    if(mCurrentSektor) mCurrentSektor->removeObserver(DRMakeStringHash("Camera"));
+    DHASH id = DRMakeStringHash(ObserverTypeName(mType));
+    if(mCurrentSektor) mCurrentSektor->removeObserver(id);
     if(current)
-		current->addObserver(DRMakeStringHash("Observer"), this);
+		current->addObserver(id, this);
     mCurrentSektor = current;
 }

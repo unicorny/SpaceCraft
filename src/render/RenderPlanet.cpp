@@ -5,48 +5,55 @@
 #include "PlanetSektor.h"
 #include "RenderTextureToTexture.h"
 
+DRString RenderPlanet::mFragmentShader[] = {DRString("PlanetContinentalNoise.frag"),
+                                          DRString("PlanetTerrainTypeNoise.frag"),
+                                          DRString("PlanetBadlandSands.frag"),
+                                          DRString("PlanetWithoutRiver.frag"),
+                                          DRString("PlanetNoiseFinal.frag")};
 
-RenderPlanet::RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
-: RenderSektor(), mTextureRenderer(), mSeaLevelInMetres(0.0f), mTexture(), mInitalized(0), mHeightMap(NULL)
+RenderPlanet::RenderPlanet(DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
+: RenderSektor(), mTextureRenderer(), mSeaLevelInMetres(0.0f), mTexture(),
+  mInitalized(0), mHeightMap(NULL), mVertexShader("noise.vert")
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution()/2;
-    ShaderProgramParameter shader[5];
-    shader[0] = ShaderProgramParameter("noise.vert", "PlanetContinentalNoise.frag");
-    shader[1] = ShaderProgramParameter("noise.vert", "PlanetTerrainTypeNoise.frag");
-    shader[2] = ShaderProgramParameter("noise.vert", "PlanetBadlandSands.frag");
-    shader[3] = ShaderProgramParameter("noise.vert", "PlanetWithoutRiver.frag");
-    shader[4] = ShaderProgramParameter("noise.vert", "PlanetNoiseFinal.frag");
-    init(seed, DRVector3(0.0f), 1.0f, DRMatrix::identity(), shader,
+    init(DRVector3(0.0f), 1.0f, DRMatrix::identity(),
          size, texturePath, planetNoiseParameter);
+    mShader = ShaderManager::Instance().getShaderProgram("simple.vert", "simpleUnpack.frag");
 }
 
-RenderPlanet::RenderPlanet(SektorID seed, DRVector3 translate,
+RenderPlanet::RenderPlanet()
+: RenderSektor(), mTextureRenderer(), mSeaLevelInMetres(0.0f), mTexture(),
+  mInitalized(0), mHeightMap(NULL), mVertexShader("subPlanetNoise.vert")
+{
+    
+}
+
+RenderPlanet::RenderPlanet(DRVector3 translate,
                            float patchScaling, const DRMatrix& rotation, DRString texturePath,
                            const PlanetNoiseParameter* planetNoiseParameter)
 : RenderSektor(), mTextureRenderer(), mSeaLevelInMetres(0.0f), mTexture(), 
-  mInitalized(0),mHeightMap(NULL)
+  mInitalized(0), mHeightMap(NULL), mVertexShader("subPlanetNoise.vert")
 {
     int size = GlobalRenderer::Instance().getTextureRenderMaxResolution();
 	//printf("[RenderPlanet::RenderPlanet] size from GlobalRenderer: %d\n", size);
-    ShaderProgramParameter shader[5];
-    shader[0] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetContinentalNoise.frag");
-    shader[1] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetTerrainTypeNoise.frag");
-    shader[2] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetBadlandSands.frag");
-    shader[3] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetWithoutRiver.frag");
-    shader[4] = ShaderProgramParameter("subPlanetNoise.vert", "PlanetNoiseFinal.frag");
-    init(seed, translate, patchScaling, rotation, shader,
+    init(translate, patchScaling, rotation,
          size, texturePath, planetNoiseParameter);
 }
 
-DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
+DRReturn RenderPlanet::init(DRVector3 translate,
               float patchScaling, const DRMatrix& rotation, 
-              ShaderProgramParameter shader[4], int textureSize, DRString texturePath,
+              int textureSize, DRString texturePath,
               const PlanetNoiseParameter* planetNoiseParameter)
 {
+    if(mInitalized) 
+    {
+        LOG_WARNING("already initalized");
+        return DR_OK;
+    }
     GlobalRenderer& gb = GlobalRenderer::Instance();
     DRTextureManager& tx = DRTextureManager::Instance();
 	//mShader = ShaderManager::Instance().getShader("simple.vert", "simple.frag");
-    mShader = ShaderManager::Instance().getShaderProgram("simple.vert", "simpleUnpack.frag");
+    
     mSeaLevelInMetres = planetNoiseParameter->seaLevelInMetres;
     int textureStepSize = gb.getTextureRenderStepSize();
     mHeightMap = new HeightMapTexture(textureStepSize*textureStepSize*16);
@@ -78,6 +85,9 @@ DRReturn RenderPlanet::init(SektorID seed, DRVector3 translate,
         }
         if(!mHeightTexture) LOG_ERROR("Zero-Pointer texture", DR_ERROR);
                 
+        ShaderProgramParameter shader[5];
+        for(int i = 0; i < 5; i++)
+            shader[i] = ShaderProgramParameter(mVertexShader.data(), (mFragmentShader[i]).data());
         mTextureRenderer = RenderToTexturePtr(new RenderNoisePlanetToTexture(shader, planetNoiseParameter));
         mTextureRenderer->setFilenameToSave(getPathAndFilename());
         getRenderNoisePlanetToTexture()->init(stepSize, translate, patchScaling, mHeightTexture, rotation);    
@@ -119,7 +129,7 @@ DRReturn RenderPlanet::generateTexture()
         {
             mTextureRenderer.release();
             mInitalized++;
-            mTexture->setFinishRender();
+            mTexture->setFinishRender();            
             if(!mTexture->isLoadingFinished())
                 LOG_ERROR("texture wasn't empty", DR_ERROR);
         }
@@ -137,6 +147,7 @@ DRReturn RenderPlanet::generateTexture()
         // remove corrupt texture file
         remove(mHeightTexture->getTextureFilename().data());
         mInitalized = -1;
+        LOG_WARNING("corrupt texture file");
 	}
         
     if(DRGrafikError("[RenderPlanet::generateTexture]")) return DR_ERROR;
@@ -148,8 +159,10 @@ DRReturn RenderPlanet::bindTexture()
     glEnable(GL_TEXTURE_2D);
     if(this->isFinishLoading() && mTexture)
         mTexture->bind();
+    //else if(mHeightTexture)
+    //    mHeightTexture->bind();
     else
-        mHeightTexture->bind();
+        glDisable(GL_TEXTURE_2D);
     
     mShader->setUniform1f("SEA_LEVEL_IN_METRES", mSeaLevelInMetres);    
     

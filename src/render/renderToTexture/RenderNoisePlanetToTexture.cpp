@@ -182,27 +182,28 @@ void RenderNoisePlanetToTexture::setFilenameToSave(DRString path)
 
 DRReturn RenderNoisePlanetToTexture::init(int stepSize, DRVector3 translate, float patchScaling, DRTexturePtr texture, const DRMatrix& rotation /*= DRMatrix::Identity()*/)
 {
+    mShaderCursor = 0;
     mPatchScaling = patchScaling;
     mTranslate = translate;
     mRotation = rotation;
- //   maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
-    maTextures[0] = texture;
+    maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
+    maTextures[4] = texture;
     return RenderInStepsToTexture::init(stepSize, maTextures[0]);    
 }
 
 DRReturn RenderNoisePlanetToTexture::reinit(DRTexturePtr texture)
 {
     mShaderCursor = 0;
-    //maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
-    maTextures[0] = texture;
+    maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
+    maTextures[4] = texture;
     return RenderInStepsToTexture::reinit(maTextures[0]);
 }
 
 DRReturn RenderNoisePlanetToTexture::step()
 {
     DRReturn ret = RenderInStepsToTexture::step();
-    RenderToTexture::setFilenameToSave(mFilename);
- /*   if(mShaderCursor < 4 && isFinished())
+   // RenderToTexture::setFilenameToSave(mFilename);
+    if(mShaderCursor < 4 && isFinished())
     {
         mShaderCursor++;
         if(mShaderCursor < 4)
@@ -213,6 +214,6 @@ DRReturn RenderNoisePlanetToTexture::step()
         if(RenderInStepsToTexture::reinit(maTextures[mShaderCursor]))
             LOG_ERROR("by reinit with step two", DR_ERROR);
     }
-    */
+    
     return ret;
 }

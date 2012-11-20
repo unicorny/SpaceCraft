@@ -89,10 +89,10 @@ void main()
 
 	float n = unpackHeight(texture2D(texture, gl_TexCoord[0].xy).xyz*2.0-1.0);
 	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
-	if(cameraAbove > 0)
-		gl_FragColor.g += 0.1;
+	//if(cameraAbove > 0)
+		//gl_FragColor.g += 0.1;
 	gl_FragColor.w = n * 0.5 + 0.5;
-	
-//	gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
+	float v = n * 0.5 + 0.5;
+	gl_FragColor = vec4(v,v,v,v);
 	//gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 }

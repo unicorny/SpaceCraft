@@ -18,7 +18,7 @@ public:
     __inline__ ObserverType getType() {return mType;}
     static const char* ObserverTypeName(ObserverType type);
     
-    void setCurrentSektor(Sektor* current);
+    virtual void setCurrentSektor(Sektor* current);
 protected:
     ObserverType mType;
 };

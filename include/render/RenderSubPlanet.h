@@ -7,9 +7,10 @@ class RenderSubPlanet : public RenderPlanet
 {
 public:
     //! \param boxSide 
-    RenderSubPlanet(SektorID seed, DRVector3 translate, float patchScaling,
+    RenderSubPlanet(DRVector3 translate, float patchScaling,
                     const DRMatrix& rotation, DRString texturePath, 
                     const PlanetNoiseParameter* planetNoiseParameter);
+    RenderSubPlanet(DRTexturePtr parentTexture);
 
     virtual ~RenderSubPlanet();
     
@@ -17,7 +18,7 @@ public:
        
 protected:
     DRGeometrieHeightfield*     mGeometrieGrid;
-    
+    DRTexturePtr                mParentTexture;
     //Sphere
         
 private:        
