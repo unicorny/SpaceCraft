@@ -107,7 +107,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     //mRenderer = new RenderSubPlanet(id, mTextureTranslate, patchScaling, mRotation, getSektorPathName(), mPlanet->getPlanetNoiseParameters());
     if(1 == mSubLevel)
         mRenderer = new RenderSubPlanet(mTextureTranslate, mPatchScaling, mRotations[mCubeSideIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());    
-    else
+    else if(mParent->getRenderer() && mParent->getRenderer()->isFinishLoading())
         mRenderer = new RenderSubPlanet(static_cast<RenderPlanet*>(mParent->getRenderer())->getTexture());
         
     
@@ -201,10 +201,10 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     {
         if(1 == mSubLevel)
             mRenderer = new RenderSubPlanet(mTextureTranslate, mPatchScaling, mRotations[mCubeSideIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
-        else
+        else if(mParent->getRenderer() && mParent->getRenderer()->isFinishLoading())
             mRenderer = new RenderSubPlanet(static_cast<RenderPlanet*>(mParent->getRenderer())->getTexture());
     }
-    if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
+    if(!mRenderer) return DR_OK;//LOG_ERROR("no renderer", DR_ERROR);
     RenderSubPlanet* renderer = static_cast<RenderSubPlanet*>(mRenderer);
     if(!renderer->isInitalized() && mCameraAbove == 1)
     {
@@ -457,7 +457,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         if(!mRenderer)
             mRenderer = new RenderSubPlanet(mTextureTranslate, mPatchScaling, mRotations[mCubeSideIndex], getSektorPathName(), mPlanet->getPlanetNoiseParameters());
         * */
-        if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
+        if(!mRenderer) LOG_ERROR("no renderer", DR_NOT_ERROR);
         
         ShaderProgramPtr shader = mRenderer->getShaderProgram();
         const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();

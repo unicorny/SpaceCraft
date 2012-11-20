@@ -24,6 +24,8 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     if(!mNoiseParameter) LOG_ERROR("no noise parameter", DR_ERROR);
    
     mShader[mShaderCursor]->bind();
+    glEnable(GL_TEXTURE_2D);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
     if(3 == mShaderCursor)
     {
@@ -31,14 +33,17 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
         mPermTexture->bind();
         mShader[mShaderCursor]->setUniform1i("permTexture", 0);
 
+        if(!maTextures[0]) LOG_ERROR("textur 0 isn't present", DR_ERROR);
         glActiveTexture(GL_TEXTURE1);
         maTextures[0]->bind();
         mShader[mShaderCursor]->setUniform1i("texture0", 1);
         
+        if(!maTextures[1]) LOG_ERROR("textur 1 isn't present", DR_ERROR);
         glActiveTexture(GL_TEXTURE2);
         maTextures[1]->bind();
         mShader[mShaderCursor]->setUniform1i("texture1", 2);
         
+        if(!maTextures[2]) LOG_ERROR("textur 2 isn't present", DR_ERROR);
         glActiveTexture(GL_TEXTURE3);
         maTextures[2]->bind();
         mShader[mShaderCursor]->setUniform1i("texture2", 3);
@@ -49,6 +54,7 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
         mPermTexture->bind();
         mShader[mShaderCursor]->setUniform1i("permTexture", 0);
 
+        if(!maTextures[3]) LOG_ERROR("textur 3 isn't present", DR_ERROR);
         glActiveTexture(GL_TEXTURE1);
         maTextures[3]->bind();
         mShader[mShaderCursor]->setUniform1i("texture0", 1);

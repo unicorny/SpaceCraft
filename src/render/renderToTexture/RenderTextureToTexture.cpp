@@ -28,10 +28,12 @@ DRReturn RenderTextureToTexture::renderStuff()
 {
     if(!mSourceTexture) LOG_ERROR("source texture Zero-Pointer", DR_ZERO_POINTER);
     if(!mShader) return DR_ZERO_POINTER;
+    glEnable(GL_TEXTURE_2D);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     mSourceTexture->bind();
     mShader->bind();
     mShader->setUniformMatrix("projection", mProjectionMatrix);
-    DRGeometrieManager::Instance().getGrid(2, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP)->render();
+    DRGeometrieManager::Instance().getGrid(4, GEO_FULL, GEO_VERTEX_TRIANGLE_STRIP)->render();
     mShader->unbind();
     return DR_OK;
 }
