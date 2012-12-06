@@ -35,6 +35,7 @@ DRReturn RenderSubPlanet::render(float fTime, Camera* cam)
     {
         bindTexture();
     }
+    glDisable(GL_CULL_FACE);
     if(mGeometrieGrid->render()) 
         LOG_ERROR("Fehler bei Geometrie Grid", DR_ERROR);
     
