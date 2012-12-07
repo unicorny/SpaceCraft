@@ -12,7 +12,7 @@ RenderSubPlanet::RenderSubPlanet(DRVector3 translate, float patchScaling, const 
 RenderSubPlanet::RenderSubPlanet(DRTexturePtr parentTexture)
 : RenderPlanet(), mParentTexture(parentTexture)
 {
-    mGeometrieGrid = DRGeometrieManager::Instance().getGrid(200, GEO_FULL, GEO_VERTEX_QUADS);
+    mGeometrieGrid = DRGeometrieManager::Instance().getGrid(70, GEO_FULL, GEO_VERTEX_QUADS);
     mShader = ShaderManager::Instance().getShaderProgram("sphere.vert", "sphere.frag");
 }
 
@@ -38,6 +38,7 @@ DRReturn RenderSubPlanet::render(float fTime, Camera* cam)
     glDisable(GL_CULL_FACE);
     if(mGeometrieGrid->render()) 
         LOG_ERROR("Fehler bei Geometrie Grid", DR_ERROR);
+    glEnable(GL_CULL_FACE);
     
     if(DRGrafikError("[RenderSubPlanet::render]")) return DR_ERROR;
     return DR_OK;

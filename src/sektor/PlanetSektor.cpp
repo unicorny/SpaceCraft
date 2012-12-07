@@ -160,7 +160,8 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     
     for(uint i = 1; i < ebene->size(); i++)
         sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
- //   printf("\r[PlanetSektor::move]%s", buffer);
+    sprintf(buffer, "%s %d ", buffer, GlobalRenderer::Instance().getRenderTaskCount());
+    printf("\r[PlanetSektor::move]%s", buffer);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
@@ -192,7 +193,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             if(mChilds.find(mSubPlanets[iChild]) == mChilds.end())
                     LOG_ERROR("sub planet missing", DR_ERROR);
             SubPlanetSektor* child = static_cast<SubPlanetSektor*>(mChilds[mSubPlanets[iChild]]);
-            for(u32 i = 0; i < 4; i++)
+            for(u8 i = 0; i < 4; i++)
             {
                 child->setNeighbor(i, static_cast<SubPlanetSektor*>(getChild(mSubPlanets[mSubPlanetNeighborIndices[iChild*4+i]])));
             }
@@ -218,7 +219,7 @@ DRReturn PlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
     for(std::list<Camera*>::const_iterator it = cameras.begin(); it != cameras.end(); it++)
     {
         double divisor = mRadius/(*it)->getSektorPositionAtSektor(this).length();
-        float local_theta = 0.0f;
+        double local_theta = 0.0f;
         if(divisor <= 1.0 && divisor >= -1.0) 
             local_theta = acos(divisor)*RADTOGRAD;
         
@@ -321,6 +322,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
         
         glDisable(GL_CULL_FACE);
         DRReturn ret = mRenderer->render(fTime, cam);
+        glEnable(GL_CULL_FACE);
         shader->unbind();
 //		GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
         if(ret) LOG_ERROR("Fehler bei call planet renderer", DR_ERROR);
@@ -374,7 +376,7 @@ bool PlanetSektor::isObjectInSektor(SektorObject* sektorObject)
     if(divisor > 1.0) return true;    
     //double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes
     double theta = acos(divisor)*RADTOGRAD;
-    printf("\rtheta: %f, distance: %f", theta, static_cast<double>(l.convertTo(KM)));
+    //printf("\rtheta: %f, distance: %s", theta, (l-mRadius).convertTo(KM).print().data());
     return theta <=89.822667f;
     /*
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;

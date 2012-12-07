@@ -1,27 +1,46 @@
 #include "HeightMapTexture.h"
 
 HeightMapTexture::HeightMapTexture(int stepSize)
-: mPixelHeightData(NULL), mLoadStepSize(stepSize), mSize(0), mState(0), mPixelCopyMutex(NULL),
+: mThis(NULL), mPixelHeightData(NULL), mLoadStepSize(stepSize), mSize(0), mPixelCopySemaphore(NULL),
   mMaxHeight(0.0f), mMaxGradient(0.0f)
 {
-    mPixelCopyMutex = SDL_CreateMutex(); LOG_WARNING_SDL();
-        
+    mPixelCopySemaphore = SDL_CreateSemaphore(1); LOG_WARNING_SDL();
+    mThis = new HeightMapTexturePtr(this);
 }
 
 HeightMapTexture::~HeightMapTexture()
 {
+    *mThis = NULL;
+    if(mThis->getRef() <= 1)
+    {
+        DR_SAVE_DELETE(mThis);
+    }
+    else
+    {
+        mThis->removeRef();
+    }
+    
+    if (SDL_SemWait(mPixelCopySemaphore) == -1) 
+        LOG_ERROR_VOID("[critical] error locking semaphore");
+    SDL_DestroySemaphore(mPixelCopySemaphore);
+    mPixelCopySemaphore = NULL;
     DR_SAVE_DELETE_ARRAY(mPixelHeightData);
-    SDL_LockMutex(mPixelCopyMutex); SDL_UnlockMutex(mPixelCopyMutex); 
-    SDL_DestroyMutex(mPixelCopyMutex); LOG_WARNING_SDL();    
+    LOG_WARNING_SDL();    
 }
 
 void HeightMapTexture::load(DRTexturePtr source)
 {
-    new HeightMapLoader(source, mLoadStepSize, this);
+    mThis->addRef();
+    new HeightMapLoader(source, mLoadStepSize, mThis);
 }
 
 void HeightMapTexture::copyPixelData(u8* data, DRVector2i size)
 {
+    
+    if(!mPixelCopySemaphore) return;
+    if (SDL_SemTryWait(mPixelCopySemaphore)) 
+        return;
+
     if(!mPixelHeightData || mSize != size) 
     {
         DR_SAVE_DELETE_ARRAY(mPixelHeightData);
@@ -64,14 +83,12 @@ void HeightMapTexture::copyPixelData(u8* data, DRVector2i size)
     }
     //DREngineLog.writeToLog("[HeightMapTexture::copyPixelData]: maxHeight: %f, maxGradient: %f", mMaxHeight, mMaxGradient);
     
-    SDL_LockMutex(mPixelCopyMutex); LOG_WARNING_SDL();    
-    mState++;
-    SDL_UnlockMutex(mPixelCopyMutex); LOG_WARNING_SDL();    
+    SDL_SemPost(mPixelCopySemaphore);
 }
 
 // ----------------------------------------------------------------------------------
 
-HeightMapLoader::HeightMapLoader(DRTexturePtr source, int stepSize, HeightMapTexture* parent)
+HeightMapLoader::HeightMapLoader(DRTexturePtr source, int stepSize, HeightMapTexturePtr* parent)
 : DRSaveTexture("", source->getTextureBuffer(), stepSize), mParent(parent)
 {
     DRTextureManager::Instance().saveTexture(source, this);    
@@ -90,12 +107,21 @@ DRReturn HeightMapLoader::saveImage()
 	if(mSavingBuffer)
 	{
 		mImage->setPixel(mSavingBuffer);		
-        mParent->copyPixelData(mSavingBuffer, mSize);
+        if(*mParent)
+            (*mParent)->copyPixelData(mSavingBuffer, mSize);
 		DR_SAVE_DELETE_ARRAY(mSavingBuffer);
 	}
 
 	DRIImage::deleteImage(mImage);
-	mImage = NULL;
+	mImage = NULL;    
+    if(mParent->getRef() <= 1) 
+    {
+        DR_SAVE_DELETE(mParent);
+    }
+    else
+    {
+        mParent->removeRef();
+    }
 		
 	mSavingState = 3;
 	//printf("image saved\n");

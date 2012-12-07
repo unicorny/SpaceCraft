@@ -13,7 +13,7 @@ uniform sampler2D texture;
 
 void main()
 {
-	vec4 scaledVertex = vec4(gl_Vertex.xy*(patchScaling*1.001)+translate.xy, gl_Vertex.z, 1.0);
+	vec4 scaledVertex = vec4(gl_Vertex.xy*(patchScaling*1.000)+translate.xy, gl_Vertex.z, 1.0);
 			
 	//calculate texture coordinates
 	float scale = 1.0;

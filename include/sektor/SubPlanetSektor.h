@@ -6,6 +6,23 @@
 #define NEIGHBOR_RIGHT 2
 #define NEIGHBOR_DOWN 3
 
+
+#define CAMERA_IS_ABOVE_SECTOR 1
+#define CAMERA_IS_ABOVE_NEIGHBOR_SECTOR 2
+#define CAMERA_IS_ABOVE_NEIGHBOR_EDGE 4
+#define CAMERA_ABOVE_SECTOR_SIDE_LEFT 8
+#define CAMERA_ABOVE_SECTOR_SIDE_TOP 16
+#define CAMERA_ABOVE_SECTOR_SIDE_RIGHT 32
+#define CAMERA_ABOVE_SECTOR_SIDE_BOTTOM 64
+#define CAMERA_ABOVE_SECTOR_EDGE_TOP_LEFT (CAMERA_ABOVE_SECTOR_SIDE_LEFT | CAMERA_ABOVE_SECTOR_SIDE_TOP)
+#define CAMERA_ABOVE_SECTOR_EDGE_TOP_RIGHT (CAMERA_ABOVE_SECTOR_SIDE_RIGHT | CAMERA_ABOVE_SECTOR_SIDE_TOP)
+#define CAMERA_ABOVE_SECTOR_EDGE_BOTTOM_LEFT (CAMERA_ABOVE_SECTOR_SIDE_BOTTOM | CAMERA_ABOVE_SECTOR_SIDE_LEFT)
+#define CAMERA_ABOVE_SECTOR_EDGE_BOTTOM_RIGHT (CAMERA_ABOVE_SECTOR_SIDE_BOTTOM | CAMERA_ABOVE_SECTOR_SIDE_RIGHT)
+#define CAMERA_ABOVE_SECTOR_EDGE (CAMERA_ABOVE_SECTOR_SIDE_LEFT | CAMERA_ABOVE_SECTOR_SIDE_TOP | CAMERA_ABOVE_SECTOR_SIDE_RIGHT | CAMERA_ABOVE_SECTOR_SIDE_BOTTOM)
+#define CAMERA_ABOVE_SECTOR_FLAG_FROM_NEIGHBOR 128
+
+
+
 #include "PlanetSektor.h"
 #include "RenderSubPlanet.h"
 
@@ -55,15 +72,22 @@ public:
     
     virtual void printTypeInfos(const char* name) const;
     
-    __inline__ bool isCameraAbove() {return 1 == mCameraAbove;}
-    __inline__ bool isCameraAboveNeighbor(int deep = 0) {checkNeighbor(deep+1); return 2 == mCameraAbove;}
+    __inline__ bool isCameraAbove() {return CAMERA_IS_ABOVE_SECTOR & mCameraAbove;}
+    __inline__ bool isCameraAboveNeighbor() {return CAMERA_IS_ABOVE_NEIGHBOR_SECTOR & mCameraAbove;}
+    __inline__ bool isCameraAboveNeighborEdge() {return CAMERA_IS_ABOVE_NEIGHBOR_EDGE & mCameraAbove;}
+    __inline__ bool isSektorVisibleToRender() {return isCameraAbove() || isCameraAboveNeighbor() || isCameraAboveNeighborEdge();}
+    
+    void setCameraAboveNeighbor();
+    __inline__ void setCameraAboveNeighborEdge() {mCameraAbove |= CAMERA_IS_ABOVE_NEIGHBOR_EDGE;}
+    __inline__ void setCameraIsMaybeAboveNeigbhorEdge() {if (mCameraAbove & CAMERA_ABOVE_SECTOR_FLAG_FROM_NEIGHBOR) setCameraAboveNeighborEdge(); else mCameraAbove |= CAMERA_ABOVE_SECTOR_FLAG_FROM_NEIGHBOR;}
+    void resetCameraAbove(int deep = 0);
 
     virtual DRString getSektorPathName();
 
     __inline__ DRSimpleResourcePtr<SubPlanetSektor>* getMeSave() {mThis->addRef(); return mThis;}
         
 protected:
-    void checkNeighbor(int deep = 0);
+    void informNeighborAboutCameraAbove();
     float calculateDistanceToNeighbor(Sektor* neighbor);
 
     SubPlanetSektorPtr* mThis;

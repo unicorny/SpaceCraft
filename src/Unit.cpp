@@ -6,8 +6,9 @@ Unit::Unit(double value, UnitTypes unitType)
 }
 
 Unit::Unit(const Unit& unit)
+: mValue(unit.mValue), mUnitType(unit.mUnitType)
 {
-    memcpy(this, &unit, sizeof(Unit));
+    //memcpy(this, &unit, sizeof(Unit));
 }
 
 Unit::Unit()

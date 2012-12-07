@@ -11,7 +11,8 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     //neuen Planeten erstellen
     Vector3Unit planetPosition(DRRandom::rVector3(7000), KM);
     planetPosition = Unit(200000, KM)*planetPosition.normalize();
-    //Vector3Unit planetPosition(DRRandom::rVector3(10), AE);
+    //planetPosition = Unit(10, AE)*planetPosition.normalize();
+    //Vector3Unit planetPosition(DRRandom::rVector3(10), AE);//VY Canis Majoris
     //planetPosition = planetPosition.normalize()*12;
     //planetPosition = planetPosition.normalize();
     //planetPosition = planetPosition * Unit(0.2f, AE);
@@ -23,7 +24,8 @@ SolarSystemSektor::SolarSystemSektor(Vector3Unit position, Unit radius, SektorID
     DRVector3 idVector(id.x, id.y, id.z);
 	idVector /= SHRT_MAX;
     int seed = (int)(p.GetValue(idVector.x, idVector.y, idVector.z)*INT_MAX);
-    Unit planetRadius(DRRandom::rDouble(7000, 6000), KM);
+    //Unit planetRadius(DRRandom::rDouble(7000, 6000), KM);
+    Unit planetRadius(6371, KM);
     //Unit planetRadius(9.3048028075, AE); //VY Canis Majoris
     
         

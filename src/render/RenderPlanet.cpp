@@ -112,6 +112,7 @@ RenderPlanet::~RenderPlanet()
     //DR_SAVE_DELETE(mTextureRenderer);
   	//DR_SAVE_DELETE(mTexture);
 	//DR_SAVE_DELETE(mPreviewTextur);
+    DR_SAVE_DELETE(mHeightMap);
 }
 DRReturn RenderPlanet::generateTexture()
 {

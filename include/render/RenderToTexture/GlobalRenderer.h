@@ -56,6 +56,7 @@ public:
 	__inline__ void addEbenenCount(uint index) {if(mEbeneCount.size() <= index) mEbeneCount.resize(index+1); mEbeneCount[index]++;}
 	__inline__ void removeEbenenCount(uint index) {mEbeneCount[index]--;}
 	__inline__ std::vector<int>* getEbenenCount() {return &mEbeneCount;}
+    __inline__ u32 getRenderTaskCount() {return mRenderTasks.size();}
     
 private:
     GlobalRenderer();
