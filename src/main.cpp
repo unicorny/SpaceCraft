@@ -36,6 +36,7 @@ ControlMode gControlModes[MAX_CONTROL_MODES];
 int gCurrentControlMode = 0;
 // Debug
 bool            wireframe = false;
+Unit            g_distanceToGround;
 
 
 
@@ -645,6 +646,10 @@ DRReturn render(float fTime)
     
     text.setText("Steuerung: %d - %s/s", gCurrentControlMode+1, gControlModes[gCurrentControlMode].mValue.print().data());
     text.setPosition(DRVector2(0.0f, 0.08f));
+    text.drawText();
+    
+    text.setText("Hoehe: %s", g_distanceToGround.print().data());
+    text.setPosition(DRVector2(0.0f, 0.12f));
     text.drawText();
 
 	GlobalRenderer& gb = GlobalRenderer::Instance();

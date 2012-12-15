@@ -398,7 +398,7 @@ DRReturn SubPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
         if(1 == mSubLevel)
             render->getRenderNoisePlanetToTexture()->setCurrentDistance(1);
         if(isSektorVisibleToRender())
-            render->getRenderNoisePlanetToTexture()->setCurrentDistance(mSubLevel *10 - (mCameraAbove & 1)*5 - (mCameraAbove & 6? 2 : 0));
+            render->getRenderNoisePlanetToTexture()->setCurrentDistance(mSubLevel *10 - (mCameraAbove & 1)*mSubLevel *9 - (mCameraAbove & 6? 2 : 0));
         else
             render->getRenderNoisePlanetToTexture()->setCurrentDistance(distance);
     }

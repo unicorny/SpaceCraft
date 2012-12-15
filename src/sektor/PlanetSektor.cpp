@@ -278,6 +278,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 //    DRVector3 relCameraPos = -pos*distance1/mRadius;
      pos *= static_cast<DRReal>(distance2);
      //printf("\r%f %f %f, %.8f, %s ", pos.x, pos.y, pos.z, radius2, (distance1-mRadius).print().data());
+     g_distanceToGround = (distance1-mRadius);
 										   //*/
     //glTranslatef(pos.x, pos.y, pos.z);
     //glScaled(radius2, radius2, radius2);

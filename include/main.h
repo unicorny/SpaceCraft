@@ -15,8 +15,10 @@
 
 class RenderBlockLoader;
 class Player;
+class Unit;
 
 struct ControlMode;
 
 extern Player g_Player;
 extern RenderBlockLoader g_RenderBlockLoader;
+extern Unit            g_distanceToGround;
