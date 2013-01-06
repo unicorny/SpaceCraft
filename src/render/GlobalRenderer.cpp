@@ -3,7 +3,7 @@
 GlobalRenderer::GlobalRenderer()
 : m_bInitialized(false), mQuadratic(NULL), mFrameBufferID(0),
   mTextureRenderStepSize(0), mTextureRenderMaxResolution(0),
-  mGrafikMemTexture(0), mGrafikMemGeometrie(0)
+  mGrafikMemTexture(0), mGrafikMemGeometrie(0), mEbeneCount(5,0)
 {
     
 }

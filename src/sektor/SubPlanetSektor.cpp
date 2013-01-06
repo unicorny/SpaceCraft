@@ -32,6 +32,8 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     if(!mParent || !mPlanet)
         LOG_ERROR_VOID("no parent, no planet, nothing");
     
+    GlobalRenderer::Instance().addEbenenCount(subLevel);
+    
     //printf("[SubPlanetSektor::SubPlanetSektor] patchScaling: %f\n", mPatchScaling);
     if(mSubLevel == 1)
     {
@@ -89,6 +91,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
 
 SubPlanetSektor::~SubPlanetSektor()
 {
+    GlobalRenderer::Instance().removeEbenenCount(mSubLevel);
     for(int i = 0; i < 4; i++)
     {
         if(mNeighbors[i])
@@ -194,6 +197,7 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
     {
         mNotRenderSeconds += fTime;
         removeInactiveChilds(inactiveTime);
+        //removeInactiveChilds(1.0f);
     }
     
     if(render && render->getRenderNoisePlanetToTexture())

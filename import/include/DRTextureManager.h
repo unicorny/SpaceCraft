@@ -66,8 +66,10 @@ private:
     GLuint _getTexture(DRVector2i size, GLuint format);
 
     void      addAsynchronTextureLoadTask(DRTexturePtr texture);
-    void      addAsynchronTextureSaveTask(DRSaveTexture* texture);
+    
     static int asynchronTextureLoadThread(void* data);
+    
+    static int asynchronTextureSaveThread(void* data);
     
     //! daten für alte Einträge, dessen Speicher noch Verwendung finden könnte
     struct TextureMemoryEntry
@@ -84,6 +86,50 @@ private:
         float  timeout; //Speicher wird freigegeben, wenn null erreicht,  0 kein timeout
     };
     
+    struct TextureThreadData
+    {
+        TextureThreadData() : mutex(NULL), thread(NULL), condition(NULL), semaphore(NULL)
+        {
+            semaphore = SDL_CreateSemaphore(1);
+            condition = SDL_CreateCond();
+            SDL_SemWait(semaphore);
+            mutex = SDL_CreateMutex();   
+        }
+        ~TextureThreadData() 
+        {
+            if(thread)
+            {
+                //Post Exit to Stream Thread
+                SDL_SemPost(semaphore); LOG_WARNING_SDL();
+                //kill TextureLoad Thread after 1/2 second
+                SDL_Delay(500);
+                SDL_KillThread(thread);
+                LOG_WARNING_SDL();
+
+                thread = NULL;
+                SDL_DestroySemaphore(semaphore);
+                SDL_DestroyMutex(mutex);
+                SDL_DestroyCond(condition);
+            }
+        }
+        
+        DRReturn lock() {SDL_LockMutex(mutex); LOG_ERROR_SDL(DR_ERROR); return DR_OK;}
+        DRReturn unlock() {SDL_UnlockMutex(mutex); LOG_ERROR_SDL(DR_ERROR); return DR_OK;} 
+        DRReturn condSignal()
+        {
+            if(SDL_CondSignal(condition)== -1) //LOG_ERROR_SDL(DR_ERROR);
+            {
+                LOG_WARNING("Fehler beim Aufruf von SDL_CondSignal"); 
+                LOG_ERROR_SDL(DR_ERROR);
+            }
+            return DR_OK;
+        }
+        SDL_mutex*		   mutex;
+        SDL_Thread*		   thread;
+        SDL_cond*		   condition;
+        SDL_sem*		   semaphore;
+    };
+    
     DHASH makeTextureHash(const char* filename, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
     DHASH makeTextureHash(const TextureMemoryEntry &entry);   
     
@@ -95,17 +141,15 @@ private:
     typedef std::pair<DHASH, TextureMemoryEntry>        DR_TEXTURE_MEMORY_ENTRY;
     bool                                                mInitalized;
     GLuint						mGrafikMemTexture;
-
+    
     //! stuff for asynchron texture load and save
     std::queue<DRTexturePtr> mAsynchronLoadTextures;
     std::queue<DRTexturePtr> mLoadedAsynchronLoadTextures;
     std::queue<DRSaveTexture*> mAsynchronSaveTextures;
     std::queue<DRSaveTexture*> mAsynchronReadyToSaveTextures;
-    SDL_mutex*		   mTextureLoadMutex;
+    TextureThreadData*     mTextureLoadThread;
+    TextureThreadData*     mTextureSaveThread;
     SDL_mutex*             mGetTextureMutex;
-    SDL_Thread*		   mTextureLoadThread;
-    SDL_cond*		   mTextureLoadCondition;
-    SDL_sem*		   mTextureLoadSemaphore;
 };
 
 #endif //__DR_ENGINE2_TEXTURE_MANAGER__
