@@ -2,13 +2,18 @@
 #define __SC_SEKTOR_
 
 #include "Vector3Unit.h"
-#include "Camera.h"
+//#include "Camera.h"
 #include "RenderSektor.h"
+
+class Observer;
+class Camera;
+class SektorObject;
 
 struct SektorID
 {
     SektorID(u64 id) : id(id) {}
     SektorID(s16 _x, s16 _y, s16 _z): x(_x), y(_y), z(_z), count(0) {}
+    SektorID(s16 _x, s16 _y, s16 _z, s16 _count): x(_x), y(_y), z(_z), count(_count) {}
     SektorID(DRVector3 id): x(static_cast<short>(id.x*1000.0f)),
                             y(static_cast<short>(id.y*1000.0f)), 
                             z(static_cast<short>(id.z*1000.0f)) {}
@@ -16,13 +21,14 @@ struct SektorID
     bool operator() (const SektorID& x, const SektorID& y) const {
         return x.id<y.id;
     }
-    operator u64() {return id;}
+    operator u64() const {return id;}
     operator DRVector3() const {return DRVector3(x, y, z)/1000.0f;}
     
-    // multipliziert x, y und z ccordinate with scalar
-    __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar);}
-    __inline__ SektorID const operator /(short scalar) {return SektorID(x/scalar, y/scalar, z/scalar);}
     
+    // multipliziert x, y und z coordinate with scalar
+    __inline__ SektorID const operator *(short scalar) {return SektorID(x*scalar, y*scalar, z*scalar, count);}
+    __inline__ SektorID const operator /(short scalar) {return SektorID(x/scalar, y/scalar, z/scalar, count);}
+        
     union
     {
         struct
@@ -111,13 +117,32 @@ public:
      * \param rootMoved set to false (used intern)
      */
     DRReturn moveAll(float fTime, Camera* cam, bool rootMoved = false);
+
+    /*! \brief update visibility of sectors for all active cameras
+     *  \param cameras list with all active cameras, which currently observe at least one sektor
+     */
+    virtual DRReturn updateVisibility(const std::list<Camera*>& cameras) = 0;
+
+    /*! \brief call updateVisibility for all parents and childs
+     *
+     * first traverse to root node and then call the childs rekursiv
+     * \param cameras list with all active cameras, which currently observe at least one sektor
+     * \param rootUpdated set to false (used intern)
+     */
+    DRReturn updateVisibilityAll(const std::list<Camera*>& cameras, bool rootUpdated = false);
     
-    // is the position inside the current sektor/ is the current sektor visible from that position
-    virtual bool isObjectInSektor(Vector3Unit positionInSektor);
+    // is the position inside/above the current sektor
+    // is the object inside/above the sector?
+    // in future maybe with bounding box/sphere
+    virtual bool isObjectInSektor(SektorObject* sektorObject);
+    
+    // is the sector visible from current position
+    virtual bool isSectorVisibleFromPosition(Vector3Unit positionInSektor);
     
     static const char* getSektorTypeName(SektorType type);
     virtual void printTypeInfos(const char* name);
     __inline__ SektorType getType() const {return mType;} 
+    __inline bool isType(SektorType type) const {return type == mType;}
     __inline__ SektorID getID() const {return mID;}
     
     //! inline getter and setter
@@ -129,17 +154,17 @@ public:
     __inline__ void setParent(Sektor* parent) {mParent = parent;}
     __inline__ Sektor* getParent() const {return mParent;}
     __inline__ bool isVisible() const {return mIdleSeconds > 0.0f ? false : true;}
+    // return child, if it didn't exist, create it
     virtual Sektor* getChild(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return mChilds[childID]; return NULL;}
+    virtual bool isChildExist(SektorID childID) {if(mChilds.find(childID) != mChilds.end()) return true; return false;};
         
     
     Sektor* getSektorByPath(std::vector<SektorID>& path, int thisIndex = 0);
     
-    //! \brief fill a vector with all sektorID
-    //!
-    //! begin with root sektor (place zero)
-    void getSektorPath(std::vector<SektorID>& storage) const;
+    __inline__ const std::vector<SektorID>& getSektorPath() const {return mSektorPath;}
+    __inline__ std::vector<SektorID>* getSektorPathPtr() {return &mSektorPath;}
     
-    DRString getSektorPathName() const;
+    virtual DRString getSektorPathName();
     
     __inline__ const Vector3Unit& getCameraPosition() {return mLastRelativeCameraPosition;}
     //! Observer
@@ -158,6 +183,12 @@ protected:
     DRReturn callForChilds(DRReturn (*callbackFunction)(Sektor* sektor, void* data), void* data);
     
     void setSektorSeed();
+    
+    __inline__ std::vector<SektorID> getSektorPathCopy() const {return mSektorPath;}
+    //! \brief fill a vector with all sektorID
+    //!
+    //! begin with root sektor (place zero)
+    void createSektorPath();
     
     //! id des sektors, gleichzeitig der seed
     SektorID            mID;

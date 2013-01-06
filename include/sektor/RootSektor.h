@@ -11,6 +11,7 @@ public:
     
     virtual DRReturn move(float fTime, Camera* cam);
     virtual DRReturn render(float fTime, Camera* cam);
+    virtual DRReturn updateVisibility(const std::list<Camera*>& cameras);
     
     void addSektor(Sektor* sektor, SektorID id);
     

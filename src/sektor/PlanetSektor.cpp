@@ -3,17 +3,27 @@
 #include "GlobalRenderer.h"
 #include "noise/noise.h"
 #include "SubPlanetSektor.h"
+#include "Camera.h"
 
 
-SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1),SektorID(1,0,0),SektorID(0,0, 1),// front, right, back
-                                        SektorID(-1,0,0),SektorID(0,1,0),SektorID(0,-1,0)};// left, top, bottom
+SektorID PlanetSektor::mSubPlanets[] = {SektorID(0,0,-1000, 0),SektorID(1000,0,0, 1),SektorID(0,0, 1000, 2),// front, right, back
+                                        SektorID(-1000,0,0, 3),SektorID(0,1000,0, 4),SektorID(0,-1000,0, 5)};// left, top, bottom
+                                            // left, up, right, down
+int      PlanetSektor::mSubPlanetNeighborIndices[] = {5, 1, 4, 3, // 0, front
+                                                      0, 5, 2, 4, // 1, right
+                                                      1, 5, 3, 4, // 2, back
+                                                      2, 5, 0, 4, // 3, right
+                                                      1, 2, 3, 0, // 4, top
+                                                      1, 0, 3, 2}; // 5, bottom     
 
 PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sektor* parent)
-: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f)
+: Sektor(position, radius, id, parent), mSphericalShaderForSubPlanet(NULL), mTheta(0.0f),
+  mReadyCount(0)
 {
     mType = PLANET;
+    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
     
-    mSphericalShaderForSubPlanet = ShaderManager::Instance().getShader("sphere.vert", "sphere.frag");
+    mSphericalShaderForSubPlanet = ShaderManager::Instance().getShaderProgram("sphere.vert", "sphere.frag");
         
     noise::module::Perlin p;
     if(id.count) p.SetSeed(id.count);
@@ -126,42 +136,46 @@ PlanetSektor::PlanetSektor(Vector3Unit position, Unit radius, SektorID id, Sekto
     
     mPlanetNoiseParameters.print(true);
     
-    mRenderer = new RenderPlanet(id, getSektorPathName(), &mPlanetNoiseParameters);
+    mRenderer = new RenderPlanet(getSektorPathName(), &mPlanetNoiseParameters);
 }
 
 PlanetSektor::~PlanetSektor()
 {
-    ShaderManager::Instance().releaseShader("sphere.vert", "sphere.frag");
+    //ShaderManager::Instance().releaseShader("sphere.vert", "sphere.frag");
     mSphericalShaderForSubPlanet = NULL;
     DR_SAVE_DELETE(mRenderer);
 }
 
 DRReturn PlanetSektor::move(float fTime, Camera* cam)
 {
-    RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
-    //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
-    else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
-    mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
-    Unit distance = mLastRelativeCameraPosition.length()-mRadius;
-    distance = distance.convertTo(KM);       
     
-//    mLastRelativeCameraPosition.print("cameraPos");
-    //printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
+    //mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    Sektor::move(fTime, cam);
+    //if(mParent) mLastRelativeCameraPosition = mParent->getCameraPosition() - getPosition();
+    //else mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+   // mTheta = acos(mRadius/mLastRelativeCameraPosition.length())*RADTOGRAD;
+    
     std::vector<int>* ebene = GlobalRenderer::Instance().getEbenenCount();
 	char buffer[256]; memset(buffer, 0, 256);
     
     for(uint i = 1; i < ebene->size(); i++)
         sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
-    printf("\r%s", buffer);
+    sprintf(buffer, "%s %d ", buffer, GlobalRenderer::Instance().getRenderTaskCount());
+    printf("\r[PlanetSektor::move]%s", buffer);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
-    if(isObjectInSektor(mLastRelativeCameraPosition))
+    RenderPlanet* renderer = static_cast<RenderPlanet*>(mRenderer);
+    if(!renderer->isFinishLoading())
+        renderer->generateTexture();
+    
+    //if(isObjectInSektor(mLastRelativeCameraPosition))
+    if(mTheta <= 75.0f)
     {                
         for(u32 i = 0; i < 6; i++)
         {
-            //horizont culling
+            getChild(mSubPlanets[i]);            
+            /*//horizont culling
             DRVector3 camPos = mLastRelativeCameraPosition.getVector3().normalize();
             double angle = acos(camPos.dot(DRVector3(mSubPlanets[i].x, mSubPlanets[i].y, mSubPlanets[i].z)))*RADTOGRAD-45.0;            
             //printf("\r %d, angle: %f (%f Grad) ", i, angle, angle*RADTOGRAD);
@@ -169,24 +183,70 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
             {
                 getChild(mSubPlanets[i]*static_cast<short>(1000));            
             }
+            //*/
             //else
                 //printf("\r %d, angle: %f, horizontAngle: %f", i, angle*RADTOGRAD, horizontAngle*RADTOGRAD);
+        }
+        //set neighbor pointers
+        for(u32 iChild = 0; iChild < 6; iChild++)
+        {
+            if(mChilds.find(mSubPlanets[iChild]) == mChilds.end())
+                    LOG_ERROR("sub planet missing", DR_ERROR);
+            SubPlanetSektor* child = static_cast<SubPlanetSektor*>(mChilds[mSubPlanets[iChild]]);
+            for(u8 i = 0; i < 4; i++)
+            {
+                child->setNeighbor(i, static_cast<SubPlanetSektor*>(getChild(mSubPlanets[mSubPlanetNeighborIndices[iChild*4+i]])));
+            }
         }
     }
     else
     {
         //removeInactiveChilds(1.0f);
+        removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
+        if(mChilds.size() < 6) mReadyCount = 0;
     }
-    removeInactiveChilds(GlobalRenderer::Instance().getTimeForInactiveChilds());
-    if(mRenderer)
+    
+    
+    return DR_OK;
+}
+
+DRReturn PlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
+    mTheta = 360.0f;
+    RenderPlanet* render = dynamic_cast<RenderPlanet*>(mRenderer);
+    DRReal distance = 100000.0f;
+        
+    for(std::list<Camera*>::const_iterator it = cameras.begin(); it != cameras.end(); it++)
     {
-        // set player distance to renderer for sort
-        if(render->getRenderNoisePlanetToTexture())
-            render->getRenderNoisePlanetToTexture()->setCurrentDistance(static_cast<DRReal>(mLastRelativeCameraPosition.length().convertTo(M)));
-        // remove renderer, if we didn't need him
-        if(mNotRenderSeconds >= GlobalRenderer::Instance().getTimeForInactiveChilds())
-            DR_SAVE_DELETE(mRenderer);
+        double divisor = mRadius/(*it)->getSektorPositionAtSektor(this).length();
+        double local_theta = 0.0f;
+        if(divisor <= 1.0 && divisor >= -1.0) 
+            local_theta = acos(divisor)*RADTOGRAD;
+        
+        if(local_theta < mTheta)
+            mTheta = local_theta;
+        Vector3Unit pos = (*it)->getSektorPositionAtSektor(this);
+        DRReal local_distance = static_cast<DRReal>(pos.length().convertTo(M));
+        if(local_distance < distance) distance = local_distance;
+        
+        if(it == cameras.begin())
+        {
+            Unit distance = pos.length()-mRadius;
+            distance = distance.convertTo(KM);       
+            //printf("\rdistance: %.3f KM, theta: %f", static_cast<double>(distance), mTheta);
+        }
     }
+       
+    if(render && render->getRenderNoisePlanetToTexture())
+    {
+        if(mIdleSeconds > 0.0f) distance *= 1000.0f;
+        render->getRenderNoisePlanetToTexture()->setCurrentDistance(0);
+        // delete only, if childs have there own textures ready
+        /*if(mNotRenderSeconds > GlobalRenderer::Instance().getTimeForInactiveChilds())
+            DR_SAVE_DELETE(mRenderer);*/
+    }
+    
+    
     return DR_OK;
 }
 
@@ -197,6 +257,8 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 #else
 	Uint8 *keystate = SDL_GetKeyState(NULL);
 #endif
+    RenderPlanet* renderer = static_cast<RenderPlanet*>(mRenderer);
+    if(!renderer->isFinishLoading()) return DR_NOT_ERROR;
     
     //if(isObjectInSektor(cam->getSektorPosition())) return DR_OK;
 	//Unit distance1 = Vector3Unit(mSektorPosition - cam->getSektorPosition()).length();
@@ -215,23 +277,27 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
     DRVector3 pos = (-mLastRelativeCameraPosition).getVector3().normalize();
 //    DRVector3 relCameraPos = -pos*distance1/mRadius;
      pos *= static_cast<DRReal>(distance2);
-/*   printf("\r %f %f %f, %.8f, %s  x:%s y:%s z:%s (%f %f %f)", pos.x, pos.y, pos.z, radius2, distance1.print().data(),
-									   absCameraPosition.x.print().data(), absCameraPosition.y.print().data(),
-									   absCameraPosition.z.print().data(), diff.x, diff.y, diff.z);
+     //printf("\r%f %f %f, %.8f, %s ", pos.x, pos.y, pos.z, radius2, (distance1-mRadius).print().data());
+     g_distanceToGround = (distance1-mRadius);
 										   //*/
     //glTranslatef(pos.x, pos.y, pos.z);
     //glScaled(radius2, radius2, radius2);
 	
-    mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(radius2))) * DRMatrix::translation(pos) * cam->getKameraMatrixRotation();
+    mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(radius2))) * DRMatrix::translation(pos) * cam->getCameraMatrixRotation();
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//if(mRenderer && !isObjectInSektor(cam->getSektorPosition()))
     //DRReturn ret = mRenderer->render(fTime, cam);
-    if(!isObjectInSektor(mLastRelativeCameraPosition))
+    //if(!isObjectInSektor(mLastRelativeCameraPosition))
+    //printf(" readyCount: %d",(int)mReadyCount);
+    if(isSectorVisibleFromPosition(mLastRelativeCameraPosition)
+       && (mTheta >= 70.0f || mReadyCount != 63))
     {
         mNotRenderSeconds = 0.0f;
+        if(static_cast<RenderPlanet*>(mRenderer)->isErrorOccured())
+            DR_SAVE_DELETE(mRenderer);
         if(!mRenderer)
-            mRenderer = new RenderPlanet(mID, getSektorPathName(), &mPlanetNoiseParameters);
+            mRenderer = new RenderPlanet(getSektorPathName(), &mPlanetNoiseParameters);
         if(!mRenderer) LOG_ERROR("no renderer", DR_ERROR);
         
         if(radius2 > 160.0f) mRenderer->setCurrentDetail(10);
@@ -255,7 +321,9 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
         shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix().transpose());
         DRGrafikError("PlanetSektor::render");
         
+        glDisable(GL_CULL_FACE);
         DRReturn ret = mRenderer->render(fTime, cam);
+        glEnable(GL_CULL_FACE);
         shader->unbind();
 //		GlobalRenderer::getSingleton().getPlanetShaderPtr()->unbind();
         if(ret) LOG_ERROR("Fehler bei call planet renderer", DR_ERROR);
@@ -295,55 +363,22 @@ Sektor* PlanetSektor::getChild(SektorID childID)
         SubPlanetSektor* temp = new SubPlanetSektor(mRadius, childID, this, this, 1.0f, 1);
         
         mChilds.insert(SEKTOR_ENTRY(childID, temp));
-
-        //Set neighbor pointer
-        for(int i = 0; i < 6; i++)
-        {
-            SubPlanetSektor* n = NULL;
-            if(i >= 1 && i <= 3) // right, back, left
-            {
-                if(mChilds.find(mSubPlanets[i-1]) != mChilds.end())
-                {
-                    n = dynamic_cast<SubPlanetSektor*>(mChilds[mSubPlanets[i-1]]);
-                    if(temp == n) continue;
-                    temp->setNeighbor(NEIGHBOR_LEFT, n);//left                    
-                    n->setNeighbor(NEIGHBOR_RIGHT, temp);//right 
-                }
-            }
-            else if(4 == i || 5 == i)//top, bottom
-            {
-                for(u8 j = 0; j < 4; j++)
-                {
-                    if(mChilds.find(mSubPlanets[j]) != mChilds.end())
-                    {
-                        n = dynamic_cast<SubPlanetSektor*>(mChilds[mSubPlanets[j]]);
-                        if(temp == n) continue;
-                        if(4 == i)
-                        {
-                            temp->setNeighbor(3-j, n);                    
-                            n->setNeighbor(NEIGHBOR_UP, temp);
-                        }
-                        else
-                        {
-                            temp->setNeighbor(j, n);                    
-                            n->setNeighbor(NEIGHBOR_DOWN, temp); 
-                        }
-                    }
-                }
-            }
-        }
     }
     
     return mChilds[childID];
 }
 
-bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
-{    
-    Unit l = positionInSektor.length();
+bool PlanetSektor::isObjectInSektor(SektorObject* sektorObject)
+{       
+    Unit l = sektorObject->getSektorPositionAtSektor(this).length();
 
-    double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.5 Grad, using ebene
-    //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
-    return theta <=70.0f;
+    double divisor = mRadius/l;
+    // leave with true, if distance is < radius
+    if(divisor > 1.0) return true;    
+    //double theta = acos(mRadius/l)*RADTOGRAD; // if theta < 0.35 Grad, using planes
+    double theta = acos(divisor)*RADTOGRAD;
+    //printf("\rtheta: %f, distance: %s", theta, (l-mRadius).convertTo(KM).print().data());
+    return theta <=89.822667f;
     /*
     Unit radiusSquare = mRadius.convertTo(AE)*6.0;
     radiusSquare *= radiusSquare;
@@ -351,6 +386,18 @@ bool PlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
     //return Vector3Unit(positionInParentSektor.convertTo(AE) - mSektorPosition).lengthSq() <= radiusSquare;    
     return positionInSektor.convertTo(AE).lengthSq() <= radiusSquare;    
      * */
+}
+bool PlanetSektor::isSectorVisibleFromPosition(Vector3Unit positionInSektor)
+{
+    Unit l = positionInSektor.length();
+    
+    double divisor = mRadius/l;
+    // leave with true, if distance is < radius
+    if(divisor > 1.0) return true;    
+    
+    double theta = acos(divisor)*RADTOGRAD; // if theta < 0.35 Grad, using planes
+    //printf("\rtheta: %f (%f Grad)", theta, theta*RADTOGRAD);
+    return theta <=89.94f;
 }
 
 //*************************************************************************************************

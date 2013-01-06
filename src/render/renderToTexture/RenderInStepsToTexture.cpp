@@ -1,7 +1,8 @@
 #include "RenderInStepsToTexture.h"
+#include "GlobalRenderer.h"
 
-RenderInStepsToTexture::RenderInStepsToTexture()
-: mTexture(), mStepSize(0), mIndexStepMode(0), mFinished(false), mDistance(-1.0f)
+RenderInStepsToTexture::RenderInStepsToTexture() 
+: RenderToTexture(), mStepSize(0), mIndexStepMode(0), mDistance(-1.0f)
 {
     
 }
@@ -11,12 +12,10 @@ RenderInStepsToTexture::~RenderInStepsToTexture()
     
 }
 
-DRReturn RenderInStepsToTexture::init(int stepSize, DRReal clippingBorder[4], DRTexturePtr texture)
+DRReturn RenderInStepsToTexture::init(int stepSize, DRTexturePtr texture)
 {
-	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-    mTextureSize = texture->getResolution();
-	if(mTextureSize.x <= 0 || mTextureSize.y <= 0)
-		LOG_ERROR("textureSize is invalid", DR_ERROR);
+    if(RenderToTexture::init(texture)) 
+        LOG_ERROR("error by init render to texture", DR_ERROR);
         
     mStepSize = stepSize;
     //mTextureSize = textureSize;
@@ -24,28 +23,21 @@ DRReturn RenderInStepsToTexture::init(int stepSize, DRReal clippingBorder[4], DR
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
     mCursorCurrentCount = 0;
-    mTexture = texture;
-    mFinished = false;
-    memcpy(mClippingBorder, clippingBorder, sizeof(DRReal)*4);
     
     return DR_OK;
 }
 
 DRReturn RenderInStepsToTexture::reinit(DRTexturePtr texture)
 {
-	if(!texture.getResourcePtrHolder()) return DR_ZERO_POINTER;
-	mTextureSize = texture->getResolution();;
-    if(mTextureSize.x <= 0 || mTextureSize.y <= 0)
-		LOG_ERROR("textureSize is invalid", DR_ERROR);
+    if(RenderToTexture::init(texture)) 
+        LOG_ERROR("error by init render to texture", DR_ERROR);
     
    // mTextureSize *= textureSizeScalar;
  //   mTextureSize = textureSize;
-    mTexture = texture;
     mCursorIndex = mTextureSize/2 - DRVector2i(static_cast<int>(mStepSize)/2);
     mIndexStepMode = 0;
     mCursorMaxCount = 1;
     mCursorCurrentCount = 0;
-    mFinished = false;
     
     return DR_OK;
 }
@@ -54,7 +46,16 @@ DRReturn RenderInStepsToTexture::step()
 {
      if(mCursorIndex > mTextureSize || mCursorIndex < DRVector2i(0))
      {
-        mFinished = true;
+        mFinished = 1;
+        if(mFileNameToSave.size() > 0)
+        {
+            //DRLog.writeToLog("Dateiname fur Textur: %s", filename.data());
+            //mTextureRenderer->saveImageToFile(getPathAndFilename().data());
+            DRTextureManager::Instance().saveTexture(mTexture, mFileNameToSave.data(),
+                GlobalRenderer::Instance().getTextureRenderStepSize()*
+                GlobalRenderer::Instance().getTextureRenderStepSize()*16);
+                // */
+        }
         return DR_OK;
      }
     
@@ -74,9 +75,10 @@ DRReturn RenderInStepsToTexture::step()
     glEnable(GL_CULL_FACE);
            
     //mCursorIndex / mTextureSize
-    DRVector2 clippingSize = DRVector2(mClippingBorder[1]-mClippingBorder[0],
-                                       mClippingBorder[3]-mClippingBorder[2]);
-    DRVector2 cursor = DRVector2(mCursorIndex) / DRVector2(mTextureSize) * clippingSize + DRVector2(mClippingBorder[0], mClippingBorder[2]);
+    /*DRVector2 clippingSize = DRVector2(mClippingBorder[1]-mClippingBorder[0],
+                                       mClippingBorder[3]-mClippingBorder[2]);*/
+    DRVector2 clippingSize = DRVector2(-2.0f);
+    DRVector2 cursor = DRVector2(mCursorIndex) / DRVector2(mTextureSize) * clippingSize + DRVector2(1.0f);
     DRVector2 halfStepSize = (DRVector2(static_cast<DRReal>(mStepSize)) / DRVector2(mTextureSize) * clippingSize) * 0.5f;
     
     //Reseten der Matrixen
@@ -119,23 +121,5 @@ DRReturn RenderInStepsToTexture::step()
             mCursorMaxCount++;
     }
     
-    return DR_OK;
-}
-DRReturn RenderInStepsToTexture::saveImageToFile(const char* path)
-{
-    DRIImage* image = DRIImage::newImage();
-    u8* buffer = (u8*)malloc(mTextureSize.x*mTextureSize.y*4*sizeof(u8));
-	mTexture->bind();
-    //glBindTexture(GL_TEXTURE_2D, mTextureID);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
-    if(DRGrafikError("RenderInStepsToTexture::saveImageToFile")) LOG_ERROR("Fehler bei getting texture Data!", DR_ERROR);
-    image->setSize(DRVector2i(mTextureSize.x, mTextureSize.y));
-    image->setImageFormat(-1);
-    image->setPixel(buffer);
-    if(image->saveIntoFile(path))
-        LOG_ERROR("fehler bei save", DR_ERROR);
-    
-    free(buffer);
-    delete image;
     return DR_OK;
 }

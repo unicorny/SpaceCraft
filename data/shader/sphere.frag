@@ -3,22 +3,19 @@
 // 'time' contains seconds since the program was linked.
 
 uniform sampler2D texture;
-uniform sampler2D texture2;
-uniform int      textureLoaded;
+uniform int		cameraAbove;
 
 void main()
 {
-//Default
-/*	float alpha = texture2D(texture, gl_TexCoord[0].xy).w;
-	if(alpha > 0.5) alpha = 1.0;
-	alpha = 1.0;
-	gl_FragColor = mix(texture2D(texture2, gl_TexCoord[3].xy),
-					   texture2D(texture, gl_TexCoord[0].xy),
-					   alpha);
-*/
-	if(textureLoaded == 0)
-		gl_FragColor = gl_Color;
-	else
-		gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
+	gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);	
+	/*if(cameraAbove == 1 || cameraAbove == 3)
+		gl_FragColor.r += 0.4;
+	else if(cameraAbove == 2 || cameraAbove == 7)
+		gl_FragColor.g += 0.4;
+	else if(cameraAbove == 4)
+		gl_FragColor.b += 0.4;
+	else if(cameraAbove == 0)
+		gl_FragColor = vec4(0,0,0,1);
+	//*/
 	
 }

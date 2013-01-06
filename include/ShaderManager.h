@@ -20,26 +20,21 @@ public:
     void exit();
     
     //! lädt oder return instance auf Textur
-    ShaderProgram* getShader(const char* vertexShader, const char* fragmentShader);
-    //! reduziert reference, bei null wird Textur gelöscht und OpenGL Texture in liste eingetragen
-    void      releaseShader(const char* vertexShader, const char* fragmentShader);
-    void      releaseShader(ShaderProgram* shader);
-    void      releaseShader(DHASH id);
+    ShaderProgramPtr getShaderProgram(const char* vertexShader, const char* fragmentShader);
+    ShaderProgramPtr getShaderProgram(ShaderProgramParameter* shaderParameter);       
     
-    
+    ShaderPtr getShader(const char* shaderName, GLenum shaderType);
 private:
     ShaderManager();
             
-    struct ShaderEntry
-    {
-        ShaderProgram* shader;
-        int referenzCounter;
-    };
-    
     DHASH makeShaderHash(const char* vertexShader, const char* fragmentShader);    
     
-    DRHashList mShaderEntrys;
-    bool mInitalized;
+    //DRHashList mShaderEntrys;
+    std::map<DHASH, ShaderProgramPtr>               mShaderProgramEntrys;
+    typedef std::pair<DHASH, ShaderProgramPtr>      SHADER_PROGRAM_ENTRY;
+    std::map<DHASH, ShaderPtr>                      mShaderEntrys;
+    typedef std::pair<DHASH, ShaderPtr>             SHADER_ENTRY;
+    bool                                            mInitalized;
 };
 
 #endif //__SC_SHADER_MANAGER__

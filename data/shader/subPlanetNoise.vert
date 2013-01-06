@@ -23,4 +23,5 @@ void main()
 	v_texCoord3D = vec4(texture * dir).xyz;
 
 	gl_FrontColor  = gl_Color;	
+	gl_TexCoord[0].xy = -gl_Vertex.xy*0.5+0.5;
 }

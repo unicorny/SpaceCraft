@@ -10,36 +10,54 @@
 
 #include "Sektor.h"
 #include "RenderNoisePlanetToTexture.h"
+#include "HeightMapTexture.h"
 //class RenderNoisePlanetToTexture;
 
 class RenderPlanet : public RenderSektor
 {
 public:
-    RenderPlanet(SektorID seed, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
+    RenderPlanet(DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
 
     virtual ~RenderPlanet();
+    
+    DRReturn init(DRVector3 translate, float patchScaling, const DRMatrix& rotation,
+                  int textureSize, DRString texturePath,
+                  const PlanetNoiseParameter* planetNoiseParameter);
     
     virtual DRReturn render(float fTime, Camera* cam);
     void setTexturePath(DRString texturePath) {mTexturePath = texturePath;}
     
     RenderNoisePlanetToTexture* getRenderNoisePlanetToTexture();
     __inline__ DRTexturePtr getTexture() {return mTexture;}
+    __inline__ HeightMapTexture* getHeightMap() {return mHeightMap;}
+    
+    __inline__ bool isFinishLoading() {return 4 == mInitalized;}
+    __inline__ bool isOneStepBeforeFinish() {return 3 == mInitalized;}
+    __inline__ bool isErrorOccured() {return -1 == mInitalized;}
+    __inline__ bool isInitalized() {return 0 < mInitalized;}
+    
+    
+    DRReturn generateTexture();
     
 protected:
-    RenderPlanet(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture);
-    DRReturn init(SektorID seed, DRVector3 translate, float patchScaling, const DRMatrix& rotation, 
-                  const char* vertexShader, const char* fragmentShader, int textureSize, DRString texturePath,
-                  const PlanetNoiseParameter* planetNoiseParameter, DRTexturePtr parentTexture);
+    RenderPlanet(DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter);
+    RenderPlanet();
     
-    DRReturn generateAndBindTexture();
+    
+    DRReturn bindTexture();
+    DRReturn generateFinalTexture();
     DRString getPathAndFilename();
         
-    RenderInStepsToTexturePtr   mTextureRenderer;
-    DRTexturePtr		mTexture;
-    DRTexturePtr		mPreviewTextur;
-    short               mInitalized;
-    DRString            mTexturePath;
-    bool                mUsingParentTexture;
+    RenderToTexturePtr          mTextureRenderer;
+    float                       mSeaLevelInMetres;
+    DRTexturePtr                mHeightTexture;
+    DRTexturePtr                mTexture;
+    short                       mInitalized; // 0 = nothing, 1  = preview, 2 = rendered, 3 = load texture, 4 = texture loading finish, -1 fehler
+    DRString                    mTexturePath;    
+    HeightMapTexture*           mHeightMap;
+    DRString                    mVertexShader;
+    
+    static DRString             mFragmentShader[];
     
 private:    
     

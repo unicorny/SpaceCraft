@@ -73,7 +73,7 @@ u64 Server::createNewServer()
 
 DRReturn Server::saveToFile()
 {
-    std::stringstream s(std::stringstream::in|std::stringstream::out);
+    std::stringstream s(std::ios_base::out|std::ios_base::in);
     s << "./data/_" << mServerID << "/server";
     DRFile* f = getFileDescriptor();
     if(!f) LOG_ERROR("f is zero", DR_ZERO_POINTER);

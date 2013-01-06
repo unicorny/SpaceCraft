@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "SolarSystemSektor.h"
 #include "time.h"
+#include "Camera.h"
 
 Player::Player()
 : mServerID(0), mSektorID(0), mCamera(NULL), mPosition(), mCameraFOV(45), mSeed(0), mCurrentSektor(NULL),
@@ -148,8 +149,7 @@ DRReturn Player::saveIntoFile(const char* file)
     Vector3Unit temp = mCamera->getSektorPosition();
     f.write(&temp, sizeof(Vector3Unit), 1);
     
-    std::vector<SektorID> sektorPath;
-    mCamera->getCurrentSektor()->getSektorPath(sektorPath);
+    const std::vector<SektorID>& sektorPath = mCamera->getCurrentSektor()->getSektorPath();
     //DRLog.writeToLog("[Player::saveIntoFile] camera sektor path by save: %s", mCamera->getCurrentSektor()->getSektorPathName().data());
     //temp.print("[Player::saveIntoFile] camera position", true);
     int size = sektorPath.size();

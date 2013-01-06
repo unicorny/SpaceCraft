@@ -1,10 +1,12 @@
 #include "RootSektor.h"
 #include "GlobalRenderer.h"
+#include "Camera.h"
 
 RootSektor::RootSektor(SektorID id)
 : Sektor(Vector3Unit(0.0), Unit(0.0, M), id, NULL)
 {
     mType = SEKTOR_ROOT;
+    DRFileManager::addFolderToFileSystem(getSektorPathName().data());
 }
 
 RootSektor::~RootSektor()
@@ -20,6 +22,11 @@ void RootSektor::addSektor(Sektor* sektor, SektorID id)
 DRReturn RootSektor::move(float fTime, Camera* cam)
 {
     mLastRelativeCameraPosition = cam->getSektorPositionAtSektor(this);
+    return DR_OK;
+}
+
+DRReturn RootSektor::updateVisibility(const std::list<Camera*>& cameras)
+{
     return DR_OK;
 }
 

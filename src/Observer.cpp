@@ -10,3 +10,12 @@ const char* Observer::ObserverTypeName(ObserverType type)
     }
     return "-error-";
 }
+
+void Observer::setCurrentSektor(Sektor* current)
+{
+    DHASH id = DRMakeStringHash(ObserverTypeName(mType));
+    if(mCurrentSektor) mCurrentSektor->removeObserver(id);
+    if(current)
+		current->addObserver(id, this);
+    mCurrentSektor = current;
+}

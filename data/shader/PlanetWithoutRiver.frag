@@ -33,7 +33,10 @@
 //#version 120
 #version 120
 
-uniform sampler2D texture;
+uniform sampler2D permTexture;
+uniform sampler2D texture0; // continental Definition
+uniform sampler2D texture1; // terrain Type Definiton
+uniform sampler2D texture2; // badlandSands
 
 varying vec3 v_texCoord3D;
 
@@ -57,22 +60,15 @@ uniform float MOUNTAINS_TWIST;
 uniform float HILLS_TWIST;
 uniform float BADLANDS_TWIST;
 
+
 float f_lacunarity;
 float f_persistence;
 
-struct GradientColor
-{
-	float pos;
-	vec4 color;
-};
 
 //libnoise helper
 float SCurve3 (float a) {return (a * a * (3.0 - 2.0 * a));}
 float LinearInterp (float n0, float n1, float a) {return ((1.0 - a) * n0) + (a * n1);}
-vec4 LinearInterpColor (vec4 color0, vec4 color1, float alpha)
-{
-	return (color1 * alpha) + (color0 * (1.0 - alpha));
-}
+
 int clampi(int x, int minVal, int maxVal) 
 {
   	if(x < minVal) return minVal;
@@ -96,269 +92,76 @@ float CubicInterp (vec4 n, float a)
   float s = n.y;
   return p * a * a * a + q * a * a + r * a + s;
 }
+
+/*
+ * To create offsets of one texel and one half texel in the
+ * texture lookup, we need to know the texture image size.
+ */
+#define ONE 0.00390625
+#define ONEHALF 0.001953125
+// The numbers above are 1/256 and 0.5/256, change accordingly
+// if you change the code to use another texture size.
+
+/*
+ * The interpolation function. This could be a 1D texture lookup
+ * to get some more speed, but it's not the main part of the algorithm.
+ */
+float fade(float t) {
+  // return t*t*(3.0-2.0*t); // Old fade, yields discontinuous second derivative
+  return t*t*t*(t*(t*6.0-15.0)+10.0); // Improved fade, yields C2-continuous noise
+}
+
 // noise helper
-vec4 permute(vec4 x) {return mod(((x*34.0)+1.0)*x, 289.0);}
-vec4 taylorInvSqrt(vec4 r) {return 1.79284291400159 - 0.85373472095314 * r;}
 vec3 fade(vec3 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
-
-float snoise(vec3 v)
-  { 
-  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
-  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
-
-// First corner
-  vec3 i  = floor(v + dot(v, C.yyy) );
-  vec3 x0 =   v - i + dot(i, C.xxx) ;
-
-// Other corners
-  vec3 g = step(x0.yzx, x0.xyz);
-  vec3 l = 1.0 - g;
-  vec3 i1 = min( g.xyz, l.zxy );
-  vec3 i2 = max( g.xyz, l.zxy );
-
-  //  x0 = x0 - 0. + 0.0 * C 
-  vec3 x1 = x0 - i1 + 1.0 * C.xxx;
-  vec3 x2 = x0 - i2 + 2.0 * C.xxx;
-  vec3 x3 = x0 - 1. + 3.0 * C.xxx;
-
-// Permutations
-  i = mod(i, 289.0 ); 
-  vec4 p = permute( permute( permute( 
-             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-           + i.y + vec4(0.0, i1.y, i2.y, 1.0 )) 
-           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
-
-// Gradients
-// ( N*N points uniformly over a square, mapped onto an octahedron.)
-  float n_ = 1.0/7.0; // N=7
-  vec3  ns = n_ * D.wyz - D.xzx;
-
-  vec4 j = p - 49.0 * floor(p * ns.z *ns.z);  //  mod(p,N*N)
-
-  vec4 x_ = floor(j * ns.z);
-  vec4 y_ = floor(j - 7.0 * x_ );    // mod(j,N)
-
-  vec4 x = x_ *ns.x + ns.yyyy;
-  vec4 y = y_ *ns.x + ns.yyyy;
-  vec4 h = 1.0 - abs(x) - abs(y);
-
-  vec4 b0 = vec4( x.xy, y.xy );
-  vec4 b1 = vec4( x.zw, y.zw );
-
-  //vec4 s0 = vec4(lessThan(b0,0.0))*2.0 - 1.0;
-  //vec4 s1 = vec4(lessThan(b1,0.0))*2.0 - 1.0;
-  vec4 s0 = floor(b0)*2.0 + 1.0;
-  vec4 s1 = floor(b1)*2.0 + 1.0;
-  vec4 sh = -step(h, vec4(0.0));
-
-  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
-  vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww ;
-
-  vec3 p0 = vec3(a0.xy,h.x);
-  vec3 p1 = vec3(a0.zw,h.y);
-  vec3 p2 = vec3(a1.xy,h.z);
-  vec3 p3 = vec3(a1.zw,h.w);
-
-//Normalise gradients
-  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-  p0 *= norm.x;
-  p1 *= norm.y;
-  p2 *= norm.z;
-  p3 *= norm.w;
-
-// Mix final noise value
-  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-  m = m * m;
-  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), 
-                                dot(p2,x2), dot(p3,x3) ) );
-  }
-
-// Classic Perlin noise
-float cnoise(vec3 P)
+  /*
+ * 3D classic noise. Slower, but a lot more useful than 2D noise, with texture lookup
+ */
+float noise(vec3 P)
 {
-  vec3 Pi0 = floor(P); // Integer part for indexing
-  vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
-  Pi0 = mod(Pi0, 289.0);
-  Pi1 = mod(Pi1, 289.0);
-  vec3 Pf0 = fract(P); // Fractional part for interpolation
-  vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
-  vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
-  vec4 iy = vec4(Pi0.yy, Pi1.yy);
-  vec4 iz0 = Pi0.zzzz;
-  vec4 iz1 = Pi1.zzzz;
+  vec3 Pi = ONE*floor(P)+ONEHALF; // Integer part, scaled so +1 moves one texel
+                                  // and offset 1/2 texel to sample texel centers
+  vec3 Pf = fract(P);     // Fractional part for interpolation
 
-  vec4 ixy = permute(permute(ix) + iy);
-  vec4 ixy0 = permute(ixy + iz0);
-  vec4 ixy1 = permute(ixy + iz1);
+  // Noise contributions from (x=0, y=0), z=0 and z=1
+  float perm00 = texture2D(permTexture, Pi.xy).a ;
+  vec3  grad000 = texture2D(permTexture, vec2(perm00, Pi.z)).rgb * 4.0 - 1.0;
+  float n000 = dot(grad000, Pf);
+  vec3  grad001 = texture2D(permTexture, vec2(perm00, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n001 = dot(grad001, Pf - vec3(0.0, 0.0, 1.0));
 
-  vec4 gx0 = ixy0 / 7.0;
-  vec4 gy0 = fract(floor(gx0) / 7.0) - 0.5;
-  gx0 = fract(gx0);
-  vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
-  vec4 sz0 = step(gz0, vec4(0.0));
-  gx0 -= sz0 * (step(0.0, gx0) - 0.5);
-  gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+  // Noise contributions from (x=0, y=1), z=0 and z=1
+  float perm01 = texture2D(permTexture, Pi.xy + vec2(0.0, ONE)).a ;
+  vec3  grad010 = texture2D(permTexture, vec2(perm01, Pi.z)).rgb * 4.0 - 1.0;
+  float n010 = dot(grad010, Pf - vec3(0.0, 1.0, 0.0));
+  vec3  grad011 = texture2D(permTexture, vec2(perm01, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n011 = dot(grad011, Pf - vec3(0.0, 1.0, 1.0));
 
-  vec4 gx1 = ixy1 / 7.0;
-  vec4 gy1 = fract(floor(gx1) / 7.0) - 0.5;
-  gx1 = fract(gx1);
-  vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
-  vec4 sz1 = step(gz1, vec4(0.0));
-  gx1 -= sz1 * (step(0.0, gx1) - 0.5);
-  gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+  // Noise contributions from (x=1, y=0), z=0 and z=1
+  float perm10 = texture2D(permTexture, Pi.xy + vec2(ONE, 0.0)).a ;
+  vec3  grad100 = texture2D(permTexture, vec2(perm10, Pi.z)).rgb * 4.0 - 1.0;
+  float n100 = dot(grad100, Pf - vec3(1.0, 0.0, 0.0));
+  vec3  grad101 = texture2D(permTexture, vec2(perm10, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n101 = dot(grad101, Pf - vec3(1.0, 0.0, 1.0));
 
-  vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
-  vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
-  vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
-  vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
-  vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
-  vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
-  vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
-  vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+  // Noise contributions from (x=1, y=1), z=0 and z=1
+  float perm11 = texture2D(permTexture, Pi.xy + vec2(ONE, ONE)).a ;
+  vec3  grad110 = texture2D(permTexture, vec2(perm11, Pi.z)).rgb * 4.0 - 1.0;
+  float n110 = dot(grad110, Pf - vec3(1.0, 1.0, 0.0));
+  vec3  grad111 = texture2D(permTexture, vec2(perm11, Pi.z + ONE)).rgb * 4.0 - 1.0;
+  float n111 = dot(grad111, Pf - vec3(1.0, 1.0, 1.0));
 
-  vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
-  g000 *= norm0.x;
-  g010 *= norm0.y;
-  g100 *= norm0.z;
-  g110 *= norm0.w;
-  vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
-  g001 *= norm1.x;
-  g011 *= norm1.y;
-  g101 *= norm1.z;
-  g111 *= norm1.w;
+  // Blend contributions along x
+  vec4 n_x = mix(vec4(n000, n001, n010, n011),
+                 vec4(n100, n101, n110, n111), fade(Pf.x));
 
-  float n000 = dot(g000, Pf0);
-  float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
-  float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
-  float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
-  float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
-  float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
-  float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
-  float n111 = dot(g111, Pf1);
+  // Blend contributions along y
+  vec2 n_xy = mix(n_x.xy, n_x.zw, fade(Pf.y));
 
-  vec3 fade_xyz = fade(Pf0);
-  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
-  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-  return 2.2 * n_xyz;
-}
-/// Square root of 3.
-const float SQRT_3 = 1.7320508075688772935;
-#extension GL_EXT_gpu_shader4 : enable
-int IntValueNoise3D (ivec3 p, int seed)
-{
-  // All constants are primes and must remain prime in order for this noise
-  // function to work correctly.
-  int n = (
-      1619    * p.x
-    + 31337    * p.y
-    + 6971    * p.z
-    + 1013 * seed)
-    & 0x7fffffff;
-  n = (n >> 13) ^ n;
-  return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-}
+  // Blend contributions along z
+  float n_xyz = mix(n_xy.x, n_xy.y, fade(Pf.z));
 
-float ValueNoise3D (vec3 p, int seed)
-{
-  return 1.0 - int(IntValueNoise3D (ivec3(p), seed) / 1073741824.0);
-}
-
-float voronoi(vec3 p, int seed, float frequenzy, float displacement, bool enableDistance)
-{
-	// This method could be more efficient by caching the seed values.  Fix
-  // later.
-
-  p *= frequenzy;
-  
-  ivec3 Int = ivec3(p.x > 0.0? int(p.x): int(p.x) - 1,
-					p.y > 0.0? int(p.y): int(p.y) - 1,
-					p.z > 0.0? int(p.z): int(p.z) - 1);
-
-  float minDist = 2147483647.0;
-  vec3 candidate = vec3(0.0);
-
-  // Inside each unit cube, there is a seed point at a random position.  Go
-  // through each of the nearby cubes until we find a cube with a seed point
-  // that is closest to the specified position.
-  for (int zCur = Int.z - 2; zCur <= Int.z + 2; zCur++) {
-    for (int yCur = Int.y - 2; yCur <= Int.y + 2; yCur++) {
-      for (int xCur = Int.x - 2; xCur <= Int.x + 2; xCur++) {
-
-        // Calculate the position and distance to the seed point inside of
-        // this unit cube.
-		vec3 Pos = vec3(xCur + ValueNoise3D (vec3(xCur, yCur, zCur), seed    ),	
-						yCur + ValueNoise3D (vec3(xCur, yCur, zCur), seed + 1),
-						zCur + ValueNoise3D (vec3(xCur, yCur, zCur), seed + 2));
-		vec3 Dist = Pos-p;
-        float dist = Dist.x * Dist.x + Dist.y * Dist.y + Dist.z * Dist.z;
-
-        if (dist < minDist) {
-          // This seed point is closer to any others found so far, so record
-          // this seed point.
-          minDist = dist;
-		  candidate = Pos;
-        }
-      }
-    }
-  }
-
-  float value;
-  if (enableDistance)
-  {
-    // Determine the distance to the nearest seed point.
-	vec3 Dist = candidate - p;
-    value = (length(Dist)) * SQRT_3 - 1.0;
-  } 
-  else
-  {
-    value = 0.0;
-  }
-
-  // Return the calculated distance with the displacement value applied.
-  return value + (displacement * ValueNoise3D (vec3(floor (candidate)), seed));
-}
-
-float svoronoi(vec3 p, float frequenzy)
-{	
-	p *= frequenzy;
-	ivec3 i = ivec3(floor(p));
-	vec3 f = p - vec3(i);
-
-	float dist1 = 9999999.0;
-	float dist2 = 9999999.0;
-	vec2 distv = vec2(9999999.0);
-	vec3 cell;
-	
-	//vec2 cell;
-
-	ivec3 index = ivec3(-1);
-	for (index.z = -1; index.z <= 1; index.z++)
-	{
-		for (index.y = -1; index.y <= 1; index.y++)
-		{
-			for (index.x = -1; index.x <= 1; index.x++)
-			{
-				float noise = 0.5 + 0.5 * snoise(i+index);
-				cell = vec3(noise);
-				cell += vec3(index)-f;
-				float dist = dot(cell, cell);
-				
-				distv.x = (dist < distv.x) ? dist : distv.x;
-			
-				if (dist < distv.x)
-				{
-					distv.y = distv.x;
-					distv.x = dist;
-				}
-				else if (dist < distv.y)
-				{
-					distv.y = dist;
-				}//*/
-			}
-		}
-	}	
-	return vec2(sqrt(distv)).x*2.0-1.0;
+  // We're done, return the final noise value.
+  return n_xyz;
 }
 
 float sOctaveNoise(vec3 p, float frequenzy, int octaveCount)
@@ -368,7 +171,7 @@ float sOctaveNoise(vec3 p, float frequenzy, int octaveCount)
 //	cnoise(p*frequenzy);
 	for(int curOctave = 0; curOctave < octaveCount; curOctave++)
 	{
-		value += snoise(p*frequenzy) * curPersistence;
+		value += noise(p*frequenzy) * curPersistence;
 		p *= f_lacunarity;
 		curPersistence *= f_persistence;
 	}
@@ -392,7 +195,7 @@ float sridged(vec3 p, float frequency, int octaveCount)
 
 	for(int curOctave = 0; curOctave < octaveCount; curOctave++)
 	{
-		signal = snoise(p);
+		signal = noise(p);
 
 		// Make the ridges.
 		signal = abs(signal);
@@ -431,7 +234,7 @@ float sbillow(vec3 p, float frequency, int octaveCount)
 //	cnoise(p*frequenzy);
 	for(int curOctave = 0; curOctave < octaveCount; curOctave++)
 	{
-		signal = snoise(p);
+		signal = noise(p);
 		signal = 2.0*abs(signal)-1.0;
 		value += signal * curPersistence;
 		p *= f_lacunarity;
@@ -523,39 +326,6 @@ float terrace(float value, float points[6], int pointsCount)
   return LinearInterp (valuev.x, valuev.y, alpha);
 }
 
-vec4 gradientColor(float value, GradientColor points[10], int pointsCount)
-{
-  // Find the first element in the control point array that has a value
-  // larger than the output value from the source module.
-  int indexPos;
-  for (indexPos = 0; indexPos < pointsCount; indexPos++) {
-    if (value < points[indexPos].pos) {
-      break;
-    }
-  }
-
-  // Find the two nearest control points so that we can map their values
-  // onto a quadratic curve.
-  ivec2 index = ivec2(clampi(indexPos - 1, 0, pointsCount - 1),
-					  clampi(indexPos    , 0, pointsCount - 1));
-
-  // If some control points are missing (which occurs if the output value from
-  // the source module is greater than the largest value or less than the
-  // smallest value of the control point array), get the value of the nearest
-  // control point and exit now.
-  if (index.x == index.y) 
-    return points[index.y].color;
-
-  // Compute the alpha value used for linear interpolation.
-  vec2 inputv = vec2(points[index.x].pos, points[index.y].pos);
-  float alpha = (value - inputv.x) / (inputv.y - inputv.x);
-
-  vec4 color0 = points[index.x].color;
-  vec4 color1 = points[index.y].color;
-
-  // Now perform the linear interpolation given the alpha value.
-  return LinearInterpColor (color0, color1, alpha);
-}
 
 float blend(vec3 value)
 {
@@ -579,144 +349,17 @@ vec3 turbulence(vec3 value, float seed, float frequency, float power, int roughn
 		      sOctaveNoise(v2, frequency, roughness)*power);
 }
 
-float BaseContinentDefinition(vec3 value)
-{
-	vec2 curveTemp[10];
-	
-	////////////////////////////////////////////////////////////////////////////
-	// Module group: continent definition
-	////////////////////////////////////////////////////////////////////////////
-
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: base continent definition (7 noise modules)
-	//
-	// This subgroup roughly defines the positions and base elevations of the
-	// planet's continents.
-	//
-	// The "base elevation" is the elevation of the terrain before any terrain
-	// features (mountains, hills, etc.) are placed on that terrain.
-	//
-	// -1.0 represents the lowest elevations and +1.0 represents the highest
-	// elevations.
-	//
-	// 1: [Continent module]: This Perlin-noise module generates the continents.
-	//    This noise module has a high number of octaves so that detail is
-	//    visible at high zoom levels.
-	f_lacunarity = CONTINENT_LACUNARITY;
-	float baseContinentDef_pe0 = sOctaveNoise(value, CONTINENT_FREQUENCY, 14);
-
-
-	// 2: [Continent-with-ranges module]: Next, a curve module modifies the
-	//    output value from the continent module so that very high values appear
-	//    near sea level.  This defines the positions of the mountain ranges.	
-	curveTemp[0] = vec2(-2.0000 + SEA_LEVEL,-1.625 + SEA_LEVEL);
-	curveTemp[1] = vec2(-1.0000 + SEA_LEVEL,-1.375 + SEA_LEVEL);
-	curveTemp[2] = vec2( 0.0000 + SEA_LEVEL,-0.375 + SEA_LEVEL);
-	curveTemp[3] = vec2( 0.0625 + SEA_LEVEL, 0.125 + SEA_LEVEL);
-	curveTemp[4] = vec2( 0.1250 + SEA_LEVEL, 0.250 + SEA_LEVEL);
-	curveTemp[5] = vec2( 0.2500 + SEA_LEVEL, 1.000 + SEA_LEVEL);
-	curveTemp[6] = vec2( 0.5000 + SEA_LEVEL, 0.250 + SEA_LEVEL);
-	curveTemp[7] = vec2( 0.7500 + SEA_LEVEL, 0.250 + SEA_LEVEL);
-	curveTemp[8] = vec2( 1.0000 + SEA_LEVEL, 0.500 + SEA_LEVEL);
-	curveTemp[9] = vec2( 2.0000 + SEA_LEVEL, 0.500 + SEA_LEVEL);
-	float baseContinentDef_cu = curve(baseContinentDef_pe0, curveTemp, 10);
-
-	// 3: [Carver module]: This higher-frequency Perlin-noise module will be
-	//    used by subsequent noise modules to carve out chunks from the mountain
-	//    ranges within the continent-with-ranges module so that the mountain
-	//    ranges will not be complely impassible.
-	float baseContinentDef_pe1 = sOctaveNoise(value+1, CONTINENT_FREQUENCY * 4.34375, 11);
-
-	// 4: [Scaled-carver module]: This scale/bias module scales the output
-	//    value from the carver module such that it is usually near 1.0.  This
-	//    is required for step 5.
-	float baseContinentDef_sb = baseContinentDef_pe1 * 0.375 + 0.625;
-
-	// 5: [Carved-continent module]: This minimum-value module carves out chunks
-	//    from the continent-with-ranges module.  It does this by ensuring that
-	//    only the minimum of the output values from the scaled-carver module
-	//    and the continent-with-ranges module contributes to the output value
-	//    of this subgroup.  Most of the time, the minimum-value module will
-	//    select the output value from the continents-with-ranges module since
-	//    the output value from the scaled-carver module is usually near 1.0.
-	//    Occasionally, the output value from the scaled-carver module will be
-	//    less than the output value from the continent-with-ranges module, so
-	//    in this case, the output value from the scaled-carver module is
-	//    selected.	
-	float baseContinentDef_mi = min(baseContinentDef_sb, baseContinentDef_cu);
-
-	// 6: [Clamped-continent module]: Finally, a clamp module modifies the
-	//    carved-continent module to ensure that the output value of this
-	//    subgroup is between -1.0 and 1.0.
-	float baseContinentDef_cl = clampf(baseContinentDef_mi, -1.0, 1.0);
-
-	return baseContinentDef_cl;
-}
-
-float BaseContinentDefinition_se(vec3 value)
-{
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: continent definition (5 noise modules)
-	//
-	// This subgroup warps the output value from the the base-continent-
-	// definition subgroup, producing more realistic terrain.
-	//
-	// Warping the base continent definition produces lumpier terrain with
-	// cliffs and rifts.
-	//
-	// -1.0 represents the lowest elevations and +1.0 represents the highest
-	// elevations.
-	//
-
-	// 3: [Warped-base-continent-definition module]: This turbulence module
-	//    warps the output value from the intermediate-turbulence module.  This
-  	//    turbulence has a higher frequency, but lower power, than the
-  	//    intermediate-turbulence module, adding some fine detail to it.
-	vec3 continentDef_tu2 = turbulence(value, 12, CONTINENT_FREQUENCY * 95.25, CONTINENT_FREQUENCY / 1019.75, 11);
-
-	// 2: [Intermediate-turbulence module]: This turbulence module warps the
-  	//    output value from the coarse-turbulence module.  This turbulence has
-  	//    a higher frequency, but lower power, than the coarse-turbulence
-  	//    module, adding some intermediate detail to it.
-	vec3 continentDef_tu1 = turbulence(continentDef_tu2, 11, CONTINENT_FREQUENCY * 47.25, CONTINENT_FREQUENCY / 433.75, 12);
-
-	// 1: [Coarse-turbulence module]: This turbulence module warps the output
-  	//    value from the base-continent-definition subgroup, adding some coarse
-  	//    detail to it.
-	vec3 continentDef_tu0 = turbulence(continentDef_tu1, 10, CONTINENT_FREQUENCY * 15.25, CONTINENT_FREQUENCY / 113.75, 13);
-	
-	return BaseContinentDefinition(value);
-	
-	float baseContinentDef_cl = BaseContinentDefinition(value);
-	float baseContinentDef_cl_tu0 = BaseContinentDefinition(continentDef_tu0);
-
-	// Module subgroup: continent definition (5 noise modules) (turbulencec are calculated bevore)
-	// 4: [Select-turbulence module]: At this stage, the turbulence is applied
-  	//    to the entire base-continent-definition subgroup, producing some very
-  	//    rugged, unrealistic coastlines.  This selector module selects the
-  	//    output values from the (unwarped) base-continent-definition subgroup
-  	//    and the warped-base-continent-definition module, based on the output
-  	//    value from the (unwarped) base-continent-definition subgroup.  The
-  	//    selection boundary is near sea level and has a relatively smooth
-  	//    transition.  In effect, only the higher areas of the base-continent-
-  	//    definition subgroup become warped; the underwater and coastal areas
-  	//    remain unaffected.
-	float continentDef_se = select(baseContinentDef_cl, baseContinentDef_cl_tu0,
-				       baseContinentDef_cl, vec2(SEA_LEVEL-0.0375, SEA_LEVEL+1000.0375), 0.0625);
-	return continentDef_se;
-}
-
-float unpackHeight(vec3 color)
-{   
-	return (color.r+color.g*256.0 + (color.b*256.0*256.0))/(256.0*256.0);
-}
-
 vec3 packHeight(float height) 
 { 
 	float b = floor(height * 256.0);
 	float g = floor(height * 65536.0) - (b*256.0);
 	float r = (floor(height * 16777216.0) - (b*65536.0)) - (g*256.0);
 	return vec3(r, g, b)/ 256.0;
+}
+
+float unpackHeight(vec3 color)
+{   
+	return (color.r+color.g*256.0 + (color.b*256.0*256.0))/(256.0*256.0);
 }
 
 void main( void )
@@ -731,57 +374,19 @@ void main( void )
 	float terraceTemp[6];
 	float n = 0;
 
-	f_lacunarity = CONTINENT_LACUNARITY;
-	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
-n = baseContinentDef_pe0;
-/*
+	
+	//float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
+//n = baseContinentDef_pe0;
+
 	//turbulences must be calculated bevore
 	
 
-	//Module subgroup: terrain type definition (3 noise modules)
-	// 1: [Warped-continent module]: This turbulence module slightly warps the
-  	//    output value from the continent-definition group.  This prevents the
-  	//    rougher terrain from appearing exclusively at higher elevations.
-  	//    Rough areas may now appear in the the ocean, creating rocky islands
-  	//    and fjords.
-	vec3 terrainTypeDef_tu = turbulence(v_texCoord3D, 20, CONTINENT_FREQUENCY * 18.125, CONTINENT_FREQUENCY / 20.59375 * TERRAIN_OFFSET, 3);
-	//terrainTypeDef_tu = v_texCoord3D;
-  
-	float continentDef_se = BaseContinentDefinition_se(v_texCoord3D);
-	float continentDef_se_tu = BaseContinentDefinition_se(terrainTypeDef_tu);
+	  
+	//float continentDef_se = BaseContinentDefinition_se(v_texCoord3D);
+	float continentDef_se = unpackHeight(texture2D(texture0, gl_TexCoord[0].xy).xyz*2.0-1.0);
+	//float continentDef_se_tu = BaseContinentDefinition_se(terrainTypeDef_tu);
 
-	////////////////////////////////////////////////////////////////////////////
-	// Module group: terrain type definition
-	////////////////////////////////////////////////////////////////////////////
-
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: terrain type definition (3 noise modules)
-	//
-	// This subgroup defines the positions of the terrain types on the planet.
-	//
-	// Terrain types include, in order of increasing roughness, plains, hills,
-	// and mountains.
-	//
-	// This subgroup's output value is based on the output value from the
-	// continent-definition group.  Rougher terrain mainly appears at higher
-	// elevations.
-	//
-	// -1.0 represents the smoothest terrain types (plains and underwater) and
-	// +1.0 represents the roughest terrain types (mountains).
-	//
-	
-
-
-	// 2: [Roughness-probability-shift module]: This terracing module sharpens
-	//    the edges of the warped-continent module near sea level and lowers
-	//    the slope towards the higher-elevation areas.  This shrinks the areas
-	//    in which the rough terrain appears, increasing the "rarity" of rough
-	//    terrain.
-	//terrainTypeDef_te.SetSourceModule (0, terrainTypeDef_tu);
-	terraceTemp[0] = -1.0;
-	terraceTemp[1] = SHELF_LEVEL + SEA_LEVEL / 2.0;
-	terraceTemp[2] =  1.0;
-	float terrainTypeDef_te = terrace(continentDef_se_tu, terraceTemp, 3);
+	float terrainTypeDef_te = unpackHeight(texture2D(texture1, gl_TexCoord[0].xy).xyz*2.0-1.0);
 	
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: mountainous terrain
@@ -1091,187 +696,6 @@ n = baseContinentDef_pe0;
 	float plainsTerrain_sb2 = plainsTerrain_mu * 2.0 -1.0;
 
 	////////////////////////////////////////////////////////////////////////////
-	// Module group: badlands terrain
-	////////////////////////////////////////////////////////////////////////////
-
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: badlands sand (6 noise modules)
-	//
-	// This subgroup generates the sandy terrain for the badlands.
-	//
-	// -1.0 represents the lowest elevations and +1.0 represents the highest
-	// elevations.
-	//
-
-	// 1: [Sand-dunes module]: This ridged-multifractal-noise module generates
-	//    sand dunes.  This ridged-multifractal noise is generated with a single
-	//    octave, which makes very smooth dunes.
-	f_lacunarity = BADLANDS_LACUNARITY;
-	float badlandsSand_rm = sridged(v_texCoord3D+80, 6163.5, 1);
-
-	// 2: [Scaled-sand-dunes module]: This scale/bias module shrinks the dune
-	//    heights by a small amount.  This is necessary so that the subsequent
-	//    noise modules in this subgroup can add some detail to the dunes.
-	float badlandsSand_sb0 = badlandsSand_rm * 0.875;
-
-	// 3: [Dune-detail module]: This noise module uses Voronoi polygons to
-	//    generate the detail to add to the dunes.  By enabling the distance
-	//    algorithm, small polygonal pits are generated; the edges of the pits
-	//    are joined to the edges of nearby pits.
-	float badlandsSand_vo = svoronoi(v_texCoord3D, 16183.25);//16183.25);
-	badlandsSand_vo = voronoi(v_texCoord3D, 81, 16183.25, 1.0, false);
-
-	// 4: [Scaled-dune-detail module]: This scale/bias module shrinks the dune
-	//    details by a large amount.  This is necessary so that the subsequent
-	//    noise modules in this subgroup can add this detail to the sand-dunes
-	//    module.
-	float badlandsSand_sb1 = badlandsSand_vo * 0.25+0.25;
-
-	// 5: [Dunes-with-detail module]: This addition module combines the scaled-
-	//    sand-dunes module with the scaled-dune-detail module.
-	float badlandsSand_ad = badlandsSand_sb0 + badlandsSand_sb1;
-
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: badlands cliffs (7 noise modules)
-	//
-	// This subgroup generates the cliffs for the badlands.
-	//
-	// -1.0 represents the lowest elevations and +1.0 represents the highest
-	// elevations.
-	//
-
-	// 6: [Warped-cliffs module]: This turbulence module warps the output value
-  	//    from the coarse-turbulence module.  This turbulence has a higher
-  	//    frequency, but lower power, than the coarse-turbulence module, adding
-  	//    some fine detail to it.
-	vec3 badlandsCliffs_tu1 = turbulence(v_texCoord3D, 92, 36107.0, 1.0 / 211543.0 * BADLANDS_TWIST, 3);
-
-	// 5: [Coarse-turbulence module]: This turbulence module warps the output
-  	//    value from the terraced-cliffs module, adding some coarse detail to
-  	//    it.
-	vec3 badlandsCliffs_tu0 = turbulence(badlandsCliffs_tu1, 91, 16111.0, 1.0 / 141539.0 * BADLANDS_TWIST, 3);
-	  
-	// 1: [Cliff-basis module]: This Perlin-noise module generates some coherent
-	//    noise that will be used to generate the cliffs.
-	float badlandsCliffs_pe = sOctaveNoise(badlandsCliffs_tu0+90, CONTINENT_FREQUENCY * 839.0, 6);
-
-	// 2: [Cliff-shaping module]: Next, this curve module applies a curve to the
-	//    output value from the cliff-basis module.  This curve is initially
-	//    very shallow, but then its slope increases sharply.  At the highest
-	//    elevations, the curve becomes very flat again.  This produces the
-	//    stereotypical Utah-style desert cliffs.
-	curveTemp[0] = vec2(-2.0000, -2.0000);
-	curveTemp[1] = vec2(-1.0000, -1.2500);
-	curveTemp[2] = vec2(-0.0000, -0.7500);
-	curveTemp[3] = vec2( 0.5000, -0.2500);
-	curveTemp[4] = vec2( 0.6250,  0.8750);
-	curveTemp[5] = vec2( 0.7500,  1.0000);
-	curveTemp[6] = vec2( 2.0000,  1.2500);
-	float badlandsCliffs_cu = curve(badlandsCliffs_pe, curveTemp, 7);
-
-	// 3: [Clamped-cliffs module]: This clamping module makes the tops of the
-	//    cliffs very flat by clamping the output value from the cliff-shaping
-	//    module so that the tops of the cliffs are very flat.
-	float badlandsCliffs_cl = clamp(badlandsCliffs_cu, -999.125, 0.875);
-
-	// 4: [Terraced-cliffs module]: Next, this terracing module applies some
-	//    terraces to the clamped-cliffs module in the lower elevations before
-	//    the sharp cliff transition.
-	terraceTemp[0] = -1.0000;
-	terraceTemp[1] = -0.8750;
-	terraceTemp[2] = -0.7500;
-	terraceTemp[3] = -0.5000;
-	terraceTemp[4] =  0.0000;
-	terraceTemp[5] =  1.0000;
-	float badlandsCliffs_te = terrace(badlandsCliffs_cl, terraceTemp, 6);
-	//n = badlandsCliffs_te;
-
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: badlands terrain (3 noise modules)
-	//
-	// Generates the final badlands terrain.
-	//
-	// Using a scale/bias module, the badlands sand is flattened considerably,
-	// then the sand elevations are lowered to around -1.0.  The maximum value
-	// from the flattened sand module and the cliff module contributes to the
-	// final elevation.  This causes sand to appear at the low elevations since
-	// the sand is slightly higher than the cliff base.
-	//
-	// -1.0 represents the lowest elevations and +1.0 represents the highest
-	// elevations.
-	//
-
-	// 1: [Scaled-sand-dunes module]: This scale/bias module considerably
-	//    flattens the output value from the badlands-sands subgroup and lowers
-	//    this value to near -1.0.
-	float badlandsTerrain_sb = badlandsSand_ad * 0.25 -0.75;
-
-	// 2: [Dunes-and-cliffs module]: This maximum-value module causes the dunes
-	//    to appear in the low areas and the cliffs to appear in the high areas.
-	//    It does this by selecting the maximum of the output values from the
-	//    scaled-sand-dunes module and the badlands-cliffs subgroup.
-	float badlandsTerrain_ma = max(badlandsCliffs_te, badlandsTerrain_sb);
-
-	////////////////////////////////////////////////////////////////////////////
-	// Module group: river positions
-	////////////////////////////////////////////////////////////////////////////
-
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: river positions (7 noise modules)
-	//
-	// This subgroup generates the river positions.
-	//
-	// -1.0 represents the lowest elevations and +1.0 represents the highest
-	// elevations.
-	//
-
-	// 6: [Warped-rivers module]: This turbulence module warps the output value
-  	//    from the combined-rivers module, which twists the rivers.  The high
-  	//    roughness produces less-smooth rivers.
-  	vec3 riverPositions_tu = turbulence(v_texCoord3D, 102, 9.25, 1.0 / 57.75, 6);
-	
-	// 1: [Large-river-basis module]: This ridged-multifractal-noise module
-	//    creates the large, deep rivers.
-	f_lacunarity = CONTINENT_LACUNARITY;
-	float riverPositions_rm0 = sridged(riverPositions_tu+100, 18.75, 1);
-
-	// 2: [Large-river-curve module]: This curve module applies a curve to the
-	//    output value from the large-river-basis module so that the ridges
-	//    become inverted.  This creates the rivers.  This curve also compresses
-	//    the edge of the rivers, producing a sharp transition from the land to
-	//    the river bottom.
-	curveTemp[0] = vec2(-2.000,  2.000);
-	curveTemp[1] = vec2(-1.000,  1.000);
-	curveTemp[2] = vec2(-0.125,  0.875);
-	curveTemp[3] = vec2( 0.000, -1.000);
-	curveTemp[4] = vec2( 1.000, -1.500);
-	curveTemp[5] = vec2( 2.000, -2.000);
-	float riverPositions_cu0 = curve(riverPositions_rm0, curveTemp, 6);
-
-	/// 3: [Small-river-basis module]: This ridged-multifractal-noise module
-	//     creates the small, shallow rivers.
-	float riverPositions_rm1 = sridged(riverPositions_tu+101, 43.25, 1);
-
-	// 4: [Small-river-curve module]: This curve module applies a curve to the
-	//    output value from the small-river-basis module so that the ridges
-	//    become inverted.  This creates the rivers.  This curve also compresses
-	//    the edge of the rivers, producing a sharp transition from the land to
-	//    the river bottom.
-	curveTemp[0] = vec2(-2.000,  2.0000);
-	curveTemp[1] = vec2(-1.000,  1.5000);
-	curveTemp[2] = vec2(-0.125,  1.4375);
-	curveTemp[3] = vec2( 0.000,  0.5000);
-	curveTemp[4] = vec2( 1.000,  0.2500);
-	curveTemp[5] = vec2( 2.000,  0.0000);
-	float riverPositions_cu1 = curve(riverPositions_rm1, curveTemp, 6);
-
-	// 5: [Combined-rivers module]: This minimum-value module causes the small
-	//    rivers to cut into the large rivers.  It does this by selecting the
-	//    minimum output values from the large-river-curve module and the small-
-	//    river-curve module.
-	float riverPositions_mi = min(riverPositions_cu0, riverPositions_cu1);
-
-	////////////////////////////////////////////////////////////////////////////
 	// Module group: scaled mountainous terrain
 	////////////////////////////////////////////////////////////////////////////
 
@@ -1403,6 +827,8 @@ n = baseContinentDef_pe0;
 	//    is measured in planetary elevation units 
 	float scaledPlainsTerrain_sb = plainsTerrain_sb2 * 0.00390625 + 0.0078125;
 
+	
+	float badlandsTerrain_ma = unpackHeight(texture2D(texture2, gl_TexCoord[0].xy).xyz*2.0-1.0);
 	////////////////////////////////////////////////////////////////////////////
 	// Module group: scaled badlands terrain
 	////////////////////////////////////////////////////////////////////////////
@@ -1631,63 +1057,13 @@ n = baseContinentDef_pe0;
 	//    terrain.
 	float continentsWithBadlands_ma = max(continentsWithMountains_se, continentsWithBadlands_se);
 
-	////////////////////////////////////////////////////////////////////////////
-	// Module subgroup: continents with rivers (4 noise modules)
-	//
-	// This subgroup applies the river-positions group to the continents-with-
-	// badlands subgroup.
-	//
-	// The output value from this module subgroup is measured in planetary
-	// elevation units (-1.0 for the lowest underwater trenches and +1.0 for the
-	// highest mountain peaks.)
-	//
-
-	// 1: [Scaled-rivers module]: This scale/bias module scales the output value
-	//    from the river-positions group so that it is measured in planetary
-	//    elevation units and is negative; this is required for step 2.
-	float continentsWithRivers_sb = riverPositions_mi * RIVER_DEPTH / 2.0 - RIVER_DEPTH / 2.0;
-
-	// 2: [Add-rivers-to-continents module]: This addition module adds the
-	//    rivers to the continents-with-badlands subgroup.  Because the scaled-
-	//    rivers module only outputs a negative value, the scaled-rivers module
-	//    carves the rivers out of the terrain.
-	float continentsWithRivers_ad = continentsWithBadlands_ma + continentsWithRivers_sb;
-
-	// 3: [Blended-rivers-to-continents module]: This selector module outputs
-	//    deep rivers near sea level and shallower rivers in higher terrain.  It
-	//    does this by selecting the output value from the continents-with-
-	//    badlands subgroup if the corresponding output value from the
-	//    continents-with-badlands subgroup is far from sea level.  Otherwise,
-	//    this selector module selects the output value from the add-rivers-to-
-	//    continents module.
-	float continentsWithRivers_se = select(continentsWithBadlands_ma, continentsWithRivers_ad,
-										   continentsWithBadlands_ma, vec2(SEA_LEVEL, CONTINENT_HEIGHT_SCALE + SEA_LEVEL),
-										   CONTINENT_HEIGHT_SCALE - SEA_LEVEL);
-
+	
 
 	if(n == 0.0)
-	   	n = continentsWithRivers_se;
+	   	n = continentsWithBadlands_ma;
 //*/
-	vec3 temp = packHeight(n);
+	vec3 temp = packHeight(n * 0.5 + 0.5);
 	
-	GradientColor gradient[10];
-	
-	gradient[0] =  GradientColor(-2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     0.0,     1.0));
-    gradient[1] =  GradientColor(-0.03125 	  	+ SEA_LEVEL_IN_METRES, vec4(0.02353, 0.22745, 0.49804, 1.0));
-    gradient[2] =  GradientColor(-0.0001220703 	+ SEA_LEVEL_IN_METRES, vec4(0.05490, 0.43922, 0.75294, 1.0));
-    gradient[3] =  GradientColor( 0.0 			+ SEA_LEVEL_IN_METRES, vec4(0.27451, 0.47059, 0.23529, 1.0));
-    gradient[4] =  GradientColor( 0.125 		+ SEA_LEVEL_IN_METRES, vec4(0.43137, 0.54902, 0.29412, 1.0));
-    gradient[5] =  GradientColor( 0.25 			+ SEA_LEVEL_IN_METRES, vec4(0.62745, 0.54902, 0.43529, 1.0));
-    gradient[6] =  GradientColor( 0.375 		+ SEA_LEVEL_IN_METRES, vec4(0.72157, 0.63921, 0.55294, 1.0));
-    gradient[7] =  GradientColor( 0.5 			+ SEA_LEVEL_IN_METRES, vec4(1.0));
-    gradient[8] =  GradientColor( 0.75 		 	+ SEA_LEVEL_IN_METRES, vec4(0.5,     1.0,     1.0,     1.0));
-    gradient[9] =  GradientColor( 2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     1.0,     1.0));
-
-   	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
-	n = unpackHeight(temp);
-	gl_FragColor.w = n * 0.5 + 0.5;
-        //gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), n*0.5+0.5);
-	vec4 color = vec4(v_texCoord3D, 1.0);
-	//gl_FragColor = color;
-	
+	gl_FragColor = vec4(temp, n * 0.5+0.5);
+		
 }

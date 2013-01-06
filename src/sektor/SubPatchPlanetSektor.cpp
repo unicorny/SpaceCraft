@@ -1,5 +1,6 @@
 #include "SubPatchPlanetSektor.h"
 #include "GlobalRenderer.h"
+#include "Camera.h"
 
 SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius, 
                                            SektorID id, Sektor* parent, PlanetSektor* planet,
@@ -37,7 +38,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     //mHorizontCulling = acos(cameraPosition.dot(patchPosition))*RADTOGRAD;  
     if(mParent)
     {
-        if(!isObjectInSektor(mLastRelativeCameraPosition))    
+        if(!isObjectInSektor(cam))    
             mIdleSeconds += fTime;
         else
             mIdleSeconds = 0.0f;
@@ -66,6 +67,11 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
  }
     
    
+ DRReturn SubPatchPlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
+ {
+     return DR_OK;
+ }
+ 
  DRReturn SubPatchPlanetSektor::render(float fTime, Camera* cam)
  {
      if(mIdleSeconds > 0.0f) return DR_OK;
@@ -100,8 +106,9 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
     return DR_OK;
  }
  
- bool SubPatchPlanetSektor::isObjectInSektor(Vector3Unit positionInSektor)
+ bool SubPatchPlanetSektor::isObjectInSektor(SektorObject* sektorObject)
 {    
+    Vector3Unit positionInSektor = sektorObject->getSektorPositionAtSektor(this);
     double theta = (mRadius/positionInSektor.length());
     if(theta <= 0.51029) return false;
     //double angle = acos(positionInSektor.normalize().dot(mSektorPosition.getVector3().normalize()));   

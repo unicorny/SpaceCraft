@@ -2,25 +2,79 @@ PROJECT(SpaceCraft CXX)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-SET(spaceCraftSrc main Player sektor/Sektor Server Camera render/RenderBlockLoader render/RenderBlock BlockLoader Block
-				  Unit render/GlobalRenderer ShaderProgram render/RenderPlanet 
-				  sektor/SolarSystemSektor sektor/RootSektor sektor/PlanetSektor render/RenderSektor render/RenderSolarSystem
-				  sektor/SubPlanetSektor render/RenderSubPlanet DRGeometrieHeightfield 
-				  DRGeometrieManager render/RenderInStepsToTexture render/RenderNoisePlanetToTexture ShaderManager
-				  render/RenderSubPatchPlanet sektor/SubPatchPlanetSektor Observer HeightMapTexture)
+SET(spaceCraftSrc main
+				  Player
+				  Server
+				  Camera
+				  BlockLoader
+				  Block
+				  Unit
+				  ShaderManager
+				  ShaderProgram
+				  DRGeometrieManager
+				  DRGeometrieHeightfield
+				  SektorObject
+				  Observer
+				  HeightMapTexture
+				  
+				  sektor/Sektor
+				  sektor/RootSektor
+				  sektor/SolarSystemSektor
+				  sektor/PlanetSektor
+				  sektor/SubPlanetSektor
+				  sektor/SubPatchPlanetSektor
+				  
+				  render/RenderBlockLoader
+				  render/RenderBlock
+				  render/RenderSektor
+				  render/RenderSolarSystem
+				  render/RenderPlanet 
+				  render/RenderSubPlanet 
+				  render/RenderSubPatchPlanet
+				  
+				  render/renderToTexture/GlobalRenderer 
+				  render/renderToTexture/RenderToTexture 
+				  render/renderToTexture/RenderTextureToTexture
+				  render/renderToTexture/RenderInStepsToTexture
+				  render/renderToTexture/RenderNoisePlanetToTexture		
+				  )
 #IF(WIN32)
-SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h ../include/Player.h ../include/sektor/Sektor.h ../include/Server.h
-								   ../include/Camera.h ../include/render/RenderBlockLoader.h ../include/render/RenderBlock.h
-								   ../include/BlockLoader.h ../include/Block.h ../include/Unit.h 
-								   ../include/Vector3Unit.h ../include/render/GlobalRenderer.h ../include/ShaderProgram
-								   ../include/render/RenderPlanet.h ../include/sektor/SolarSystemSektor.h ../include/sektor/RootSektor.h
-								   ../include/sektor/PlanetSektor.h ../include/render/RenderSektor.h ../include/render/RenderSolarSystem.h
-								   ../include/sektor/SubPlanetSektor.h ../include/render/RenderSubPlanet.h 
+SET(spaceCraftSrc ${spaceCraftSrc} ../include/main.h
+								   ../include/Player.h  
+								   ../include/Server.h
+								   ../include/Camera.h 
+								   ../include/BlockLoader.h 
+								   ../include/Block.h 
+								   ../include/Unit.h 
+								   ../include/Vector3Unit.h 
+								   ../include/ShaderProgram
 								   ../include/DRGeometrieHeightfield.h 
-								   ../include/DRGeometrieManager.h ../include/render/RenderInStepsToTexture.h 
-								   ../include/render/RenderNoisePlanetToTexture.h ../include/ShaderManager.h 
-								   ../include/render/RenderSubPatchPlanet.h ../include/sektor/SubPatchPlanetSektor.h
-								   ../include/Observer.h ../include/HeightMapTexture.h
+								   ../include/DRGeometrieManager.h 
+								   ../include/ShaderManager.h 
+								   ../include/SektorObject
+								   ../include/Observer.h 
+								   ../include/HeightMapTexture.h 
+								   
+								   ../include/sektor/Sektor.h
+								   ../include/sektor/RootSektor.h
+								   ../include/sektor/SolarSystemSektor.h 
+								   ../include/sektor/PlanetSektor.h 
+								   ../include/sektor/SubPlanetSektor.h 
+								   ../include/sektor/SubPatchPlanetSektor.h
+								   
+								   ../include/render/RenderBlockLoader.h 
+								   ../include/render/RenderBlock.h
+								   ../include/render/RenderSektor.h 
+								   ../include/render/RenderSolarSystem.h
+								   ../include/render/RenderPlanet.h 
+								   ../include/render/RenderSubPlanet.h 
+								   ../include/render/RenderSubPatchPlanet.h 
+								   
+								   ../include/render/renderToTexture/GlobalRenderer.h 
+								   ../include/render/renderToTexture/RenderToTexture.h
+								   ../include/render/renderToTexture/RenderTextureToTexture.h
+								   ../include/render/renderToTexture/RenderInStepsToTexture.h 
+								   ../include/render/renderToTexture/RenderNoisePlanetToTexture.h 
 								   )
 #ENDIF(WIN32)
 
