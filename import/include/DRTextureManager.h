@@ -38,6 +38,7 @@ public:
     
     void exit();
     //! lädt oder return instance auf Textur
+    //! thread save, but if called from other thread than main thread (openGL), loadAsynchron must be true
     DRTexturePtr getTexture(const char* filename, bool loadAsynchron = false, GLint glMinFilter = GL_LINEAR, GLint glMagFilter = GL_LINEAR);
     DRTexturePtr getTexture(DRVector2i size, GLuint format, GLubyte* data = NULL, GLint dataSize = 0);
     //! Warning. not testet yet!
@@ -101,6 +102,7 @@ private:
     std::queue<DRSaveTexture*> mAsynchronSaveTextures;
     std::queue<DRSaveTexture*> mAsynchronReadyToSaveTextures;
     SDL_mutex*		   mTextureLoadMutex;
+    SDL_mutex*             mGetTextureMutex;
     SDL_Thread*		   mTextureLoadThread;
     SDL_cond*		   mTextureLoadCondition;
     SDL_sem*		   mTextureLoadSemaphore;
