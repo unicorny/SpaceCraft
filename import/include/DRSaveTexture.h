@@ -29,7 +29,7 @@
 class ENGINE2_API DRSaveTexture
 {
 public:
-    DRSaveTexture(const char* savingPath, GLuint stepSize = 16384);
+    DRSaveTexture(const char* savingPath, DRTextureBufferPtr textureBuffer, GLuint stepSize = 16384);
     // no openGL funtion called
     ~DRSaveTexture();
     // create a pbo buffer with currently bind texture
@@ -37,13 +37,14 @@ public:
     //! \param stepSize how many bytes pro call will be readed
     DRReturn putPixelsToImage();
     //! cann be called in other thread, no openGL functions called
-    DRReturn saveImage();
+    virtual DRReturn saveImage();
     
     __inline__ bool isTextureReadyToSave() {return mSavingState == 2;}
     __inline__ bool isTextureSaved() {return mSavingState == 3;}
     
-private:
+protected:
     GLuint      mPboSaveID;// OpenGL Pixel Buffer Object to save texture
+    DRTextureBufferPtr mTextureBuffer;
     short	mSavingState; //
     GLuint	mSavingCursor;
     u8* 	mSavingBuffer;

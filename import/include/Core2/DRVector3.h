@@ -122,12 +122,12 @@ public:
     DRVector3 operator / (const float f)       const {return DRVector3(x/f, y/f, z/f);}
     DRVector3 operator /= (const float f)            {*this = *this / f; return *this;}
     //!  multiplieziert diesen Vektor mit einem Skalar, const
-    //! \brief * operator
+    //! \brief operator: Vector * Scalar
     //! \param f Skalar mit dem multipliziert wird
     //! \return einen neuen Vektor
     DRVector3 operator *  (const float f)       const {return DRVector3(x*f, y*f, z*f);}
     DRVector3 operator *= (const float f)             {*this = *this * f; return *this;}
- 
+
     //! \brief transformiert diesen Vektor mit der Matrix m, const
     //! \param die &uuml;bergebende Mtrix m
     //! \return einen neuen, transformierten Vektor

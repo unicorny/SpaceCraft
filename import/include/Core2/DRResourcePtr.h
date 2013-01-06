@@ -37,6 +37,56 @@
 
 #include <cstddef>
 
+template <class ResourceType>
+class DRSimpleResourcePtr
+{
+public:
+    DRSimpleResourcePtr(const DRSimpleResourcePtr<ResourceType> & resPtr);
+    explicit DRSimpleResourcePtr(ResourceType * pRes);
+    ~DRSimpleResourcePtr();
+
+    DRSimpleResourcePtr<ResourceType> & operator= (ResourceType * resPtr);
+
+    ResourceType * operator->() const { return mResource; }
+    ResourceType & operator*() const { return *mResource; }
+    operator ResourceType*() {return mResource;} 
+
+    int getRef() {return mRefCounter;}
+    void addRef() {mRefCounter++;}
+    void removeRef() {mRefCounter--;}
+
+private:
+    ResourceType*   mResource;
+    int             mRefCounter;
+};
+template <class ResourceType>
+DRSimpleResourcePtr<ResourceType>::DRSimpleResourcePtr(const DRSimpleResourcePtr<ResourceType> & resPtr)
+: mRefCounter(1)
+{
+    mResource = resPtr.mResource;
+}
+
+
+template <class ResourceType>
+DRSimpleResourcePtr<ResourceType>::DRSimpleResourcePtr(ResourceType * pRes)
+: mRefCounter(1)
+{
+    mResource = pRes;
+}
+
+template <class ResourceType>
+DRSimpleResourcePtr<ResourceType>::~DRSimpleResourcePtr()
+{
+    mResource = NULL;
+}
+
+template <class ResourceType>
+DRSimpleResourcePtr<ResourceType> & DRSimpleResourcePtr<ResourceType>::operator= (ResourceType * resPtr)
+{
+    mResource = resPtr;
+    return *this;
+}
+
 
 template <class ResourceType>
 class DRResourcePtr
