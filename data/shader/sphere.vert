@@ -34,7 +34,19 @@ void main()
 	//h = 0.0;
 	vec4 newVertex = vec4(normalize(scaledVertex.xyz)*(1.0+h*MAX_HEIGHT_IN_PERCENT), 1.0);
 		
-	gl_Position    = projection * modelview * newVertex;
+	vec4 v = newVertex;
+	if(translate.xy == vec2(-10,-10))
+	{
+		float PI = 3.14159265358979323846;
+		float alpha = (PI/2.0) * scale;
+		float R = sqrt(1.0-1.0*cos(alpha));
+		float Rlocal = (1.0- length(v.xy)/sqrt(2.0))*R;
+		//float h = 1.0 - sqrt(1.0-Rlocal*Rlocal);
+		float h = 1.0 - sqrt(1.0-R*R);
+		v = gl_Vertex;
+		v.z = 0.0;
+	}
+	gl_Position    = projection * modelview * v;//newVertex;
 //    gl_Position    = gl_ModelViewProjectionMatrix  * newVertex;
 
 	gl_FrontColor  = gl_Color;

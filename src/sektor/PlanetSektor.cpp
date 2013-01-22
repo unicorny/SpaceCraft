@@ -161,7 +161,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
     for(uint i = 1; i < ebene->size(); i++)
         sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
     sprintf(buffer, "%s %d ", buffer, GlobalRenderer::Instance().getRenderTaskCount());
-    printf("\r[PlanetSektor::move]%s", buffer);
+    //printf("\r[PlanetSektor::move]%s", buffer);
     if(EnIsButtonPressed(SDLK_k))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
@@ -267,7 +267,7 @@ DRReturn PlanetSektor::render(float fTime, Camera* cam)
 	//DRVector3 diff = Vector3Unit(mSektorPosition - cam->getSektorPosition()).convertTo(KM).getVector3();
 
     distance1 = distance1.convertTo(mRadius.getType());
-    double distance2 = 200.0f;
+    double distance2 = 2000.0f;
     Unit radius1 = mRadius;
     double radius2 = ((radius1 * distance2) / distance1);
 

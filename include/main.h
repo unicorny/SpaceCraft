@@ -9,6 +9,7 @@
 #include <limits.h>
 #include <vector>
 #include <queue>
+#include <float.h>
 
 #include "Eigen/Dense"
 #include "Eigen/Geometry"

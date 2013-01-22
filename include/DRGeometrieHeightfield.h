@@ -58,6 +58,7 @@ public:
      * \param vertexFormat currently choose between GEO_VERTEX_TRIANGLE_STRIP, GEO_VERTEX_QUADS and GEO_VERTEX_TRIANGLES
      *         GEO_VERTEX_TRIANGLE_STRIP use the half count of indices like GEO_VERTEX_QUADS and is faster to render,
      *         but it isn't suitable for mountains and cannot be used for a other GeometrieGridFormat as GEO_FULL
+     * \param curveScale if it isn't zero, the heightfield will be curved
      * \return DR_OK if no error occured
      */
     DRReturn init(u32 gridSize, DRVector3 edgePoints[4], GeometrieGridFormat format, GeometrieVertexFormat vertexFormat = GEO_VERTEX_TRIANGLES);    

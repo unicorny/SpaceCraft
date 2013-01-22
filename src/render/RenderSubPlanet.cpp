@@ -1,6 +1,7 @@
 #include "RenderSubPlanet.h"
 #include "DRGeometrieManager.h"
 #include "ShaderManager.h"
+#include "Camera.h"
 
 RenderSubPlanet::RenderSubPlanet(DRVector3 translate, float patchScaling, const DRMatrix& rotation, DRString texturePath, const PlanetNoiseParameter* planetNoiseParameter)
 : RenderPlanet(translate, patchScaling, rotation, texturePath, planetNoiseParameter), mGeometrieGrid(NULL)
@@ -35,7 +36,8 @@ DRReturn RenderSubPlanet::render(float fTime, Camera* cam)
     {
         bindTexture();
     }
-    glDisable(GL_CULL_FACE);
+    if(cam->getCurrentSektor()->getRenderer() == this)
+        glDisable(GL_CULL_FACE);
     if(mGeometrieGrid->render()) 
         LOG_ERROR("Fehler bei Geometrie Grid", DR_ERROR);
     glEnable(GL_CULL_FACE);

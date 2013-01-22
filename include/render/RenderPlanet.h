@@ -31,10 +31,10 @@ public:
     __inline__ DRTexturePtr getTexture() {return mTexture;}
     __inline__ HeightMapTexture* getHeightMap() {return mHeightMap;}
     
-    __inline__ bool isFinishLoading() {return 4 == mInitalized;}
+    __inline__ virtual bool isFinishLoading() {return 4 == mInitalized;}
     __inline__ bool isOneStepBeforeFinish() {return 3 == mInitalized;}
-    __inline__ bool isErrorOccured() {return -1 == mInitalized;}
-    __inline__ bool isInitalized() {return 0 < mInitalized;}
+    __inline__ virtual bool isErrorOccured() {return -1 == mInitalized;}
+    __inline__ virtual bool isInitalized() {return 0 < mInitalized;}
     
     
     DRReturn generateTexture();

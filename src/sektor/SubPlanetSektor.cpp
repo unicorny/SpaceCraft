@@ -457,7 +457,26 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         mMatrix = mRotation * mParent->getMatrix();
     else
         mMatrix = mParent->getMatrix();
-     
+    
+    //new Matrix
+    double alpha = (M_PI/2.0)/pow(2.0,(static_cast<double>(mSubLevel)-1.0));
+    double r = mRadius.convertTo(KM);
+    double R = sqrt(r*r-r*r*cos(alpha));
+    
+    static float rotate = 0.0;
+  //  if(cam->getCurrentSektor() == this)
+//       rotate += .2*fTime;
+    if(cam->getCurrentSektor() == this)
+        printf("\r[SubPlanetSektor::render] R:%f, rotate: %f", R, rotate);
+   if(mSubLevel > 1 && cam->getCurrentSektor() == this)
+    {    
+        mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(R*0.5))) * DRMatrix::rotationZ(rotate) * mRotation * DRMatrix::translation(-mLastRelativeCameraPosition.convertTo(KM).getVector3()) * cam->getCameraMatrixRotation();
+    }
+    //else
+    {
+        
+    }
+    
     short count = 0;
     for(std::map<u64, Sektor*>::iterator it = mChilds.begin(); it != mChilds.end(); it++)
     {
@@ -484,15 +503,21 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         * */
         if(!mRenderer) 
             LOG_ERROR("no renderer", DR_NOT_ERROR);
-        
+        DRVector3 translate = mTextureTranslate;
+        float scale = mPatchScaling;
+        if(mSubLevel > 1 && cam->getCurrentSektor() == this)
+        {
+            translate = DRVector3(-10.0f);
+            //scale = -1.0f;
+        }
         ShaderProgramPtr shader = mRenderer->getShaderProgram();
         const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();
         if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
         shader->bind();
         shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix());
         shader->setUniformMatrix("modelview", mMatrix);
-        shader->setUniform3fv("translate", mTextureTranslate);
-        shader->setUniform1f("patchScaling", mPatchScaling);
+        shader->setUniform3fv("translate", translate);
+        shader->setUniform1f("patchScaling", scale);
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);
         shader->setUniform1f("SEA_LEVEL", p->seaLevel);
