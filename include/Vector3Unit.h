@@ -102,6 +102,13 @@ public:
     //! \return einen neuen Vektor
     Vector3Unit operator *  (const double f)       const {return Vector3Unit(x*f, y*f, z*f);}
     Vector3Unit operator *= (const double f)             {*this = *this * f; return *this;}
+    
+    //!  multiplieziert diesen Vektor mit einem Array von Skalaren, also einem Vector3, const
+    //! \brief * operator
+    //! \param v Skalar mit dem multipliziert wird
+    //! \return einen neuen Vektor
+    Vector3Unit operator *  (const DRVector3 v)       const {return Vector3Unit(x*static_cast<double>(v.x), y*static_cast<double>(v.y), z*static_cast<double>(v.z));}
+    Vector3Unit operator *= (const DRVector3 v)             {*this = *this * v; return *this;}
  
     //! \brief normalisiert diesen vektor (brint die L&auml;nge auf eins), const
     //! \return einen neuen normalisierten Vektor
@@ -159,8 +166,9 @@ public:
 private:
 };
 
-// Unit * Vector3 = Vector3Unit
+// Unit * Vector3 = Vector3Unit and the other way aroud
 __inline__ Vector3Unit operator * (const Unit& u, const DRVector3& v) {return Vector3Unit(v.x*u, v.y*u, v.z*u, u.getType());}
+//__inline__ Vector3Unit operator * (const DRVector3& v, const Unit& u) {return Vector3Unit(v.x*u, v.y*u, v.z*u, u.getType());}
 
 #endif	/* __SPACE_CRAFT_VECTOR3_UNIT_H */
 

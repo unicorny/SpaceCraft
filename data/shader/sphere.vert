@@ -4,6 +4,7 @@ uniform float patchScaling;
 uniform mat4 projection;
 uniform mat4 modelview;
 uniform vec3 translate;
+uniform vec3 transformVertices;
 uniform float MAX_HEIGHT_IN_PERCENT;
 uniform float MIN_HEIGHT_IN_PERCENT;
 uniform float SEA_LEVEL;
@@ -13,7 +14,7 @@ uniform sampler2D texture;
 
 void main()
 {
-	vec4 scaledVertex = vec4(gl_Vertex.xy*(patchScaling*1.002)+translate.xy, gl_Vertex.z, 1.0);
+	vec4 scaledVertex = vec4(gl_Vertex.xy*(patchScaling)+translate.xy, gl_Vertex.z, 1.0);
 			
 	//calculate texture coordinates
 	float scale = 1.0;
@@ -35,17 +36,9 @@ void main()
 	vec4 newVertex = vec4(normalize(scaledVertex.xyz)*(1.0+h*MAX_HEIGHT_IN_PERCENT), 1.0);
 		
 	vec4 v = newVertex;
-	if(translate.xy == vec2(-10,-10))
-	{
-		float PI = 3.14159265358979323846;
-		float alpha = (PI/2.0) * scale;
-		float R = sqrt(1.0-1.0*cos(alpha));
-		float Rlocal = (1.0- length(v.xy)/sqrt(2.0))*R;
-		//float h = 1.0 - sqrt(1.0-Rlocal*Rlocal);
-		float h = 1.0 - sqrt(1.0-R*R);
-		v = gl_Vertex;
-		v.z = 0.0;
-	}
+	
+	if(length(transformVertices) > 0.0)
+		v = newVertex - vec4(transformVertices, 0.0);
 	gl_Position    = projection * modelview * v;//newVertex;
 //    gl_Position    = gl_ModelViewProjectionMatrix  * newVertex;
 

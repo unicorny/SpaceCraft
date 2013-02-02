@@ -57,7 +57,7 @@ SubPlanetSektor::SubPlanetSektor(Unit radius, SektorID id, Sektor* parent, Plane
     if(mSubLevel == 1)
     {
         mVectorToPlanetCenter = childID.normalize();
-        mSektorPosition = Vector3Unit(mVectorToPlanetCenter, KM)*mRadius;
+        mSektorPosition = mRadius*mVectorToPlanetCenter;
     }
     else
     {
@@ -189,7 +189,9 @@ DRReturn SubPlanetSektor::move(float fTime, Camera* cam)
   //      camDir *= 0.5f;
     //    camDir += 0.5f;
         
-       // printf("\r cam: %f %f %f, %f, %d", camDir.x, camDir.y, camDir.z, intersection, mSubLevel);
+       //printf("\r cam: %f %f %f, %f, %d", camDir.x, camDir.y, camDir.z, intersection, mSubLevel);
+        DRVector3 camPos = cam->getSektorPositionAtSektor(mPlanet).convertTo(KM).getVector3();
+        //printf("\r [SubPlanetSektor::Move] cam: %f %f %f = %f", camPos.x, camPos.y, camPos.z, camPos.length());
     }
     
     if(mSubLevel > 1 && !mPlanet->isReady()) return DR_OK;
@@ -462,18 +464,42 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
     double alpha = (M_PI/2.0)/pow(2.0,(static_cast<double>(mSubLevel)-1.0));
     double r = mRadius.convertTo(KM);
     double R = sqrt(r*r-r*r*cos(alpha));
+    DRVector3 transformVertices = DRVector3(0.0f);
+    
+    if(cam->getCurrentSektor() == this)
+        printf("\r %d", mSubLevel);
     
     static float rotate = 0.0;
-  //  if(cam->getCurrentSektor() == this)
-//       rotate += .2*fTime;
-    if(cam->getCurrentSektor() == this)
-        printf("\r[SubPlanetSektor::render] R:%f, rotate: %f", R, rotate);
-   if(mSubLevel > 1 && cam->getCurrentSektor() == this)
+    //if(cam->getCurrentSektor() == this)
+       //rotate += .2*fTime;
+   // if(cam->getCurrentSektor() == this)
+     //   printf("\r[SubPlanetSektor::render] R:%f, rotate: %f", R, rotate);
+   if(mSubLevel > 7)// && cam->getCurrentSektor() == this)
     {    
-        mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(R*0.5))) * DRMatrix::rotationZ(rotate) * mRotation * DRMatrix::translation(-mLastRelativeCameraPosition.convertTo(KM).getVector3()) * cam->getCameraMatrixRotation();
-    }
-    //else
-    {
+        DRVector3 centerPosition = mTextureTranslate.normalize(); 
+        DRVector3 startAxis(0.00001f, 0.00001f, 1.0f);
+
+        DRVector3 rotationAxis = startAxis.cross(centerPosition).normalize();//startAxis.cross(centerPosition).normalize();
+        float rotationAngle = startAxis.dot(centerPosition);//startAxis.dot(centerPosition);
+        
+        Eigen::Affine3f affine;
+        affine = Eigen::AngleAxisf(acosf(rotationAngle), Eigen::Vector3f(rotationAxis));
+            //*Eigen::AngleAxisf(acosf(5.0f*GRADTORAD*faktor), Eigen::Vector3f(0.0f, 0.0f, 1.0f));
+
+        transformVertices = DRVector3(0.0, 0.0, sqrt(cos(alpha))).transformCoords(DRMatrix(affine.data()));
+    
+        DRVector3 camPos = -mLastRelativeCameraPosition.convertTo(KM).getVector3();
+        
+        //printf("\r [SubPlanetSektor::Render] cam: %f km %f km %f km = %f", camPos.x, camPos.y, camPos.z, camPos.length());
+        
+        
+        //camPos = -camPos;//DRVector3(0.0f, -1.0f, 0.0f);
+        DRVector3 scale = DRVector3(static_cast<DRReal>(R/(mPatchScaling*1.004f)));
+        scale = DRVector3( mRadius.convertTo(KM)*1.0001);
+        //scale = DRVector3(1.0);
+
+//        mMatrix = DRMatrix::scaling(DRVector3(static_cast<DRReal>(R*0.5))) * DRMatrix::rotationZ(rotate) * mRotation * DRMatrix::translation(-mLastRelativeCameraPosition.convertTo(KM).getVector3()) * cam->getCameraMatrixRotation();
+        mMatrix = DRMatrix::scaling(scale) * mRotations[mCubeSideIndex] * DRMatrix::translation(camPos)  * cam->getCameraMatrixRotation();
         
     }
     
@@ -483,14 +509,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         if(it->second->isVisible())
             count++;
 	}
- /*   if(mSubLevel == 2)
-    {
-        DRVector3 childPos(mID.x, mID.y, mID.z);
-        childPos /= 1000.0f;
-        childPos = childPos.transformNormal(mRotation);
-        printf("\rchildPos: %f %f %f", childPos.x, childPos.y, childPos.z);
-    }
-  * */
+ 
     if(mNotRenderSeconds <= 0.0f || !count)
     {
        /* if(static_cast<RenderSubPlanet*>(mRenderer)->isErrorOccured())
@@ -504,12 +523,9 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         if(!mRenderer) 
             LOG_ERROR("no renderer", DR_NOT_ERROR);
         DRVector3 translate = mTextureTranslate;
-        float scale = mPatchScaling;
-        if(mSubLevel > 1 && cam->getCurrentSektor() == this)
-        {
-            translate = DRVector3(-10.0f);
-            //scale = -1.0f;
-        }
+        float scale = mPatchScaling*1.004f;
+        
+
         ShaderProgramPtr shader = mRenderer->getShaderProgram();
         const PlanetNoiseParameter* p = mPlanet->getPlanetNoiseParameters();
         if(!shader) LOG_ERROR("renderer shader isn't valid", DR_ERROR);
@@ -517,6 +533,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         shader->setUniformMatrix("projection", GlobalRenderer::Instance().getProjectionMatrix());
         shader->setUniformMatrix("modelview", mMatrix);
         shader->setUniform3fv("translate", translate);
+        shader->setUniform3fv("transformVertices", transformVertices);
         shader->setUniform1f("patchScaling", scale);
         shader->setUniform1f("MAX_HEIGHT_IN_PERCENT", p->maxHeightInPercent);
         shader->setUniform1f("MIN_HEIGHT_IN_PERCENT", p->minHeightInPercent);

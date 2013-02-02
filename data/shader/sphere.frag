@@ -4,6 +4,7 @@
 
 uniform sampler2D texture;
 uniform int		cameraAbove;
+uniform vec3 transformVertices;
 
 void main()
 {
@@ -17,5 +18,7 @@ void main()
 	else if(cameraAbove == 0)
 		gl_FragColor = vec4(0,0,0,1);
 	//*/
+	if(length(transformVertices) > 0.0)
+		gl_FragColor.r += 0.01;
 	
 }

@@ -30,7 +30,7 @@ void SektorObject::translateRel_SektorPosition(const DRVector3& translate, const
 void SektorObject::translateRel(const DRVector3& translate)
 {
     DRObjekt::translateRel(translate);
-    //printf("\r camera: %f %f %f l:%f", mPosition.x, mPosition.y, mPosition.z, mPosition.length());
+    //printf("\r [SektorObject::translateRel]: %f %f %f l:%f", mPosition.x, mPosition.y, mPosition.z, mPosition.length());
     
     if(mPosition.lengthSq() > 1000.0f*1000.0f)
     {

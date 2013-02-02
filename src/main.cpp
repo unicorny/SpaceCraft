@@ -274,6 +274,7 @@ DRReturn load()
     u16 i = 0;
     gControlModes[i++] = ControlMode(Unit(20, M), 120.0f);
     gControlModes[i++] = ControlMode(Unit(0.100, KM), 100.0f);
+    gControlModes[i++] = ControlMode(Unit(1, KM), 90.0f);
     gControlModes[i++] = ControlMode(Unit(10, KM), 80.0f);
     gControlModes[i++] = ControlMode(Unit(100, KM), 60.0f);
     gControlModes[i++] = ControlMode(Unit(1000, KM), 30.0f);
@@ -282,7 +283,7 @@ DRReturn load()
     gControlModes[i++] = ControlMode(Unit(0.1, AE), 1.0f);
     gControlModes[i++] = ControlMode(Unit(1, AE), 1.0f);
     //gControlModes[i++] = ControlMode(Unit(10, AE), 1.0f);
-    gControlModes[i++] = ControlMode(Unit(500, AE), 1.0f);
+    //gControlModes[i++] = ControlMode(Unit(500, AE), 1.0f);
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
@@ -411,9 +412,9 @@ DRReturn move(float fTime)
         g_cam->rotateRel(DRVector3(-mouseMove_y, -mouseMove_x, 0.0f)*fTime*fRotSpeed);
     //}
 
-    if(gControlModes[gCurrentControlMode].mValue.getType() == M)
-        g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
-    else
+    //if(gControlModes[gCurrentControlMode].mValue.getType() == M)
+      //  g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
+    //else
         g_cam->translateRel_SektorPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
     
     //set control mode
