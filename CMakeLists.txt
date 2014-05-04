@@ -3,6 +3,8 @@ PROJECT(SpaceCraft CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ../)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  /EHsc")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  /EHsc")
 
 SUBDIRS(src)
 INCLUDE_DIRECTORIES(include import/include include/render include/render/renderToTexture include/sektor)
