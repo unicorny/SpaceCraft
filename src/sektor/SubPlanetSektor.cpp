@@ -474,7 +474,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
        //rotate += .2*fTime;
    // if(cam->getCurrentSektor() == this)
      //   printf("\r[SubPlanetSektor::render] R:%f, rotate: %f", R, rotate);
-   if(mSubLevel > 7)// && cam->getCurrentSektor() == this)
+   if(mSubLevel > 4)// && cam->getCurrentSektor() == this)
     {    
         DRVector3 centerPosition = mTextureTranslate.normalize(); 
         DRVector3 startAxis(0.00001f, 0.00001f, 1.0f);

@@ -4,7 +4,8 @@ HeightMapTexture::HeightMapTexture(int stepSize)
 : mThis(NULL), mPixelHeightData(NULL), mLoadStepSize(stepSize), mSize(0), mPixelCopySemaphore(NULL),
   mMaxHeight(0.0f), mMaxGradient(0.0f)
 {
-    mPixelCopySemaphore = SDL_CreateSemaphore(1); LOG_WARNING_SDL();
+    mPixelCopySemaphore = SDL_CreateSemaphore(1); 
+    if(!mPixelCopySemaphore) LOG_WARNING_SDL();
     mThis = new HeightMapTexturePtr(this);
 }
 
@@ -25,7 +26,7 @@ HeightMapTexture::~HeightMapTexture()
     SDL_DestroySemaphore(mPixelCopySemaphore);
     mPixelCopySemaphore = NULL;
     DR_SAVE_DELETE_ARRAY(mPixelHeightData);
-    LOG_WARNING_SDL();    
+    //LOG_WARNING_SDL();    
 }
 
 void HeightMapTexture::load(DRTexturePtr source)

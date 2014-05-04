@@ -287,7 +287,7 @@ DRReturn load()
      
     //if(EnInit_OpenGL(1.0f, DRVideoConfig(800, 600), "Space Craft - Techdemo"))
     if(EnInit_INI("data/config.ini"))
-        LOG_ERROR("Fehler bei init OpenGL", DR_ERROR);       
+        LOG_ERROR("Fehler bei init OpenGL, data/config.ini doesn't exist or is corrupted", DR_ERROR);       
 	LOG_WARNING_SDL();
     
     //check maximal multitextures
@@ -418,8 +418,8 @@ DRReturn move(float fTime)
       //  g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
     //else
         g_cam->translateRel_SektorPosition(DRVector3(keystate[SDL_SCANCODE_D]-keystate[SDL_SCANCODE_A],
-                                                     keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN],
-                                                     keystate[SDLK_DOWN]-keystate[SDLK_UP])
+                                                     keystate[SDL_SCANCODE_PAGEUP]-keystate[SDL_SCANCODE_PAGEDOWN],
+                                                     keystate[SDL_SCANCODE_DOWN]-keystate[SDL_SCANCODE_UP])
                                                      *fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
     
     //set control mode

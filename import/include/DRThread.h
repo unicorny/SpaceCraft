@@ -56,6 +56,7 @@ protected:
     SDL_Thread*		   thread;
     SDL_cond*		   condition;
     SDL_sem*		   semaphore;
+    bool               exitCalled;
 };
 
 #endif //__DR_ENGINE2_THREAD__
