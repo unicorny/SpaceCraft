@@ -162,7 +162,7 @@ DRReturn PlanetSektor::move(float fTime, Camera* cam)
         sprintf(buffer, "%s %d ", buffer, (*ebene)[i]);
     sprintf(buffer, "%s %d ", buffer, GlobalRenderer::Instance().getRenderTaskCount());
     //printf("\r[PlanetSektor::move]%s", buffer);
-    if(EnIsButtonPressed(SDLK_k))
+    if(EnIsButtonPressed(SDL_SCANCODE_K))
         cam->setAxis(DRVector3(-1.0f, 0.0f, 0.0f), DRVector3(0.0f, 1.0f, 0.0f), DRVector3(0.0f, 0.0f, -1.0f));
     
     RenderPlanet* renderer = static_cast<RenderPlanet*>(mRenderer);
@@ -253,7 +253,7 @@ DRReturn PlanetSektor::updateVisibility(const std::list<Camera*>& cameras)
 DRReturn PlanetSektor::render(float fTime, Camera* cam)
 {
 #if SDL_VERSION_ATLEAST(1,3,0)
-	Uint8 *keystate = SDL_GetKeyboardState(NULL);
+	const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 #else
 	Uint8 *keystate = SDL_GetKeyState(NULL);
 #endif

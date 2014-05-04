@@ -91,7 +91,7 @@ void main()
 	//gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
 	if(cameraAbove > 0)
 		gl_FragColor.g += 0.1;
-	gl_FragColor.w = n * 0.5 + 0.5;
+	//gl_FragColor.w = n * 0.5 + 0.5;
 	
 	gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
 	

@@ -357,6 +357,30 @@ float svoronoi(vec3 p, float frequenzy)
 	}	
 	return vec2(sqrt(distv)).x*2.0-1.0;
 }
+// Noise functions...
+float Hash( float n )
+{
+    return fract(sin(n)*43758.5453123);
+}
+
+//--------------------------------------------------------------------------
+float Hash(vec2 p)
+{
+	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+float Noise( in vec3 x )
+{
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+    f = f*f*(3.0-2.0*f);
+    float n = p.x + p.y*57.0 + 113.0*p.z;
+    float res = mix(mix(mix( Hash(n+  0.0), Hash(n+  1.0),f.x),
+                        mix( Hash(n+ 57.0), Hash(n+ 58.0),f.x),f.y),
+                    mix(mix( Hash(n+113.0), Hash(n+114.0),f.x),
+                        mix( Hash(n+170.0), Hash(n+171.0),f.x),f.y),f.z);
+    return res;
+}
 
 float sOctaveNoise(vec3 p, float frequenzy, int octaveCount)
 {
@@ -598,8 +622,8 @@ void main( void )
 	//    visible at high zoom levels.
 	f_lacunarity = CONTINENT_LACUNARITY;
 	float baseContinentDef_pe0 = sOctaveNoise(v_texCoord3D, CONTINENT_FREQUENCY, 14);
-n = baseContinentDef_pe0;
-/*
+//n = baseContinentDef_pe0;
+
 
 	// 2: [Continent-with-ranges module]: Next, a curve module modifies the
 	//    output value from the continent module so that very high values appear
@@ -1535,7 +1559,7 @@ n = baseContinentDef_pe0;
    	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
 	vec4 color = vec4(v_texCoord3D, 1.0);
 	//gl_FragColor = vec4(color.x+color.x, color.y*color.y, color.z*color.z, 1.0);
-	//gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), 1.0);
+	gl_FragColor = vec4(0.5 + 0.5*vec3(n,n,n), 1.0);
 	//gl_FragColor = color;
 	//gl_FragColor(v_texCoord3D*0.5+0.5, 1.0);
 }

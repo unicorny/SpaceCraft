@@ -60,7 +60,11 @@ const float PI = 3.1415926535f;
 
 //Engines
 //einbinden der Simple Direct Layer Bibliothek
+#ifdef _WIN32
 #include <sdl/sdl.h>
+#else
+#include <SDL/SDL.h>
+#endif
 
 //einbinden von OpenGL
 //#include <GL/glu.h>   // Damit kann Glu32 genutzt werden.
@@ -73,34 +77,7 @@ const float PI = 3.1415926535f;
 #include <sdl/SDL_opengl.h>
 #include <sdl/SDL_thread.h>
 
-// ---------------------------------------------------------------------------------------------------
-// in SDL 1.3 funtkioniert das keyboard noch nicht, daher werden hier manuell alle tasten belegt
-#if SDL_VERSION_ATLEAST(1,3,0)
-#define SDLK_a 4 
-#define SDLK_d 7 
-#define SDLK_e 8
-#define SDLK_q 20
-#define SDLK_r 21
-#define SDLK_s 22
-#define SDLK_w 26
-#define SDLK_1 30
-#define SDLK_2 31
-#define SDLK_3 32
-#define SDLK_4 33
-#define SDLK_5 34
-#define SDLK_6 35
-#define SDLK_7 36
-#define SDLK_8 37
-#define SDLK_9 38
-#define SDLK_PAGEUP 75
-#define SDLK_PAGEDOWN 78 
-#define SDLK_RIGHT 79
-#define SDLK_LEFT 80
-#define SDLK_DOWN 81
-#define SDLK_UP 82	
-#define SDLK_MINUS 86
-#define SDLK_PLUS 87
-#endif
+
 
 //----------------------------------------------------------------------------------------------------------------------
 //Eigene Header
@@ -138,7 +115,8 @@ const float PI = 3.1415926535f;
 #include "Engine_Lua.h"
 */
 //----------------------------------------------------------------------------------------------------------------------
-ENGINE2_API extern SDL_Surface* g_pSDLWindow;
+ENGINE2_API extern SDL_Window* g_pSDLWindow;
+ENGINE2_API extern SDL_GLContext g_glContext;
 ENGINE2_API extern DRVector2  g_v2WindowLength;
 ENGINE2_API extern Uint8*    g_piPressed;
 ENGINE2_API extern u16       g_CPU_Count;
@@ -183,7 +161,7 @@ ENGINE2_API void     EnExit();
 
 ENGINE2_API void		EnPostExitMessageToSDL();
 ENGINE2_API DRReal              EnSDL_Loop();
-ENGINE2_API bool		EnIsButtonPressed(SDLKey button);
+ENGINE2_API bool		EnIsButtonPressed(SDL_Scancode button);
 ENGINE2_API DRString            EnGetTimeSinceStart();
 
 //----------------------------------------------------------------------------------------------------------------------

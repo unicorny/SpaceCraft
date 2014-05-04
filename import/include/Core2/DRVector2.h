@@ -114,6 +114,7 @@ public:
 
 };
 
+inline DRVector2 operator *  (const float f, const DRVector2 v)  {return DRVector2(v.x*f, v.y*f);}
 //********************************************************************************************************************++
 
 #endif //__DR_CORE2_VECTOR2__

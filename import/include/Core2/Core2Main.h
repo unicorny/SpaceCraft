@@ -48,6 +48,7 @@
 #include <cstddef>
 #include <math.h>
 #include <list>
+#include <vector>
 
 
 
@@ -135,6 +136,7 @@ enum /*CORE_API*/ DRReturn
 // core includes (ohne log)
  #include "DRVector2i.h"
 #include "DRVector2.h"
+#include "DRVector3i.h"
 #include "DRVector3.h"
 #include "DRColor.h"
 #include "DRPlane.h"
@@ -144,6 +146,7 @@ enum /*CORE_API*/ DRReturn
 #include "DRFrustumCulling.h"
 #include "DRIni.h"
 #include "DRDampingSpring.h"
+#include "DRCubicSpline.h"
 //#include "DRGeometrieGenerator.h"
 #include "DRHash.hpp"
 #include "DRHashList.hpp"

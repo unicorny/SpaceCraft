@@ -149,6 +149,32 @@ float noise(vec3 P)
   return n_xyz;
 }
 
+// Noise functions...
+float Hash( float n )
+{
+    return fract(sin(n)*43758.5453123);
+}
+
+//--------------------------------------------------------------------------
+float Hash(vec2 p)
+{
+	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+//--------------------------------------------------------------------------
+float Noise( in vec3 x )
+{
+    vec3 p = floor(x);
+    vec3 f = fract(x);
+    f = f*f*(3.0-2.0*f);
+    float n = p.x + p.y*57.0 + 113.0*p.z;
+    float res = mix(mix(mix( Hash(n+  0.0), Hash(n+  1.0),f.x),
+                        mix( Hash(n+ 57.0), Hash(n+ 58.0),f.x),f.y),
+                    mix(mix( Hash(n+113.0), Hash(n+114.0),f.x),
+                        mix( Hash(n+170.0), Hash(n+171.0),f.x),f.y),f.z);
+    return res;
+}
+
 
 //#extension GL_EXT_gpu_shader4 : enable
 
@@ -397,6 +423,7 @@ vec3 packHeight(float height)
 	return vec3(r, g, b)/ 256.0;
 }
 
+
 void main( void )
 {
 	//Default
@@ -454,5 +481,9 @@ void main( void )
 	vec3 temp = packHeight(n * 0.5 + 0.5);
 
 	gl_FragColor = vec4(temp, n * 0.5+0.5);
+	
+	//float h = n *0.5+0.5;
+	//gl_FragColor = vec4(h, h, h, h);
+
 	
 }

@@ -386,7 +386,7 @@ DRReturn move(float fTime)
 	int numKeys = 0;
     //Kamera
 #if SDL_VERSION_ATLEAST(1,3,0)
-	Uint8 *keystate = SDL_GetKeyboardState(&numKeys);
+	const Uint8 *keystate = SDL_GetKeyboardState(&numKeys);
 #else
 	Uint8 *keystate = SDL_GetKeyState(NULL);
 #endif
@@ -405,7 +405,9 @@ DRReturn move(float fTime)
     //if(gCurrentControlMode != 0 )
     //{
          // die Kamera wird rotiert, gesteuert durch die Tasten w, s (x Achse, hoch/runter), <-, -> (y Achse links/rechts), e und q (z Achse seitlich)
-        g_cam->rotateRel(DRVector3(keystate[SDLK_s]-keystate[SDLK_w], keystate[SDLK_RIGHT]-keystate[SDLK_LEFT], keystate[SDLK_q]-keystate[SDLK_e])*fTime);
+    g_cam->rotateRel(DRVector3(keystate[SDL_SCANCODE_S]-keystate[SDL_SCANCODE_W],
+                               keystate[SDL_SCANCODE_RIGHT]-keystate[SDL_SCANCODE_LEFT],
+                               keystate[SDL_SCANCODE_Q]-keystate[SDL_SCANCODE_E])*fTime);
         // wenn die rechte maustaste gedrückt ist
         if((mousePressed & 4) == 4)
             // wird die Kamera auch abhängig von der Mausposition gedreht
@@ -415,27 +417,30 @@ DRReturn move(float fTime)
     //if(gControlModes[gCurrentControlMode].mValue.getType() == M)
       //  g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
     //else
-        g_cam->translateRel_SektorPosition(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
+        g_cam->translateRel_SektorPosition(DRVector3(keystate[SDL_SCANCODE_D]-keystate[SDL_SCANCODE_A],
+                                                     keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN],
+                                                     keystate[SDLK_DOWN]-keystate[SDLK_UP])
+                                                     *fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
     
     //set control mode
-    if(EnIsButtonPressed(SDLK_1)) gCurrentControlMode = 0;
-    else if(EnIsButtonPressed(SDLK_2)) gCurrentControlMode = 1;
-    else if(EnIsButtonPressed(SDLK_3)) gCurrentControlMode = 2;
-    else if(EnIsButtonPressed(SDLK_4)) gCurrentControlMode = 3;
-    else if(EnIsButtonPressed(SDLK_5)) gCurrentControlMode = 4;
-    else if(EnIsButtonPressed(SDLK_6)) gCurrentControlMode = 5;
-    else if(EnIsButtonPressed(SDLK_7)) gCurrentControlMode = 6;
-    else if(EnIsButtonPressed(SDLK_8)) gCurrentControlMode = 7;
-    else if(EnIsButtonPressed(SDLK_9)) gCurrentControlMode = 8;
+    if(EnIsButtonPressed(SDL_SCANCODE_1)) gCurrentControlMode = 0;
+    else if(EnIsButtonPressed(SDL_SCANCODE_2)) gCurrentControlMode = 1;
+    else if(EnIsButtonPressed(SDL_SCANCODE_3)) gCurrentControlMode = 2;
+    else if(EnIsButtonPressed(SDL_SCANCODE_4)) gCurrentControlMode = 3;
+    else if(EnIsButtonPressed(SDL_SCANCODE_5)) gCurrentControlMode = 4;
+    else if(EnIsButtonPressed(SDL_SCANCODE_6)) gCurrentControlMode = 5;
+    else if(EnIsButtonPressed(SDL_SCANCODE_7)) gCurrentControlMode = 6;
+    else if(EnIsButtonPressed(SDL_SCANCODE_8)) gCurrentControlMode = 7;
+    else if(EnIsButtonPressed(SDL_SCANCODE_9)) gCurrentControlMode = 8;
     
     GlobalRenderer::Instance().setTimeForInactiveChild(gControlModes[gCurrentControlMode].mTime);
     g_Player.setCurrentSpeed(gControlModes[gCurrentControlMode].mValue);
      
     // R-Taste
-    if(EnIsButtonPressed(SDLK_r)) wireframe = !wireframe;
+    if(EnIsButtonPressed(SDL_SCANCODE_R)) wireframe = !wireframe;
     
     //if(EnIsButtonPressed(SDLK_z)) blockCount++;
-    if(keystate[SDLK_z]) blockCount++;
+    if(keystate[SDL_SCANCODE_Z]) blockCount++;
     
     if(fTime == 0.0f) fTime = 0.00166f;
 
@@ -451,7 +456,9 @@ DRReturn move(float fTime)
 
 DRReturn render(float fTime)
 {
-    glViewport(0, 0, g_pSDLWindow->w, g_pSDLWindow->h);
+    int w = 0, h = 0;
+    SDL_GL_GetDrawableSize(g_pSDLWindow, &w, &h);
+    glViewport(0, 0, w, h);
     
     glClearColor(0.1, 0.2, 0.0, 0);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

@@ -127,8 +127,7 @@ public:
     //! \return einen neuen Vektor
     DRVector3 operator *  (const float f)       const {return DRVector3(x*f, y*f, z*f);}
     DRVector3 operator *= (const float f)             {*this = *this * f; return *this;}
-    
-     
+
     //! \brief transformiert diesen Vektor mit der Matrix m, const
     //! \param die &uuml;bergebende Mtrix m
     //! \return einen neuen, transformierten Vektor
@@ -188,5 +187,7 @@ public:
 private:
 
 };
+
+inline DRVector3 operator *  (const float f, const DRVector3 v)  {return DRVector3(v.x*f, v.y*f, v.z*f);}
 
 #endif //__DR_CORE2_VECTOR3__

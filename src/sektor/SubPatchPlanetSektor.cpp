@@ -33,7 +33,7 @@ SubPatchPlanetSektor::SubPatchPlanetSektor(Vector3Unit position, Unit radius,
   //  mLastRelativeCameraPosition.convertTo(KM).print("[SubPatchPlanetSektor::move] camera Position");
     DRVector3 patchPosition = mSektorPosition.getVector3().normalize();
     DRVector3 cameraPosition = mLastRelativeCameraPosition.getVector3().normalize();
-    if(EnIsButtonPressed(SDLK_y))
+    if(EnIsButtonPressed(SDL_SCANCODE_Y))
         cam->setSektorPosition(DRVector3(0.0f));
     //mHorizontCulling = acos(cameraPosition.dot(patchPosition))*RADTOGRAD;  
     if(mParent)
