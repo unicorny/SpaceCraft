@@ -34,7 +34,7 @@ vec4 gradientColor(float value, GradientColor points[10], int pointsCount)
       break;
     }
   }
-
+  
   // Find the two nearest control points so that we can map their values
   // onto a quadratic curve.
   ivec2 index = ivec2(clampi(indexPos - 1, 0, pointsCount - 1),
@@ -56,6 +56,18 @@ vec4 gradientColor(float value, GradientColor points[10], int pointsCount)
 
   // Now perform the linear interpolation given the alpha value.
   return LinearInterpColor (color0, color1, alpha);
+}
+
+vec4 gradientColor2(float value, GradientColor points[10], int pointsCount)
+{
+	float percent[10];
+	vec4 color = vec4(0.0);
+	for(int i = 0; i < pointsCount; i++)
+	{
+		percent[i] = abs(value - points[i].pos)/4.0;
+		color += points[i].color * percent[i];
+	}
+	return vec4(percent[5]*0.1, percent[5]*0.1, percent[5]*0.1, 1.0);
 }
 
 float unpackHeight(vec3 color)
@@ -87,15 +99,18 @@ void main()
 	gradient[8] =  GradientColor( 0.75 		 	+ SEA_LEVEL_IN_METRES, vec4(0.5,     1.0,     1.0,     1.0));
 	gradient[9] =  GradientColor( 2.0 			+ SEA_LEVEL_IN_METRES, vec4(0.0,     0.0,     1.0,     1.0));
 
-	float n = unpackHeight(texture2D(texture, gl_TexCoord[0].xy).xyz *2.0-1.0);
+	//float n = unpackHeight(texture2D(texture, gl_TexCoord[0].xy).xyz *2.0-1.0);
+	float n = unpackHeight(texture2D(texture, gl_TexCoord[0].xy).xyz * 2.0-1.0);
+	// n = texture2D(texture, gl_TexCoord[0].xy).x;
 	//if(n < -0.03125 + SEA_LEVEL_IN_METRES) n = -0.50;
-	gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
+	vec4 vGradientColor = gradientColor(n, gradient, 10);
+	//gl_FragColor = gradientColor(n, gradient, 10);//vec4(0.5 + 0.5*vec3(n, n, n), 1.0);
 
 	//if(cameraAbove > 0)
 		//gl_FragColor.g += 0.1;
-	gl_FragColor.w = n * 0.5 + 0.5;
-	float v = n * 0.5 + 0.5;
-	//gl_FragColor = vec4(v,v,v,v);
+	//gl_FragColor.w = n * 0.5 + 0.5;
+	float v = n * 0.25 + 0.5;
+	gl_FragColor = vec4(vGradientColor.rgb,v);
 	//gl_FragColor = texture2D(texture, gl_TexCoord[0].xy);
 	//gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 }

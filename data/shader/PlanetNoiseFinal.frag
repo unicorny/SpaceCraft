@@ -474,6 +474,7 @@ void main( void )
 	   	n = continentsWithRivers_se;
 //*/
 	vec3 temp = packHeight(n * 0.5 + 0.5);
+	//temp = vec3(n * 0.5 + 0.5);
 	
 	gl_FragColor = vec4(temp, n * 0.5+0.5);
 		
