@@ -111,7 +111,10 @@ DRReturn Sektor::moveAll(float fTime, Camera* cam, bool rootMoved/* = false*/)
         {
             Sektor* temp = it->second;     
             ret = temp->move(fTime, cam);
-            if(ret) LOG_ERROR("Fehler bei move", DR_ERROR);
+            if(ret) {
+				//DREngineLog.writeToLog("ret value: %d", ret);
+				LOG_ERROR("Fehler bei move", DR_ERROR);
+			}
             
             temp->updateCameraSektor(cam);
             

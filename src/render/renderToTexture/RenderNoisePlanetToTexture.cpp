@@ -160,6 +160,7 @@ DRReturn RenderNoisePlanetToTexture::renderStuff()
     mShader[mShaderCursor]->setUniform1f("BADLANDS_TWIST", mNoiseParameter->badlandsTwist);
     
     mShader[mShaderCursor]->setUniformMatrix("projection", mProjectionMatrix);
+	//mShader[mShaderCursor]->setUniformMatrix("projection", DRMatrix::identity());
 	mShader[mShaderCursor]->setUniformMatrix("texture", mRotation);
     
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -192,6 +193,9 @@ DRReturn RenderNoisePlanetToTexture::init(int stepSize, DRVector3 translate, flo
     mPatchScaling = patchScaling;
     mTranslate = translate;
     mRotation = rotation;
+	if (texture->getResolution() == DRVector2i(0)) {
+		LOG_ERROR("texture size is zero", DR_ERROR);
+	}
     maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
     maTextures[4] = texture;
     return RenderInStepsToTexture::init(stepSize, maTextures[0]);    
@@ -200,6 +204,9 @@ DRReturn RenderNoisePlanetToTexture::init(int stepSize, DRVector3 translate, flo
 DRReturn RenderNoisePlanetToTexture::reinit(DRTexturePtr texture)
 {
     mShaderCursor = 0;
+	if (texture->getResolution() == DRVector2i(0)) {
+		LOG_ERROR("texture size is zero", DR_ERROR);
+	}
     maTextures[0] = DRTextureManager::Instance().getTexture(texture->getResolution(), 4);
     maTextures[4] = texture;
     return RenderInStepsToTexture::reinit(maTextures[0]);
@@ -212,8 +219,14 @@ DRReturn RenderNoisePlanetToTexture::step()
     if(mShaderCursor < 4 && isFinished())
     {
         mShaderCursor++;
-        if(mShaderCursor < 4)
-            maTextures[mShaderCursor] = DRTextureManager::Instance().getTexture(maTextures[mShaderCursor-1]->getResolution(), 4);
+		if (mShaderCursor < 4) {
+			DRVector2i texSize = maTextures[mShaderCursor - 1]->getResolution();
+			if (texSize == DRVector2i(0)) {
+				LOG_ERROR("texture size is zero", DR_ERROR);
+			}
+			maTextures[mShaderCursor] = DRTextureManager::Instance().getTexture(texSize, 4);
+		}
+            
 
         RenderToTexture::setFilenameToSave(mFilename);
         

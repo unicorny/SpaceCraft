@@ -523,7 +523,7 @@ DRReturn SubPlanetSektor::render(float fTime, Camera* cam)
         if(!mRenderer) 
             LOG_ERROR("no renderer", DR_NOT_ERROR);
         DRVector3 translate = mTextureTranslate;
-        float scale = mPatchScaling*1.004f;
+		float scale = mPatchScaling;// *1.004f;
         
 
         ShaderProgramPtr shader = mRenderer->getShaderProgram();

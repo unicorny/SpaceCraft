@@ -2,14 +2,16 @@
 #include "GlobalRenderer.h"
 
 RenderToTexture::RenderToTexture()
-: mTexture(), mFinished(0), mFileNameToSave("")
+: mTexture(), mFinished(0), mFileNameToSave(""), mFrameBufferID(0)
 {
     
 }
 
 RenderToTexture::~RenderToTexture()
 {
-    
+	if (mFrameBufferID)
+		glDeleteFramebuffersEXT(1, &mFrameBufferID);
+	mFrameBufferID = 0;
 }
 
 DRReturn RenderToTexture::init(DRTexturePtr texture)
@@ -22,11 +24,42 @@ DRReturn RenderToTexture::init(DRTexturePtr texture)
         DREngineLog.writeToLog("textureSize: %f %f", mTextureSize.x, mTextureSize.y);
 		LOG_ERROR("textureSize is invalid", DR_ERROR);
     }
-        
+	
     mTexture = texture;
     mFinished = 0;
     
     return DR_OK;
+}
+
+DRReturn RenderToTexture::setupFrameBuffer()
+{
+	if (!mFrameBufferID) {
+		glGenFramebuffersEXT(1, &mFrameBufferID);
+
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
+		//create texture
+		//bind to the new texture ID
+		mTexture->bind();
+
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+			GL_TEXTURE_2D, mTexture->getId(), 0);
+		GLenum ret = GL_FRAMEBUFFER_COMPLETE_EXT;
+		ret = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+		if (ret != GL_FRAMEBUFFER_COMPLETE_EXT)
+		{
+			DREngineLog.writeToLog("Fehler bei Check Framebuffer Status: %s", getFrameBufferEnumName(ret));
+			LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
+		}
+	}
+		// glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	else {
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, mFrameBufferID);
+		//mTexture->bind();
+		glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+			GL_TEXTURE_2D, mTexture->getId(), 0);
+		
+	};
+	return DR_OK;
 }
 
 DRReturn RenderToTexture::step()
@@ -45,7 +78,7 @@ DRReturn RenderToTexture::step()
         mFinished++;
         return DR_OK;
      }
-    
+	setupFrameBuffer();
     
     //mFrameBuffer->bindToRender();
     
@@ -92,4 +125,21 @@ DRReturn RenderToTexture::step()
     mFinished++;
     
     return DR_OK;
+}
+
+const char* RenderToTexture::getFrameBufferEnumName(GLenum name)
+{
+	switch (name)
+	{
+	case GL_FRAMEBUFFER_COMPLETE_EXT: return "GL_FRAMEBUFFER_COMPLETE_EXT";
+	case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT: return "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT";
+	case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT: return "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT";
+	case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT: return "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT";
+	case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT: return "GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT";
+	case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT: return "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT";
+	case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT: return "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT";
+	case GL_FRAMEBUFFER_UNSUPPORTED_EXT: return "GL_FRAMEBUFFER_UNSUPPORTED_EXT";
+	default: return "-unknown enum-";
+	}
+	return "-error-";
 }

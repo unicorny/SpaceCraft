@@ -62,6 +62,9 @@ DRReturn RenderPlanet::init(DRVector3 translate,
 	//float stepSize = static_cast<float>(stepSizei);
 
     mTexturePath = texturePath;  
+	if (textureSize <= 0) {
+		LOG_ERROR("texture size is zero", DR_ERROR);
+	}
     mTexture = tx.getTexture(DRVector2i(textureSize), 4);    
     mTexture->setWrappingMode(TEXTURE_WRAPPING_CLAMP_TO_EDGE);
     mTexture->setFilter(GL_NEAREST, GL_NEAREST);
@@ -77,6 +80,9 @@ DRReturn RenderPlanet::init(DRVector3 translate,
           //                                                           GL_UNSIGNED_BYTE, 4);    
 //        mPreviewTextureID = DRTextureManager::Instance().getGLTextureMemory(stepSizei, stepSizei,
   //                                                                   GL_UNSIGNED_BYTE, 4);    		
+		if (textureSize <= 0) {
+			LOG_ERROR("texture size is zero", DR_ERROR);
+		}
 		mHeightTexture = tx.getTexture(DRVector2i(textureSize), 4);
 		if(mHeightTexture.getResourcePtrHolder())
         {
@@ -116,7 +122,7 @@ RenderPlanet::~RenderPlanet()
 }
 DRReturn RenderPlanet::generateTexture()
 {
-    if(mTextureRenderer && mTextureRenderer->isFinished())
+    if(mTextureRenderer.getResourcePtrHolder() && mTextureRenderer->isFinished())
     {		
 		//finish rendering texture, render after color
 		if(1 == mInitalized)

@@ -60,6 +60,7 @@ DRReturn RenderInStepsToTexture::step()
      }
     
     //mFrameBuffer->bindToRender();
+	 setupFrameBuffer();
     
     //render stuff
     if(mCursorIndex == mTextureSize/2 - DRVector2i(static_cast<int>(mStepSize)/2))

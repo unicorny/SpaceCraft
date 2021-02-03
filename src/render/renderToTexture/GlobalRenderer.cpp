@@ -22,10 +22,11 @@ DRReturn GlobalRenderer::init(const char* configFilename)
     gluQuadricTexture(mQuadratic, GL_TRUE); // erzeugt Textur Koordinaten ( NEU )
     
     //render to texture
-     glGenFramebuffersEXT(1, &mFrameBufferID);
+    glGenFramebuffersEXT(1, &mFrameBufferID);
         
     DRIni cfg(configFilename);
     mTextureRenderStepSize = cfg.getInt("RenderToTexte", "StepSize");
+	if (!mTextureRenderStepSize) mTextureRenderStepSize = 16;
     mTextureRenderMaxResolution = cfg.getInt("RenderToTexte", "Resolution");
     
     m_bInitialized= true;
@@ -62,8 +63,8 @@ DRReturn GlobalRenderer::renderTaskFromQueue(std::list<RenderToTexturePtr>* list
     {
         current = list->front();
 		//DHASH hash = reinterpret_cast<DHASH>(list->front().getResourcePtrHolder()->mResource);
-        if(!current || setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
-            LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
+    //    if(!current || setupFrameBuffer(current->getTextur())) //setup framebuffer with new texture
+      //      LOG_ERROR("Fehler bei setupFrameBuffer", DR_ERROR);
         if(current->step()) LOG_ERROR("Fehler bei Step", DR_ERROR);
     
         if(current->isFinished())
