@@ -24,6 +24,43 @@ int clampi(int x, int minVal, int maxVal)
   	else return x;
 }
 
+vec4 gradientColorPart(GradientColor c1, GradientColor c2, float value)
+{
+	vec4 result = vec4(0.0,0.0,0.0,0.0);
+	if(value > c1.pos && value < c2.pos) {
+		float faktor = (value - c1.pos)/(c2.pos - c1.pos);
+		result = faktor * c1.color + (1.0-faktor) * c2.color;
+	} 
+	return result;
+}
+/*
+vec4 gradientColor(float value, GradientColor points[10], int pointsCount)
+{
+	
+  // Find the first element in the control point array that has a value
+  // larger than the output value from the source module.
+  
+  vec4 color = vec4(0,0,0,0);
+  color += gradientColorPart(points[0], points[1], value);
+  color += gradientColorPart(points[1], points[2], value);
+  color += gradientColorPart(points[2], points[3], value);
+  color += gradientColorPart(points[3], points[4], value);
+  color += gradientColorPart(points[4], points[5], value);
+  color += gradientColorPart(points[5], points[6], value);
+  color += gradientColorPart(points[6], points[7], value);
+  color += gradientColorPart(points[7], points[8], value);
+  color += gradientColorPart(points[8], points[9], value);
+  color += gradientColorPart(points[9], points[8], value);
+  
+  if(value < points[0].pos) color = points[0].color;
+  if(value > points[9].pos) color = points[9].color;
+  
+  //color += gradientColorPart(points, value, 9); 
+  
+  return color;
+  
+}
+//*/
 vec4 gradientColor(float value, GradientColor points[10], int pointsCount)
 {
   // Find the first element in the control point array that has a value
@@ -34,7 +71,7 @@ vec4 gradientColor(float value, GradientColor points[10], int pointsCount)
       break;
     }
   }
-  
+
   // Find the two nearest control points so that we can map their values
   // onto a quadratic curve.
   ivec2 index = ivec2(clampi(indexPos - 1, 0, pointsCount - 1),
@@ -67,7 +104,8 @@ vec4 gradientColor2(float value, GradientColor points[10], int pointsCount)
 		percent[i] = abs(value - points[i].pos)/4.0;
 		color += points[i].color * percent[i];
 	}
-	return vec4(percent[5]*0.1, percent[5]*0.1, percent[5]*0.1, 1.0);
+	return color;
+	//return vec4(percent[5]*0.1, percent[5]*0.1, percent[5]*0.1, 1.0);
 }
 
 float unpackHeight(vec3 color)

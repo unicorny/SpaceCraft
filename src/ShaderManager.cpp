@@ -56,6 +56,12 @@ ShaderProgramPtr ShaderManager::getShaderProgram(const char* vertexShader, const
     ShaderProgramPtr shaderProgram(new ShaderProgram(id));    
     if(shaderProgram->init(getShader(vertexShader, GL_VERTEX_SHADER), getShader(fragmentShader, GL_FRAGMENT_SHADER)))
         LOG_ERROR("error loading shader program", NULL);
+	std::string shaderNames("Shader loaded: ");
+	shaderNames += vertexShader;
+	shaderNames += ", ";
+	shaderNames += fragmentShader;
+	
+	LOG_INFO(shaderNames.data());
         
     if(!mShaderProgramEntrys.insert(SHADER_PROGRAM_ENTRY(id, shaderProgram)).second)
     {

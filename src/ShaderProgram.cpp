@@ -95,14 +95,22 @@ DRReturn ShaderProgram::init(ShaderPtr vertexShader, ShaderPtr fragmentShader)
     
     mVertexShader = vertexShader;
     mFragmentShader = fragmentShader;
+
+	GLuint vertexShaderId = mVertexShader->getShader();
+	GLuint fragmentShaderId = mFragmentShader->getShader();
     
        // Create a program object and attach the two compiled shaders.
     mProgram = glCreateProgram();
-    glAttachShader( mProgram, *mVertexShader );
-    glAttachShader( mProgram, *mFragmentShader );
+    glAttachShader( mProgram, vertexShaderId );
+    glAttachShader( mProgram, fragmentShaderId );
 
     // Link the program object and print out the info log.
-    glLinkProgram( mProgram );
+	try {
+		glLinkProgram( mProgram );
+	} catch(int e) {
+		DREngineLog.writeToLog("Exception trowed from glLinkProgramm, maybe shader isn't compatible with current hardware?, exception: %d", e);
+		LOG_ERROR("Shader Compiling Error", DR_ERROR);
+	}
     glGetProgramiv( mProgram, GL_LINK_STATUS, &shadersLinked );
     if( shadersLinked == GL_FALSE )
     {

@@ -417,10 +417,19 @@ DRReturn move(float fTime)
     //if(gControlModes[gCurrentControlMode].mValue.getType() == M)
       //  g_cam->translateRel(DRVector3(keystate[SDLK_d]-keystate[SDLK_a], keystate[SDLK_PAGEUP]-keystate[SDLK_PAGEDOWN], keystate[SDLK_DOWN]-keystate[SDLK_UP])*fTime*gControlModes[gCurrentControlMode].mValue);
     //else
-        g_cam->translateRel_SektorPosition(DRVector3(keystate[SDL_SCANCODE_D]-keystate[SDL_SCANCODE_A],
-                                                     keystate[SDL_SCANCODE_PAGEUP]-keystate[SDL_SCANCODE_PAGEDOWN],
-                                                     keystate[SDL_SCANCODE_DOWN]-keystate[SDL_SCANCODE_UP])
-                                                     *fTime*gControlModes[gCurrentControlMode].mValue, gControlModes[gCurrentControlMode].mValue.getType());    
+		DRVector3 camTranslate = DRVector3(
+			keystate[SDL_SCANCODE_D] - keystate[SDL_SCANCODE_A],
+			keystate[SDL_SCANCODE_PAGEUP] - keystate[SDL_SCANCODE_PAGEDOWN],
+			keystate[SDL_SCANCODE_DOWN] - keystate[SDL_SCANCODE_UP]
+		);
+
+        g_cam->translateRel_SektorPosition(
+			camTranslate*fTime*gControlModes[gCurrentControlMode].mValue,
+			gControlModes[gCurrentControlMode].mValue.getType()
+		);    
+		camTranslate.z *= -1.0f;
+		camTranslate.x *= -1.0f;
+		g_cam->translateRel(camTranslate * fTime);
     
     //set control mode
     if(EnIsButtonPressed(SDL_SCANCODE_1)) gCurrentControlMode = 0;
@@ -525,7 +534,8 @@ DRReturn render(float fTime)
         g_tex->bind();
       
     //glColor3f(0.2f, 0.5f, 0.1f);
- /*   glColor3f(1.0f, 1.0f, 1.0f);
+	/*
+    glColor3f(1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
         glTexCoord2f(1.0, 0.0f);
         glVertex3f( 50.0f, 0.0f, -50.0f);
@@ -555,20 +565,25 @@ DRReturn render(float fTime)
     translate.y += 10.0f;
 	//*/
     RenderBlock* rb =  g_RenderBlockLoader.getRenderBlock("dirt");
-	/*
+	///*
+	
     rb->render();
     
     glTranslatef(0.0f, -5.0f, 0.0f);
     translate.y -= 5.0f;
     rb = g_RenderBlockLoader.getRenderBlock("dirG");
+	glScalef(1.0f, 0.5f, 1.0f);
     rb->render();
+	glScalef(1.0f, 1.0f, 1.0f);
     glTranslatef(1.0f, 0.0f, 0.0f);
     translate.x += 1.0f;
-    rb->render();
+    //rb->render();
     glTranslatef(0.0f, 2.0f, 0.0f);
     translate.y += 2.0f;
-    
+
+	glScalef(1.0f, 0.5f, 1.0f);
 	DRFrustumPosition res = cull.isBoxInFrustum(DRVector3(-0.5f), DRVector3(0.5f), DRMatrix::translation(translate));
+	
     if(res != OUTSIDE)    
         g_RenderBlockLoader.getRenderBlock("benc")->render();
     

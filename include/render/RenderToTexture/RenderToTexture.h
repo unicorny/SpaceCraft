@@ -39,6 +39,10 @@ protected:
     DRMatrix	mProjectionMatrix;
     u8           mFinished;
     DRString     mFileNameToSave;
+	GLuint                              mFrameBufferID;
+
+	DRReturn setupFrameBuffer();
+	static const char* RenderToTexture::getFrameBufferEnumName(GLenum name);
     
 private:
      
